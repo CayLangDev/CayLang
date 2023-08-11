@@ -1,0 +1,44 @@
+grammar;
+
+// Define a rule for the entire program
+pub main: Vec<Rule> = { rule* }
+
+// Define a rule for the rules within the fold block
+rule: Rule = { "fold" Path "{" rule_entries "}" }
+
+// Define a rule for the rule entries
+rule_entries: Vec<RuleEntry> = { rule_entry* }
+
+// Define a rule for a single rule entry
+rule_entry: RuleEntry = { Pattern Arrow Path }
+
+Token: Token = {
+    r"\s+" => Token::Whitespace,
+    r"fold" => Token::Fold,
+    r"{" => Token::OpenBrace,
+    r"=>" => Token::Arrow,
+    r"}" => Token::CloseBrace,
+    r"[-a-zA-Z0-9_/]+" => Token::Path(_),
+    r".+" => Token::Pattern(_),
+}
+
+// Define the data structures to store the parsed information
+pub enum Token {
+    Whitespace,
+    Fold,
+    OpenBrace,
+    Arrow,
+    CloseBrace,
+    Path(String),
+    Pattern(String),
+}
+
+pub struct Rule {
+    pub path: String,
+    pub entries: Vec<RuleEntry>,
+}
+
+pub struct RuleEntry {
+    pub pattern: String,
+    pub destination: String,
+}
