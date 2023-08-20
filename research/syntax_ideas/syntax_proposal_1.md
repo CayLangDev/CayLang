@@ -36,8 +36,7 @@ DirectorySet Years {
   Names: r"[0-9]{4}",
   Tags: {
     year: asint name,
-    version: ifelse year > 2019 2.0 1.0,
-    new: version > 1.0
+    version: ifelse year > 2019 2.0 1.0
   }
 }
 
