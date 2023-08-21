@@ -29,7 +29,7 @@ fn main() -> std::io::Result<()> {
 		println!("{i:}");
 		for e in layer {
 		   	println!("{:?}", e);
-		}	
+		}
 	}
 
 	println!("DFS 2");
