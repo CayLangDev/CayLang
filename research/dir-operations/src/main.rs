@@ -14,6 +14,11 @@ fn dfs<T: std::fmt::Debug>(tree: &Tree<T>, current_idx: NodeIdx) {
 	}
 }
 
+fn bfs<T: std::fmt::Debug>(tree: &Tree<T>, current_idx: NodeIdx) {
+	// ...
+	// tbd
+}
+
 fn main() -> std::io::Result<()> {
 	let args: Vec<String> = env::args().collect();
 	if args.len() != 2 {
@@ -25,16 +30,11 @@ fn main() -> std::io::Result<()> {
 
 	println!("BFS");
 	
-	for (i, layer) in ((&layers).into_iter()).enumerate() {
-		println!("{i:}");
-		for e in layer {
-		   	println!("{:?}", e);
-		}
-	}
+	bfs(&tree, root_idx());
 
-	println!("DFS 2");
+	println!("DFS");
 
-	dfs(&layers, root_idx());
+	dfs(&tree, root_idx());
 	
 	return Ok(());
 }

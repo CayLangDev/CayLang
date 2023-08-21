@@ -9,40 +9,32 @@ pub type FileSysTree = Tree<FileIden>;
 
 
 pub fn load_full_tree(root: FileIden) -> FileSysTree {
-    let mut layers: FileSysTree = Vec::new();
-
+    let mut tree: FileSysTree = Vec::new();
+    let mut root: NodeIdx = root_idx();
     for entry in WalkDir::new(root).sort(true) {
 		let entry = entry.unwrap();
 
-		let e: FileNode = if entry.depth == 0 {
-			FileNode {parent: 0, child_start: 0, elem: entry.path(), leaf: entry.file_type.is_file()}
-		} else {
-			let prior_layer = layers.get(entry.depth()-1).unwrap();
-			if entry.file_type.is_file() {
-				FileNode {parent: prior_layer.len()-1,
-								 child_start: 0, elem: entry.path(),
-								 leaf: true}
-			}
-			else {
-				let child_start = if let Some(next_layer) = layers.get(entry.depth()+1) {
-					next_layer.len()
-				}
-				else {
-					0
-				};
-				FileNode {parent: prior_layer.len()-1, child_start, elem: entry.path(), leaf: false}
-			}
 
-		};
-
-	   	if let Some(layer) = layers.get_mut(entry.depth()) {
-	   		layer.push(e);
-	   	}
-	   	else {
-	   		layers.push(vec![e]);
-	   	}
+        let e: entry.path();
+        let child_idx = tree.add_child(root, e);
+        // ...
+        // need to determine if child_idx is our new root
+        // entry.file_type.is_file() and entry.depth() will likely help
+        //
 	}
 
-	return layers;
-
+	return tree;
 }
+
+// validation-loading ideas
+// the naive approach is to just full load the tree and then validate
+// if the tree is massive and obviously fucked early this is dumb
+// better idea?
+// validate current tree every k nodes, doubling k each time
+
+// need to edit to take a closure (tree) -> bool
+pub fn load_tree_val(root: FileIden) -> FileSysTree {
+    // ...
+}
+// super simple approach, a better one would use a struct with a validation trait that statefully tracks what has been validified, and pass difference from last time
+// but this would be sophisticated enough for now
