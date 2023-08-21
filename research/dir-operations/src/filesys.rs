@@ -7,21 +7,22 @@ pub type FileIden = PathBuf;
 pub type FileNode = Node<FileIden>;
 pub type FileSysTree = Tree<FileIden>;
 
-
 pub fn load_full_tree(root: FileIden) -> FileSysTree {
-    let mut tree: FileSysTree = Vec::new();
+    let mut tree: FileSysTree = Tree::new();
     let mut root: NodeIdx = root_idx();
+    /* 
     for entry in WalkDir::new(root).sort(true) {
 		let entry = entry.unwrap();
 
 
-        let e: entry.path();
-        let child_idx = tree.add_child(root, e);
+        // let e: entry.path();
+        // let child_idx = tree.add_child(root, e, "");
         // ...
         // need to determine if child_idx is our new root
         // entry.file_type.is_file() and entry.depth() will likely help
         //
 	}
+    */
 
 	return tree;
 }
