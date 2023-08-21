@@ -2,9 +2,10 @@
 // https://doc.rust-lang.org/rust-by-example/custom_types/structs.html
 // https://doc.rust-lang.org/rust-by-example/fn/methods.html
 // https://doc.rust-lang.org/rust-by-example/trait.html
-
+use std::collections::HashMap;
 
 pub type NodeIdx = usize;
+// need to add a second index type for string??
 
 #[derive(Debug)]
 pub struct Node<T> {
