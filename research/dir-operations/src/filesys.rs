@@ -9,11 +9,12 @@ pub type FileSysTree = Tree;
 
 pub fn load_full_tree(root: FileIden) -> FileSysTree {
     let mut tree: FileSysTree = Tree::new();
-    let mut root: NodeIdx = root_idx();
-    /* 
+    // let mut root: NodeIdx = root_idx();
+    
     for entry in WalkDir::new(root).sort(true) {
 		let entry = entry.unwrap();
 
+        println!("{}", entry.path().display());
 
         // let e: entry.path();
         // let child_idx = tree.add_child(root, e, "");
@@ -22,7 +23,6 @@ pub fn load_full_tree(root: FileIden) -> FileSysTree {
         // entry.file_type.is_file() and entry.depth() will likely help
         //
 	}
-    */
 
 	return tree;
 }
