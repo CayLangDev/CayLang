@@ -3,9 +3,9 @@
 // https://doc.rust-lang.org/rust-by-example/fn/methods.html
 // https://doc.rust-lang.org/rust-by-example/trait.html
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 pub type NodeIdx = usize;
-pub type Path = String;
 
 #[derive(Debug)]
 pub struct Node<T> {
@@ -23,12 +23,12 @@ impl<T> Node<T> {
 #[derive(Debug)]
 pub struct Tree<T> {
 	pub nodes: Vec<Node<T>>,
-	pub path_map: HashMap<Path, NodeIdx>,
+	pub path_map: HashMap<PathBuf, NodeIdx>,
 }
 
 impl<T> Tree<T> {
-	pub fn new() -> Self { 
-		Self { nodes: Vec::new(), path_map: HashMap::<Path, NodeIdx>::new() } 
+	pub fn new() -> Self {
+		Self { nodes: Vec::new(), path_map: HashMap::<PathBuf, NodeIdx>::new() }
 	}
 }
 
@@ -54,13 +54,15 @@ impl<T> GetChildren<T> for Tree<T> {
 }
 
 pub trait AddChild<T> {
-	fn add_child(&self, parent_idx: NodeIdx, child_elem: T, child_path: Path) -> NodeIdx; 
+	fn add_child(&self, parent_idx: NodeIdx, child_elem: T, child_path: PathBuf) -> NodeIdx;
 }
 
 impl<T> AddChild<T> for Tree<T> {
-	fn add_child(&self, parent_idx: NodeIdx, child_elem: T, child_path: Path) -> NodeIdx {
-        let child = Node::new(child_elem);
+	fn add_child(&self, parent_idx: NodeIdx, child_elem: T, child_path: PathBuf) -> NodeIdx {
+        let parent = mut &self[parent_idx];
+		let child = Node::new(child_elem);
 		let child_idx = self.nodes.len();
+		parent.children.push(child_idx);
 
 		self.nodes.push(child);
 
@@ -71,12 +73,14 @@ impl<T> AddChild<T> for Tree<T> {
     }
 }
 
+
+
 pub trait GetNode<T> {
-	fn get_node(&self, child_path: Path) -> Option<&Node<T>>;
+	fn get_node(&self, child_path: PathBuf) -> Option<&Node<T>>;
 }
 
 impl<T> GetNode<T> for Tree<T> {
-	fn get_node(&self, child_path: Path) -> Option<&Node<T>>{
+	fn get_node(&self, child_path: PathBuf) -> Option<&Node<T>>{
 		match self.path_map.get(&child_path) {
 			None => None,
 			Some(nodeIdx) => return Some(&self.nodes[*nodeIdx]),
