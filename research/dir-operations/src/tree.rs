@@ -36,23 +36,6 @@ pub fn root_idx() -> NodeIdx {
     return 0;
 }
 
-// 'a is life-time shit
-pub struct Children<'a, T> {
-	tree: &'a Tree<T>,
-	parent_idx: NodeIdx,
-	current: usize
-}
-
-pub trait GetChildren<T> {
-    fn get_children(&self, parent_idx: NodeIdx) -> Children<'_, T>;
-}
-
-impl<T> GetChildren<T> for Tree<T> {
-    fn get_children(&self, parent_idx: NodeIdx) -> Children<'_, T> {
-        Children {tree: &self, parent_idx, current: 0}
-    }
-}
-
 pub trait AddChild<T> {
 	fn add_child(&self, parent_idx: NodeIdx, child_elem: T, child_path: PathBuf) -> NodeIdx;
 }
@@ -73,19 +56,34 @@ impl<T> AddChild<T> for Tree<T> {
     }
 }
 
-
-
 pub trait GetNode<T> {
-	fn get_node(&self, child_path: PathBuf) -> Option<&Node<T>>;
+	fn get_node(&self, path: PathBuf) -> Option<&Node<T>>;
 }
 
 impl<T> GetNode<T> for Tree<T> {
-	fn get_node(&self, child_path: PathBuf) -> Option<&Node<T>>{
-		match self.path_map.get(&child_path) {
+	fn get_node(&self, path: PathBuf) -> Option<&Node<T>>{
+		match self.path_map.get(&path) {
 			None => None,
 			Some(nodeIdx) => return Some(&self.nodes[*nodeIdx]),
 		}
     }
+}
+
+pub trait GetChildren<T> {
+    fn get_children(&self, parent_idx: NodeIdx) -> Children<'_, T>;
+}
+
+impl<T> GetChildren<T> for Tree<T> {
+    fn get_children(&self, parent_idx: NodeIdx) -> Children<'_, T> {
+        Children {tree: &self, parent_idx, current: 0}
+    }
+}
+
+// 'a is life-time shit
+pub struct Children<'a, T> {
+	tree: &'a Tree<T>,
+	parent_idx: NodeIdx,
+	current: usize
 }
 
 impl<T> Iterator for Children<'_, T> {
@@ -98,6 +96,7 @@ impl<T> Iterator for Children<'_, T> {
 		}
 
 		let curr_idx = parent_node.children[self.current];
+		current += 1;
 
 		let curr_node = &self.tree.nodes[curr_idx];
 
