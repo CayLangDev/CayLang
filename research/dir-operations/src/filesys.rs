@@ -1,11 +1,11 @@
 use jwalk::{WalkDir};
 use std::path::PathBuf;
 use std::env;
-use crate::tree::{Tree, Node, GetChildren, NodeIdx, root_idx};
+use crate::tree::{Tree, Node, NodeIdx, root_idx};
 
 pub type FileIden = PathBuf;
-pub type FileNode = Node<FileIden>;
-pub type FileSysTree = Tree<FileIden>;
+pub type FileNode = Node;
+pub type FileSysTree = Tree;
 
 pub fn load_full_tree(root: FileIden) -> FileSysTree {
     let mut tree: FileSysTree = Tree::new();
@@ -35,7 +35,9 @@ pub fn load_full_tree(root: FileIden) -> FileSysTree {
 
 // need to edit to take a closure (tree) -> bool
 pub fn load_tree_val(root: FileIden) -> FileSysTree {
-    // ...
+    let mut tree: FileSysTree = Tree::new();
+
+    return tree;
 }
 // super simple approach, a better one would use a struct with a validation trait that statefully tracks what has been validified, and pass difference from last time
 // but this would be sophisticated enough for now

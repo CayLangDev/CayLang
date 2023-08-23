@@ -8,87 +8,86 @@ use std::path::PathBuf;
 pub type NodeIdx = usize;
 
 #[derive(Debug)]
-pub struct Node<T> {
-	pub(crate) parent: NodeIdx,
-	pub(crate) children: Vec<NodeIdx>,
-	pub elem: T,
+pub struct NodeData {
+	pub path: PathBuf
 }
 
-impl<T> Node<T> {
-	pub fn new(elem: T) -> Self { 
-		Self{ parent: 0, children: vec![], elem } 
+#[derive(Debug)]
+pub struct Node {
+	pub(crate) parent: NodeIdx,
+	pub(crate) children: Vec<NodeIdx>,
+	pub data: NodeData,
+}
+
+impl Node {
+	pub fn new(data: NodeData) -> Self { 
+		Self{ parent: 0, children: vec![], data } 
 	}
 }
 
 #[derive(Debug)]
-pub struct Tree<T> {
-	pub nodes: Vec<Node<T>>,
+pub struct Tree {
+	pub nodes: Vec<Node>,
 	pub path_map: HashMap<PathBuf, NodeIdx>,
-}
-
-impl<T> Tree<T> {
-	pub fn new() -> Self {
-		Self { nodes: Vec::new(), path_map: HashMap::<PathBuf, NodeIdx>::new() }
-	}
 }
 
 pub fn root_idx() -> NodeIdx {
     return 0;
 }
 
-pub trait AddChild<T> {
-	fn add_child(&self, parent_idx: NodeIdx, child_elem: T, child_path: PathBuf) -> NodeIdx;
-}
+impl Tree {
+	pub fn new() -> Self {
+		Self { nodes: Vec::new(), path_map: HashMap::<PathBuf, NodeIdx>::new() }
+	}
 
-impl<T> AddChild<T> for Tree<T> {
-	fn add_child(&self, parent_idx: NodeIdx, child_elem: T, child_path: PathBuf) -> NodeIdx {
-        let parent = mut &self[parent_idx];
-		let child = Node::new(child_elem);
+	fn add_child(&mut self, parent_idx: NodeIdx, child_data: NodeData) -> NodeIdx {
+		let child = Node::new(child_data);
 		let child_idx = self.nodes.len();
-		parent.children.push(child_idx);
 
+        let parent = &mut self.nodes[parent_idx];
+		parent.children.push(child_idx);
 		self.nodes.push(child);
 
-		// todo implement validation for parent directories, or just create them
-		self.path_map.insert(child_path, child_idx);
+		// TODO consider this type of code if we only want to pass 
+		//   name rather than all data
+		//
+		// child.data.path = self.nodes[parent_idx].data.path.clone()
+		// child.data.path.push(child_name)
+
+		self.path_map.insert(self.nodes[child_idx].data.path.clone(), child_idx);
 
 		return child_idx;
     }
-}
 
-pub trait GetNode<T> {
-	fn get_node(&self, path: PathBuf) -> Option<&Node<T>>;
-}
-
-impl<T> GetNode<T> for Tree<T> {
-	fn get_node(&self, path: PathBuf) -> Option<&Node<T>>{
+	fn get_node_by_path(&self, path: PathBuf) -> Option<&Node> {
 		match self.path_map.get(&path) {
 			None => None,
 			Some(nodeIdx) => return Some(&self.nodes[*nodeIdx]),
 		}
     }
-}
 
-pub trait GetChildren<T> {
-    fn get_children(&self, parent_idx: NodeIdx) -> Children<'_, T>;
-}
-
-impl<T> GetChildren<T> for Tree<T> {
-    fn get_children(&self, parent_idx: NodeIdx) -> Children<'_, T> {
+    fn get_children(&self, parent_idx: NodeIdx) -> Children<'_> {
         Children {tree: &self, parent_idx, current: 0}
     }
+
+	fn get_child(&self, parent_idx: NodeIdx, file_name: String) -> Option<&NodeIdx> {
+		let parent = &self.nodes[parent_idx];
+		let mut child_path = parent.data.path.clone();
+		child_path.push(file_name);
+
+		return self.path_map.get(&child_path);
+	}
 }
 
 // 'a is life-time shit
-pub struct Children<'a, T> {
-	tree: &'a Tree<T>,
+pub struct Children<'a> {
+	tree: &'a Tree,
 	parent_idx: NodeIdx,
 	current: usize
 }
 
-impl<T> Iterator for Children<'_, T> {
-	type Item = NodeIdx;
-	fn next(&mut self) -> Option<Self::Item> {
+impl Children<'_> {
+	fn next(&mut self) -> Option<NodeIdx> {
 		let parent_node = &self.tree.nodes[self.parent_idx];
 
 		if self.current >= parent_node.children.len() {
@@ -96,7 +95,7 @@ impl<T> Iterator for Children<'_, T> {
 		}
 
 		let curr_idx = parent_node.children[self.current];
-		current += 1;
+		self.current += 1;
 
 		let curr_node = &self.tree.nodes[curr_idx];
 
