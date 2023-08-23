@@ -7,13 +7,11 @@ use crate::tree::{Tree, Node, NodeData, NodeIdx, root_idx};
 use crate::filesys::{load_full_tree, FileSysTree};
 
 fn dfs(tree: &Tree, current_idx: NodeIdx) {
-	/* 
 	let root = &tree.nodes[current_idx];
 	println!("{:?}", root.data.path);
 	for child in tree.get_children(current_idx) {
 		dfs(&tree, child);
 	}
-	*/
 }
 
 fn bfs(tree: &Tree, current_idx: NodeIdx) {

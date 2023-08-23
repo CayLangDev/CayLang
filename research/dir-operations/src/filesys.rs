@@ -1,7 +1,7 @@
 use jwalk::{WalkDir};
 use std::path::PathBuf;
 use std::env;
-use crate::tree::{Tree, Node, NodeIdx, root_idx};
+use crate::tree::{Tree, Node, NodeData, NodeIdx, root_idx};
 
 pub type FileIden = PathBuf;
 pub type FileNode = Node;
@@ -11,17 +11,22 @@ pub fn load_full_tree(root: FileIden) -> FileSysTree {
     let mut tree: FileSysTree = Tree::new();
     // let mut root: NodeIdx = root_idx();
     
-    for entry in WalkDir::new(root).sort(true) {
+    for entry in WalkDir::new(&root).sort(true) {
 		let entry = entry.unwrap();
 
-        println!("{}", entry.path().display());
+        let mut parent_path = entry.path().clone();
+        parent_path.pop();
+        // Path sorting means we can expect the parent to exist
+        let parent_idx = tree.path_map.get(&parent_path);
 
-        // let e: entry.path();
-        // let child_idx = tree.add_child(root, e, "");
-        // ...
-        // need to determine if child_idx is our new root
-        // entry.file_type.is_file() and entry.depth() will likely help
-        //
+        match parent_idx {
+            Some (idx) => {
+                tree.add_child(*idx, NodeData { path: entry.path() });
+            }
+            None => {
+                tree.add_child(0, NodeData { path: entry.path() });
+            }
+        }
 	}
 
 	return tree;

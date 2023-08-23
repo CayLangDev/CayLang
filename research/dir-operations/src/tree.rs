@@ -37,10 +37,16 @@ pub fn root_idx() -> NodeIdx {
 
 impl Tree {
 	pub fn new() -> Self {
-		Self { nodes: Vec::new(), path_map: HashMap::<PathBuf, NodeIdx>::new() }
+		let mut new_tree = Self { nodes: Vec::new(), path_map: HashMap::<PathBuf, NodeIdx>::new() };
+		
+		let mut root = Node::new(NodeData { path: "".into() });
+		root.parent = 0;
+		new_tree.nodes.push(root);
+
+		return new_tree;
 	}
 
-	fn add_child(&mut self, parent_idx: NodeIdx, child_data: NodeData) -> NodeIdx {
+	pub fn add_child(&mut self, parent_idx: NodeIdx, child_data: NodeData) -> NodeIdx {
 		let child = Node::new(child_data);
 		let child_idx = self.nodes.len();
 
@@ -59,18 +65,18 @@ impl Tree {
 		return child_idx;
     }
 
-	fn get_node_by_path(&self, path: PathBuf) -> Option<&Node> {
+	pub fn get_node_by_path(&self, path: PathBuf) -> Option<&Node> {
 		match self.path_map.get(&path) {
 			None => None,
 			Some(nodeIdx) => return Some(&self.nodes[*nodeIdx]),
 		}
     }
 
-    fn get_children(&self, parent_idx: NodeIdx) -> Children<'_> {
+    pub fn get_children(&self, parent_idx: NodeIdx) -> Children<'_> {
         Children {tree: &self, parent_idx, current: 0}
     }
 
-	fn get_child(&self, parent_idx: NodeIdx, file_name: String) -> Option<&NodeIdx> {
+	pub fn get_child(&self, parent_idx: NodeIdx, file_name: String) -> Option<&NodeIdx> {
 		let parent = &self.nodes[parent_idx];
 		let mut child_path = parent.data.path.clone();
 		child_path.push(file_name);
@@ -86,8 +92,9 @@ pub struct Children<'a> {
 	current: usize
 }
 
-impl Children<'_> {
-	fn next(&mut self) -> Option<NodeIdx> {
+impl Iterator for Children<'_> {
+	type Item = NodeIdx;
+	fn next(&mut self) -> Option<Self::Item> {
 		let parent_node = &self.tree.nodes[self.parent_idx];
 
 		if self.current >= parent_node.children.len() {
