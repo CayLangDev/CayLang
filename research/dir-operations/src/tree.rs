@@ -47,19 +47,15 @@ impl Tree {
 	}
 
 	pub fn add_child(&mut self, parent_idx: NodeIdx, child_data: NodeData) -> NodeIdx {
-		let child = Node::new(child_data);
+		let mut child = Node::new(child_data);
 		let child_idx = self.nodes.len();
 
         let parent = &mut self.nodes[parent_idx];
 		parent.children.push(child_idx);
+
+		child.parent = parent_idx;
+
 		self.nodes.push(child);
-
-		// TODO consider this type of code if we only want to pass 
-		//   name rather than all data
-		//
-		// child.data.path = self.nodes[parent_idx].data.path.clone()
-		// child.data.path.push(child_name)
-
 		self.path_map.insert(self.nodes[child_idx].data.path.clone(), child_idx);
 
 		return child_idx;
