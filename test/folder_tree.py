@@ -24,7 +24,7 @@ def main(args):
     branch_prob = args.branch_prob
     num_files = args.n
 
-    root_folder = f"root-{gen_randname()}"
+    root_folder = args.rootname if args.rootname else f"root-{gen_randname()}"
     os.makedirs(root_folder)
     gen_tree(root_folder, max_depth, max_branches, branch_prob, num_files)
 
@@ -34,6 +34,7 @@ if __name__ == "__main__":
     parser.add_argument("--max-branches", type=int, required=True, help="Max branches") 
     parser.add_argument("--branch-prob", type=float, required=True, help="Branching probability")
     parser.add_argument("--n", type=int, required=True, help="Number of files to make at the leaves")
+    parser.add_argument("--rootname", "-r", required=False, help="path of root file")
     
     args = parser.parse_args()
     main(args)
