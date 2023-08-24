@@ -104,11 +104,11 @@ fold NumDataSet {
 fold (match NumDataSet f"root") root {
   num: Nums {
     cat: Cats {
-      f"A" => {
+      r"A" => {
         file: Files => `{root}/{num}/{cat}_{file}`
         _ => `{root}/{num}/{cat}/{_}`
-      }
-      f"B" => {
+      },
+      r"B" => {
         ...
       }
       ...
@@ -173,7 +173,7 @@ from f"~/root" fold {
   root: NumDataSet {
     num: Nums {
       cat: Cats {
-        _: JsonFiles {
+        _: Files {
           r"1" => `{root}/{num}/{cat}_one`
           r"2" => `{root}/{num}/{cat}_two`
           r"3" => `{root}/{num}/{cat}_big_three`
@@ -184,6 +184,24 @@ from f"~/root" fold {
   }
 }
 ```
+
+```
+from f"~/root" fold {
+  NumDataSet {
+    Nums {
+      Cats {
+        _: Files {
+          r"1" => `{NumDataSet}/{num}/{cat}_one`
+          r"2" => `{root}/{num}/{cat}_two`
+          r"3" => `{root}/{num}/{cat}_big_three`
+          _ => `{root}/{num}/{cat}/{_}`
+        }
+      }
+    }
+  }
+}
+```
+
 
 ```
 from f"~/root" fold {

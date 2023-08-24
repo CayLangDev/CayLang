@@ -50,7 +50,7 @@ Here the DirectorySet construct will define a prototype named SmallNumDir that m
 
 ## Built Ins
 
-### Buit In Constructs
+### Description Constructs
 
 #### DirectorySet
 DirectorySet defines a prototype that matches, and may associate metadata with, a directory based on its name.
@@ -112,6 +112,19 @@ The Names field defines a regular expression that matches the names of a directo
 The Structure field wraps the layers and edge labelled sets, which describes the structure of a matching file tree.
 * Layers, consists of labels and depth bounded protypes
     * Depth-bounded, a layer's prototype can't match a ...
+
+
+### Operation Constructs
+
+### Fold
+
+```
+fold {
+
+}
+
+```
+
 
 
 ### Built In Functions
