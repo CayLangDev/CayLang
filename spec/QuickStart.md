@@ -69,12 +69,12 @@ Now we'll only match a dataset with the symmetric and full structure first shown
 
 ## Operation
 
+Suppose we have our dataset located as a subfolder of our home directory ("~"), such that it's path is `~/dataset`.
+Then we can flatten our dataset as follows.
+
 ```
-match NumDataSet f"root" |>  // f"dataset" is the path to our dataset folder
-fold Num {
-    r"1"/file => `1_{file}`,
-    r"2"/file => `2_{file}`,
-    r"3"/file => `3_{file}`,
+from f"~" fold NumDataNumsSet {
+  NumDataSet/Nums/Files => `{NumDataSet}/{Nums}_{Files}`
 }
 ```
 
@@ -93,18 +93,126 @@ fold Num {
       num/file => `{num}_{file}`
     }
 }
+
+fold NumDataSet {
+  Nums/Cat/Files
+}
 ```
+
 
 ```
 fold (match NumDataSet f"root") root {
   num: Nums {
     cat: Cats {
-      file => `{root}/{num}/{cat}_{file}`
-      _ => `{root}/{num}/{cat}/{_}`
+      f"A" => {
+        file: Files => `{root}/{num}/{cat}_{file}`
+        _ => `{root}/{num}/{cat}/{_}`
+      }
+      f"B" => {
+        ...
+      }
+      ...
     }
   }
 }
 // have to match every file and directory
+```
+
+```
+fold NumDataSet<f"~/root"> {
+  root: NumDataSet {
+      num: Nums {
+        cat: Cats {
+          _: JsonFiles {
+            r"1" => `{root}/{num}/{cat}_one`
+            r"2" => `{root}/{num}/{cat}_two`
+            r"3" => `{root}/{num}/{cat}_big_three`
+            _ => `{root}/{num}/{cat}/{_}`
+          }
+        }
+    }
+  }
+}
+```
+
+```
+fold f"~/root" {
+  root: NumDataSet {
+      num: Nums {
+        cat: Cats {
+          _: JsonFiles {
+            r"1" => `{root}/{num}/{cat}_one`
+            r"2" => `{root}/{num}/{cat}_two`
+            r"3" => `{root}/{num}/{cat}_big_three`
+            _ => `{root}/{num}/{cat}/{_}`
+          }
+        }
+    }
+  }
+}
+```
+
+```
+fold NumDataSet<f"~/root"> root {
+    num: Nums {
+      cat: Cats {
+        _: JsonFiles {
+          r"1" => `{root}/{num}/{cat}_one`
+          r"2" => `{root}/{num}/{cat}_two`
+          r"3" => `{root}/{num}/{cat}_big_three`
+          _ => `{root}/{num}/{cat}/{_}`
+        }
+      }
+  }
+}
+```
+
+
+```
+from f"~/root" fold {
+  root: NumDataSet {
+    num: Nums {
+      cat: Cats {
+        _: JsonFiles {
+          r"1" => `{root}/{num}/{cat}_one`
+          r"2" => `{root}/{num}/{cat}_two`
+          r"3" => `{root}/{num}/{cat}_big_three`
+          _ => `{root}/{num}/{cat}/{_}`
+        }
+      }
+    }
+  }
+}
+```
+
+```
+from f"~/root" fold {
+  layers {
+    root: NumDataSet,
+    num: Nums,
+    cat: Cats,
+  },
+  edges {
+    _: JsonFiles {
+      r"1" => `{root}/{num}/{cat}_one`
+      r"2" => `{root}/{num}/{cat}_two`
+      r"3" => `{root}/{num}/{cat}_big_three`
+      _ => `{root}/{num}/{cat}/{_}`
+    }
+  }
+}
+```
+
+
+```
+from f"~" fold NumDataNumsSet {
+  _: Files {
+    r"1" => `{NumDataSet}/{Nums}_one`
+    r"2" => `{NumDataSet}/{Nums}_two`
+    r"3" => `{NumDataSet}/{Nums}_big_three`
+    _ => `{NumDataSet}/{Nums}/{_}`
+  }
+}
 ```
 
 
