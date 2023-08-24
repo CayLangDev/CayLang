@@ -141,3 +141,7 @@ def dfs_flatten(new_root, root, trace):
 new_tree = Tree("root")
 dfs_flatten(new_tree, tree, "root")
 print_tree(new_tree)
+
+tree = make_tree(["dataset",["1","2","3"], ["A", "B", "C"], , ["A", "B", "C"]])
+print_tree(tree)
+print()

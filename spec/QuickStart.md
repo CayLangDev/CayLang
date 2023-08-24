@@ -73,10 +73,15 @@ Suppose we have our dataset located as a subfolder of our home directory ("~"), 
 Then we can flatten our dataset as follows.
 
 ```
-from f"~" fold NumDataNumsSet {
-  NumDataSet/Nums/Files => `{NumDataSet}/{Nums}_{Files}`
+from f"~" fold NumDataSet {
+  root => {
+    nums => {
+      files => `{root}/{nums}_{files}`
+    }
+  }
 }
 ```
+`Operation syntax is WIP, see Operations.md`
 
 Now we've flattened our dataset
 ```
@@ -87,214 +92,21 @@ Now we've flattened our dataset
 
 Alternatively we could write
 ```
-match NumDataSet f"root" |>  // f"dataset" is the path to our dataset folder
-fold Num {
-    num {
-      num/file => `{num}_{file}`
-    }
-}
-
-fold NumDataSet {
-  Nums/Cat/Files
-}
-```
-
-
-```
-fold (match NumDataSet f"root") root {
-  num: Nums {
-    cat: Cats {
-      r"A" => {
-        file: Files => `{root}/{num}/{cat}_{file}`
-        _ => `{root}/{num}/{cat}/{_}`
-      },
-      r"B" => {
-        ...
-      }
-      ...
-    }
-  }
-}
-// have to match every file and directory
-```
-
-```
-fold NumDataSet<f"~/root"> {
-  root: NumDataSet {
-      num: Nums {
-        cat: Cats {
-          _: JsonFiles {
-            r"1" => `{root}/{num}/{cat}_one`
-            r"2" => `{root}/{num}/{cat}_two`
-            r"3" => `{root}/{num}/{cat}_big_three`
-            _ => `{root}/{num}/{cat}/{_}`
-          }
-        }
+from f"~" fold NumDataSet {
+  root => {
+    r"1" num => { // r"1" is regex matching only 1, num is an identifier capturing the match
+      files => `{root}/{num}_{files}
+    },
+    r"2" => { // if we don't care about the match's value we can omit the identifier
+      files => `{root}/2_{files}
+    },
+    r"." num => { // but sometimes we need it
+      files => `{root}/{num}_{files}
     }
   }
 }
 ```
-
-```
-fold f"~/root" {
-  root: NumDataSet {
-      num: Nums {
-        cat: Cats {
-          _: JsonFiles {
-            r"1" => `{root}/{num}/{cat}_one`
-            r"2" => `{root}/{num}/{cat}_two`
-            r"3" => `{root}/{num}/{cat}_big_three`
-            _ => `{root}/{num}/{cat}/{_}`
-          }
-        }
-    }
-  }
-}
-```
-
-```
-fold NumDataSet<f"~/root"> root {
-    num: Nums {
-      cat: Cats {
-        _: JsonFiles {
-          r"1" => `{root}/{num}/{cat}_one`
-          r"2" => `{root}/{num}/{cat}_two`
-          r"3" => `{root}/{num}/{cat}_big_three`
-          _ => `{root}/{num}/{cat}/{_}`
-        }
-      }
-  }
-}
-```
-
-
-```
-from f"~/root" fold {
-  root: NumDataSet {
-    num: Nums {
-      cat: Cats {
-        _: Files {
-          r"1" => `{root}/{num}/{cat}_one`
-          r"2" => `{root}/{num}/{cat}_two`
-          r"3" => `{root}/{num}/{cat}_big_three`
-          _ => `{root}/{num}/{cat}/{_}`
-        }
-      }
-    }
-  }
-}
-```
-
-```
-from f"~/root" fold {
-  NumDataSet {
-    Nums {
-      Cats {
-        _: Files {
-          r"1" => `{NumDataSet}/{num}/{cat}_one`
-          r"2" => `{root}/{num}/{cat}_two`
-          r"3" => `{root}/{num}/{cat}_big_three`
-          _ => `{root}/{num}/{cat}/{_}`
-        }
-      }
-    }
-  }
-}
-```
-
-
-```
-from f"~/root" fold {
-  layers {
-    root: NumDataSet,
-    num: Nums,
-    cat: Cats,
-  },
-  edges {
-    _: JsonFiles {
-      r"1" => `{root}/{num}/{cat}_one`
-      r"2" => `{root}/{num}/{cat}_two`
-      r"3" => `{root}/{num}/{cat}_big_three`
-      _ => `{root}/{num}/{cat}/{_}`
-    }
-  }
-}
-```
-
-
-```
-from f"~" fold NumDataNumsSet {
-  _: Files {
-    r"1" => `{NumDataSet}/{Nums}_one`
-    r"2" => `{NumDataSet}/{Nums}_two`
-    r"3" => `{NumDataSet}/{Nums}_big_three`
-    _ => `{NumDataSet}/{Nums}/{_}`
-  }
-}
-```
-
-
-```
-fold (match NumDataNumsSet f"root") root {
-  Nums num: {
-    Cats cat: {
-      file => `{root}/{num}/{cat}_{file}`
-      _ => `{root}/{num}/{cat}/{_}`
-    }
-  }
-}
-// have to match every file and directory
-```
-
-```
-fold (match NumDataSet f"root") root {
-  retain Nums nums {
-    flatten Cats cats {
-      file => `{cat}_{file}`
-      _ => `{cat}/{_}`
-    }
-  }
-}
-// have to match every file and directory
-```
-
-
-```
-fold (match NumDataSet f"root") root {
-  num: group Nums {
-    cat: group Cats {
-      file: leaf File {`{root}/{num}/{cat}_{file}`},
-      other: leaf not File {`{root}/{num}/{cat}/{_}`}
-    }
-  }
-}
-// have to match every file and directory
-```
-
-```
-fold (match NumDataSet f"root") root {
-  num: group Nums {
-    cat: group Cats {
-      File file => `{root}/{num}/{cat}_{file}`
-      _ => `{root}/{num}/{cat}/{_}`
-    }
-  }
-}
-// have to match every file and directory
-```
-
-
-```
-fold (match NumDataSet f"root") root {
-  Nums num {>
-    Cats cat {>
-      File file => `{root}/{num}/{cat}_{file}`
-      _ => `{root}/{num}/{cat}/{_}`
-    }
-  }
-}
-// have to match every file and directory
-```
+`Operation syntax is WIP, see Operations.md`
 The former is more useful for edge cases, especially when there are different types of files.
 
 
