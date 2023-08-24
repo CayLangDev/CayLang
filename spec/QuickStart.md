@@ -70,7 +70,7 @@ Now we'll only match a dataset with the symmetric and full structure first shown
 ## Operation
 
 ```
-match SmallNumDir f"root" |>  // f"dataset" is the path to our dataset folder
+match NumDataSet f"root" |>  // f"dataset" is the path to our dataset folder
 fold Num {
     r"1"/file => `1_{file}`,
     r"2"/file => `2_{file}`,
@@ -87,10 +87,87 @@ Now we've flattened our dataset
 
 Alternatively we could write
 ```
-match SmallNumDir f"root" |>  // f"dataset" is the path to our dataset folder
+match NumDataSet f"root" |>  // f"dataset" is the path to our dataset folder
 fold Num {
-    num/file => `{num}_{file}`
+    num {
+      num/file => `{num}_{file}`
+    }
 }
+```
+
+```
+fold (match NumDataSet f"root") root {
+  num: Nums {
+    cat: Cats {
+      file => `{root}/{num}/{cat}_{file}`
+      _ => `{root}/{num}/{cat}/{_}`
+    }
+  }
+}
+// have to match every file and directory
+```
+
+
+```
+fold (match NumDataNumsSet f"root") root {
+  Nums num: {
+    Cats cat: {
+      file => `{root}/{num}/{cat}_{file}`
+      _ => `{root}/{num}/{cat}/{_}`
+    }
+  }
+}
+// have to match every file and directory
+```
+
+```
+fold (match NumDataSet f"root") root {
+  retain Nums nums {
+    flatten Cats cats {
+      file => `{cat}_{file}`
+      _ => `{cat}/{_}`
+    }
+  }
+}
+// have to match every file and directory
+```
+
+
+```
+fold (match NumDataSet f"root") root {
+  num: group Nums {
+    cat: group Cats {
+      file: leaf File {`{root}/{num}/{cat}_{file}`},
+      other: leaf not File {`{root}/{num}/{cat}/{_}`}
+    }
+  }
+}
+// have to match every file and directory
+```
+
+```
+fold (match NumDataSet f"root") root {
+  num: group Nums {
+    cat: group Cats {
+      File file => `{root}/{num}/{cat}_{file}`
+      _ => `{root}/{num}/{cat}/{_}`
+    }
+  }
+}
+// have to match every file and directory
+```
+
+
+```
+fold (match NumDataSet f"root") root {
+  Nums num {>
+    Cats cat {>
+      File file => `{root}/{num}/{cat}_{file}`
+      _ => `{root}/{num}/{cat}/{_}`
+    }
+  }
+}
+// have to match every file and directory
 ```
 The former is more useful for edge cases, especially when there are different types of files.
 
