@@ -1,0 +1,22 @@
+use crate::ast::{Rule, RuleEntry, Operation, Path};
+
+grammar;
+
+pub Main: Vec<Rule> = { rule* }
+
+rule: Rule = { <operation:Operation> <path:Path> "{" <entries:RuleEntries> "}" => Rule {<>}}
+
+Path: Path = { 
+    r"[-a-zA-Z0-9_/\.]+" => Path::Exact(String::from(<>)),
+    r"[-a-zA-Z0-9_/\.\*]*\*[-a-zA-Z0-9_/\.\*]*" => Path::Glob(String::from(<>)), 
+}
+
+Operation: Operation = { 
+    "fold" => Operation::Fold, 
+    "reduce" => Operation::Reduce, 
+    "find" => Operation::Find 
+}
+
+RuleEntries: Vec<RuleEntry> = { RuleEntry* }
+
+RuleEntry: RuleEntry = { <pattern:Path> " => " <destination:Path> => RuleEntry {<>} }
