@@ -28,7 +28,8 @@ fn main() -> std::io::Result<()> {
 
 	let mut tree: FileSysTree = load_full_tree((&args[1]).into());
 
-	tree.add_node(NodeData{ path: PathBuf::from("a/f/g/h") });
+	tree.add_node(NodeData{ path: PathBuf::from("a/f/g/h.txt") });
+	tree.add_node(NodeData{ path: PathBuf::from("b/f/g/h.txt") });
 
 	println!("BFS");
 	

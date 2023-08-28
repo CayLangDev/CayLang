@@ -43,6 +43,7 @@ impl Tree {
 		let mut root = Node::new(NodeData { path: "".into() });
 		root.parent = 0;
 		new_tree.nodes.push(root);
+		new_tree.path_map.insert(PathBuf::from(""), 0);
 
 		return new_tree;
 	}
@@ -53,17 +54,22 @@ impl Tree {
 
 		for ancestor in ancestors.iter().rev()
 		{
-			println!("{}", ancestor.display());
+			let ancestor_buf = PathBuf::from(ancestor);
 
-			match self.path_map.get(&PathBuf::from(ancestor)) {
+			match self.path_map.get(&ancestor_buf) {
 				None => {
-					let ancestor_buf = PathBuf::from(ancestor);
-					let ancestor_parent = PathBuf::from(ancestor.parent().unwrap());
+					let ancestor_parent = match ancestor.parent() {
+						Some(x) => PathBuf::from(x),
+						None => PathBuf::from("")
+					};
+
+					// Unwrap should be fine since all parents are either root or 
+					//	already created
 					let parent_idx = self.path_map.get(&ancestor_parent).unwrap();
 					
 					self.add_child(*parent_idx, NodeData { path: ancestor_buf });
 				},
-				Some(node_idx) => (),
+				Some(parent_idx) => (),
 			}
 		}
 	}
