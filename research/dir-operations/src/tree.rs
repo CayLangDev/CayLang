@@ -10,7 +10,17 @@ pub type NodeIdx = usize;
 
 #[derive(Debug,Clone)]
 pub struct NodeData {
+	pub original_path: PathBuf,
 	pub path: PathBuf
+}
+
+impl NodeData {
+	pub fn new(original_path: PathBuf) -> Self {
+		NodeData {
+			path: original_path.clone(),
+			original_path: original_path,
+		}
+	}
 }
 
 #[derive(Debug)]
@@ -32,6 +42,10 @@ pub struct Tree {
 	pub path_map: HashMap<PathBuf, NodeIdx>,
 }
 
+pub fn root_path() -> PathBuf {
+    return PathBuf::from("");
+}
+
 pub fn root_idx() -> NodeIdx {
     return 0;
 }
@@ -40,10 +54,10 @@ impl Tree {
 	pub fn new() -> Self {
 		let mut new_tree = Self { nodes: Vec::new(), path_map: HashMap::<PathBuf, NodeIdx>::new() };
 		
-		let mut root = Node::new(NodeData { path: "".into() });
+		let mut root = Node::new(NodeData::new(root_path()));
 		root.parent = 0;
 		new_tree.nodes.push(root);
-		new_tree.path_map.insert(PathBuf::from(""), 0);
+		new_tree.path_map.insert(root_path(), 0);
 
 		return new_tree;
 	}
@@ -81,9 +95,9 @@ impl Tree {
 					//	already created
 					let parent_idx = self.path_map.get(&ancestor_parent).unwrap();
 					
-					self.add_child(*parent_idx, NodeData { path: ancestor_buf });
+					self.add_child(*parent_idx, NodeData::new(ancestor_buf));
 				},
-				Some(parent_idx) => (),
+				Some(_parent_idx) => (),
 			}
 		}
 	}
@@ -106,7 +120,7 @@ impl Tree {
 	pub fn get_node_by_path(&self, path: &PathBuf) -> Option<&Node> {
 		match self.path_map.get(path) {
 			None => None,
-			Some(nodeIdx) => return Some(&self.nodes[*nodeIdx]),
+			Some(node_idx) => return Some(&self.nodes[*node_idx]),
 		}
     }
 
@@ -141,8 +155,6 @@ impl Iterator for Children<'_> {
 
 		let curr_idx = parent_node.children[self.current];
 		self.current += 1;
-
-		let curr_node = &self.tree.nodes[curr_idx];
 
 		return Some(curr_idx);
 	}

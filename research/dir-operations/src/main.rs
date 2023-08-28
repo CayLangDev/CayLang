@@ -1,9 +1,7 @@
-use jwalk::{WalkDir};
-use std::path::PathBuf;
 use std::env;
 pub mod tree;
 pub mod filesys;
-use crate::tree::{Tree, Node, NodeData, NodeIdx, root_idx};
+use crate::tree::{Tree, NodeIdx, root_idx};
 use crate::filesys::{load_full_tree, FileSysTree};
 
 fn dfs(tree: &Tree, current_idx: NodeIdx) {
@@ -14,10 +12,10 @@ fn dfs(tree: &Tree, current_idx: NodeIdx) {
 	}
 }
 
-fn bfs(tree: &Tree, current_idx: NodeIdx) {
-	// ...
-	// tbd
-}
+// fn bfs(tree: &Tree, current_idx: NodeIdx) {
+// 	// ...
+// 	// tbd
+// }
 
 fn main() -> std::io::Result<()> {
 	let args: Vec<String> = env::args().collect();
@@ -26,16 +24,11 @@ fn main() -> std::io::Result<()> {
 		return Ok(());
 	}
 
-	let mut tree: FileSysTree = load_full_tree((&args[1]).into());
+	let tree: FileSysTree = load_full_tree((&args[1]).into());
 
-	/*
-	tree.add_node(NodeData{ path: PathBuf::from("a/f/g/h.txt") });
-	tree.add_node(NodeData{ path: PathBuf::from("b/f/g/h.txt") });
-	*/
-
-	println!("BFS");
+	// println!("BFS");
 	
-	bfs(&tree, root_idx());
+	// bfs(&tree, root_idx());
 
 	println!("DFS");
 
