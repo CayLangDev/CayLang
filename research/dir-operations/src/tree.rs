@@ -8,7 +8,7 @@ use std::path::Path;
 
 pub type NodeIdx = usize;
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct NodeData {
 	pub path: PathBuf
 }
@@ -44,6 +44,20 @@ impl Tree {
 		root.parent = 0;
 		new_tree.nodes.push(root);
 		new_tree.path_map.insert(PathBuf::from(""), 0);
+
+		return new_tree;
+	}
+
+	pub fn from_fold(from_tree: Tree, from_paths: Vec<PathBuf>, to_paths: Vec<PathBuf>) -> Self {
+		let mut new_tree = Tree::new();
+
+		for i in 0..from_paths.len() {
+			// TODO deal with None
+			let from_file = from_tree.get_node_by_path(&from_paths[i]).unwrap();
+			let mut new_data = from_file.data.clone();
+			new_data.path = to_paths[i].clone();
+			new_tree.add_node(new_data);
+		}
 
 		return new_tree;
 	}
@@ -89,8 +103,8 @@ impl Tree {
 		return child_idx;
     }
 
-	pub fn get_node_by_path(&self, path: PathBuf) -> Option<&Node> {
-		match self.path_map.get(&path) {
+	pub fn get_node_by_path(&self, path: &PathBuf) -> Option<&Node> {
+		match self.path_map.get(path) {
 			None => None,
 			Some(nodeIdx) => return Some(&self.nodes[*nodeIdx]),
 		}
