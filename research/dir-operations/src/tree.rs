@@ -62,7 +62,7 @@ impl Tree {
 		return new_tree;
 	}
 
-	pub fn from_fold(from_tree: Tree, from_paths: Vec<PathBuf>, to_paths: Vec<PathBuf>) -> Self {
+	pub fn from_fold(from_tree: &Tree, from_paths: Vec<PathBuf>, to_paths: Vec<PathBuf>) -> Self {
 		let mut new_tree = Tree::new();
 
 		for i in 0..from_paths.len() {
