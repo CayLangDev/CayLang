@@ -26,7 +26,9 @@ fn main() -> std::io::Result<()> {
 		return Ok(());
 	}
 
-	let tree: FileSysTree = load_full_tree((&args[1]).into());
+	let mut tree: FileSysTree = load_full_tree((&args[1]).into());
+
+	tree.add_node(NodeData{ path: PathBuf::from("a/f/g/h") });
 
 	println!("BFS");
 	

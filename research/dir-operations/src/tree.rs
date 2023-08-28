@@ -4,6 +4,7 @@
 // https://doc.rust-lang.org/rust-by-example/trait.html
 use std::collections::HashMap;
 use std::path::PathBuf;
+use std::path::Path;
 
 pub type NodeIdx = usize;
 
@@ -44,6 +45,27 @@ impl Tree {
 		new_tree.nodes.push(root);
 
 		return new_tree;
+	}
+
+	pub fn add_node(&mut self, child_data: NodeData)
+	{
+		let ancestors: Vec<&Path> = child_data.path.ancestors().collect();	
+
+		for ancestor in ancestors.iter().rev()
+		{
+			println!("{}", ancestor.display());
+
+			match self.path_map.get(&PathBuf::from(ancestor)) {
+				None => {
+					let ancestor_buf = PathBuf::from(ancestor);
+					let ancestor_parent = PathBuf::from(ancestor.parent().unwrap());
+					let parent_idx = self.path_map.get(&ancestor_parent).unwrap();
+					
+					self.add_child(*parent_idx, NodeData { path: ancestor_buf });
+				},
+				Some(node_idx) => (),
+			}
+		}
 	}
 
 	pub fn add_child(&mut self, parent_idx: NodeIdx, child_data: NodeData) -> NodeIdx {
