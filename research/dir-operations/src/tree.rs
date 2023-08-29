@@ -70,6 +70,26 @@ impl Tree {
 		return new_tree;
 	}
 
+	pub fn from_fold_function(from_tree: &Tree, f: fn(&Node) -> PathBuf) -> Self {
+		let from_paths = (&from_tree.nodes).into_iter().filter(|x| {
+			match x.data.node_type {
+				NodeType::File => true,
+				NodeType::Directory => false,
+			}
+		}).map(|x| {
+			x.data.path.clone()
+		}).collect();
+
+		let to_paths = (&from_tree.nodes).into_iter().filter(|x| {
+			match x.data.node_type {
+				NodeType::File => true,
+				NodeType::Directory => false,
+			}
+		}).map(f).collect();
+
+		return Tree::from_fold(&from_tree, from_paths, to_paths);
+	}
+
 	pub fn from_fold(from_tree: &Tree, from_paths: Vec<PathBuf>, to_paths: Vec<PathBuf>) -> Self {
 		let mut new_tree = Tree::new();
 

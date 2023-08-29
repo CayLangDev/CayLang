@@ -39,20 +39,21 @@ fn create_all_parents(path: &PathBuf)
     std::fs::create_dir_all(prefix).unwrap();
 }
 
-pub fn write_full_tree(from_tree: Tree, to_tree: Tree)
+pub fn write_full_tree(from_tree: &Tree, to_tree: &Tree)
 {
-    for node in to_tree.nodes {
+    for node in to_tree.nodes.iter() {
         match node.data.node_type {
             NodeType::File => {
                 // println!("{} -> {}", node.data.original_path.display(), node.data.path.display()); 
                 create_all_parents(&node.data.path);
                 fs::rename(&node.data.original_path, &node.data.path);
             }
-            x => ()
+            _ => ()
         }
     }
 
-    for node in from_tree.nodes {
+    for node in from_tree.nodes.iter() {
+
         match node.data.node_type {
             NodeType::Directory => {
                 match to_tree.path_map.get(&node.data.path) {
@@ -62,9 +63,9 @@ pub fn write_full_tree(from_tree: Tree, to_tree: Tree)
                     }
                     Some(_) => ()
                 }
-                fs::rename(node.data.original_path, node.data.path);
+                fs::rename(&node.data.original_path, &node.data.path);
             }
-            x => ()
+            _ => ()
         }
     }
 }
