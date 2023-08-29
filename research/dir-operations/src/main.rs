@@ -2,7 +2,7 @@ use std::env;
 pub mod tree;
 use std::path::PathBuf;
 pub mod filesys;
-use crate::tree::{Tree, NodeIdx, root_idx};
+use crate::tree::{Tree, NodeIdx, root_idx, NodeType};
 use crate::filesys::{load_full_tree, write_full_tree};
 
 fn dfs(tree: &Tree, current_idx: NodeIdx) {
@@ -27,11 +27,21 @@ fn copy_fold(tree: &Tree) -> Tree {
 
 // TODO for Gleb
 fn flatten_fold(tree: &Tree) -> Tree {
-	let from_paths = (&tree.nodes).into_iter().map(|x| {
+	let from_paths = (&tree.nodes).into_iter().filter(|x| {
+		match x.data.node_type {
+			NodeType::File => true,
+			NodeType::Directory => false,
+		}
+	}).map(|x| {
 		x.data.path.clone()
 	}).collect();
 
-	let to_paths = (&tree.nodes).into_iter().map(|x| {
+	let to_paths = (&tree.nodes).into_iter().filter(|x| {
+		match x.data.node_type {
+			NodeType::File => true,
+			NodeType::Directory => false,
+		}
+	}).map(|x| {
 		let string = x.data.path.to_str().unwrap();
 		PathBuf::from(str::replace(string, "/", "_"))
 	}).collect();

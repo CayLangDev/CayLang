@@ -55,10 +55,10 @@ pub fn write_full_tree(from_tree: Tree, to_tree: Tree)
     for node in from_tree.nodes {
         match node.data.node_type {
             NodeType::Directory => {
-                // println!("{} -> {}", node.data.original_path.display(), node.data.path.display()); 
                 match to_tree.path_map.get(&node.data.path) {
                     None => {
                         fs::remove_dir_all(&node.data.path);
+                        fs::remove_dir(&node.data.path);
                     }
                     Some(_) => ()
                 }
