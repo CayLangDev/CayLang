@@ -1,13 +1,10 @@
 use jwalk::{WalkDir};
+use std::fs;
 use std::path::PathBuf;
-use crate::tree::{Tree, Node, NodeData};
+use crate::tree::{Tree, Node, NodeData, NodeType};
 
-pub type FileIden = PathBuf;
-pub type FileNode = Node;
-pub type FileSysTree = Tree;
-
-pub fn load_full_tree(root: FileIden) -> FileSysTree {
-    let mut tree: FileSysTree = Tree::new();
+pub fn load_full_tree(root: PathBuf) -> Tree {
+    let mut tree: Tree = Tree::new();
     // let mut root: NodeIdx = root_idx();
     
     for entry in WalkDir::new(&root).sort(true) {
@@ -18,17 +15,58 @@ pub fn load_full_tree(root: FileIden) -> FileSysTree {
         // Path sorting means we can expect the parent to exist
         let parent_idx = tree.path_map.get(&parent_path);
 
+        let node_type = match entry.file_type().is_file() {
+            true => NodeType::File,
+            false => NodeType::Directory,
+        };
+
         match parent_idx {
             Some (idx) => {
-                tree.add_child(*idx, NodeData::new(entry.path()));
+                tree.add_child(*idx, NodeData::new(entry.path(), node_type));
             }
             None => {
-                tree.add_child(0, NodeData::new(entry.path()));
+                tree.add_child(0, NodeData::new(entry.path(), node_type));
             }
         }
 	}
 
 	return tree;
+}
+
+fn create_all_parents(path: &PathBuf)
+{
+    let prefix = path.as_path().parent().unwrap();
+    std::fs::create_dir_all(prefix).unwrap();
+}
+
+pub fn write_full_tree(from_tree: Tree, to_tree: Tree)
+{
+    for node in to_tree.nodes {
+        match node.data.node_type {
+            NodeType::File => {
+                // println!("{} -> {}", node.data.original_path.display(), node.data.path.display()); 
+                create_all_parents(&node.data.path);
+                fs::rename(&node.data.original_path, &node.data.path);
+            }
+            x => ()
+        }
+    }
+
+    for node in from_tree.nodes {
+        match node.data.node_type {
+            NodeType::Directory => {
+                // println!("{} -> {}", node.data.original_path.display(), node.data.path.display()); 
+                match to_tree.path_map.get(&node.data.path) {
+                    None => {
+                        fs::remove_dir_all(&node.data.path);
+                    }
+                    Some(_) => ()
+                }
+                fs::rename(node.data.original_path, node.data.path);
+            }
+            x => ()
+        }
+    }
 }
 
 // validation-loading ideas

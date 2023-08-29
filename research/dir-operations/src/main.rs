@@ -3,7 +3,7 @@ pub mod tree;
 use std::path::PathBuf;
 pub mod filesys;
 use crate::tree::{Tree, NodeIdx, root_idx};
-use crate::filesys::{load_full_tree, FileSysTree};
+use crate::filesys::{load_full_tree, write_full_tree};
 
 fn dfs(tree: &Tree, current_idx: NodeIdx) {
 	let root = &tree.nodes[current_idx];
@@ -46,12 +46,16 @@ fn flatten_fold(tree: &Tree) -> Tree {
 
 fn main() -> std::io::Result<()> {
 	let args: Vec<String> = env::args().collect();
-	if args.len() != 2 {
-		println!("Err: Expected one path argument");
+	if args.len() != 3 {
+		println!("Err: Expected two path arguments");
 		return Ok(());
 	}
 
-	let tree: FileSysTree = load_full_tree((&args[1]).into());
+	let from_path = PathBuf::from(&args[1]);
+	let to_path = PathBuf::from(&args[2]);
+
+	let tree: Tree = load_full_tree((&args[1]).into());
+
 
 	let copied_tree = copy_fold(&tree);
 	let flattened_tree = flatten_fold(&tree);
@@ -71,6 +75,8 @@ fn main() -> std::io::Result<()> {
 	println!("DFS Flatten Fold");
 
 	dfs(&flattened_tree, root_idx());
+
+	write_full_tree(tree, flattened_tree);
 	
 	return Ok(());
 }

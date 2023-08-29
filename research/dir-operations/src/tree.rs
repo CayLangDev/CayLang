@@ -9,16 +9,24 @@ use std::path::Path;
 pub type NodeIdx = usize;
 
 #[derive(Debug,Clone)]
+pub enum NodeType {
+	File,
+	Directory,
+}
+
+#[derive(Debug,Clone)]
 pub struct NodeData {
 	pub original_path: PathBuf,
-	pub path: PathBuf
+	pub path: PathBuf,
+	pub node_type: NodeType,
 }
 
 impl NodeData {
-	pub fn new(original_path: PathBuf) -> Self {
+	pub fn new(original_path: PathBuf, node_type: NodeType) -> Self {
 		NodeData {
 			path: original_path.clone(),
 			original_path: original_path,
+			node_type: node_type
 		}
 	}
 }
@@ -54,7 +62,7 @@ impl Tree {
 	pub fn new() -> Self {
 		let mut new_tree = Self { nodes: Vec::new(), path_map: HashMap::<PathBuf, NodeIdx>::new() };
 		
-		let mut root = Node::new(NodeData::new(root_path()));
+		let mut root = Node::new(NodeData::new(root_path(), NodeType::Directory));
 		root.parent = 0;
 		new_tree.nodes.push(root);
 		new_tree.path_map.insert(root_path(), 0);
@@ -95,7 +103,14 @@ impl Tree {
 					//	already created
 					let parent_idx = self.path_map.get(&ancestor_parent).unwrap();
 					
-					self.add_child(*parent_idx, NodeData::new(ancestor_buf));
+					if ancestor_buf != child_data.path
+					{
+						self.add_child(*parent_idx, NodeData::new(ancestor_buf, NodeType:: Directory));
+					}
+					else 
+					{
+						self.add_child(*parent_idx, child_data.clone());
+					}
 				},
 				Some(_parent_idx) => (),
 			}
