@@ -5,8 +5,17 @@ grammar;
 
 pub Main: Expr = Expr;
 
-// expression is any series (space seperated) of basic expressions
-Expr: Expr = BasicExpr*  => Expr::ExprList(<>);
+// expression is any series (space seperated) of closed expressions
+Expr: Expr = ClosedExpr+ => Expr::ExprList(<>);
+
+// a closed expression is any independent expression, it's value is fully encapsulated in
+// its node in the ast.
+// i.e. "1" is exactly 1, "(f)" is exactly the function f with no arguments applied, "(f a)" is exactly f with the argument a applied
+// on the other hand: "f a" is the function f with a applied as an argument, it may have further arguments next to it that will be applied, and so is not a closed expression.
+ClosedExpr: Expr = {
+    "(" <BasicExpr+> ")" => Expr::ExprList(<>),
+    BasicExpr
+}
 
 // basic expression is any single identifier, literal or compound literal.
 BasicExpr: Expr = {
