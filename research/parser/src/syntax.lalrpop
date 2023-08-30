@@ -1,4 +1,4 @@
-use crate::fold_ast::{Expr, Literal, Ident, Pair, Guard, Clause, Function, TypeDestructured, FoldExpr, Field, ClauseType, Destination};
+use crate::ast::{Expr, Literal, Ident, Pair, Guard, Clause, Function, TypeDestructured, FoldExpr, Field, ClauseType, Destination};
 use std::str::FromStr;
 
 

@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod tests {
     use lalrpop_util::{lalrpop_mod, ParseError};
-    lalrpop_mod!(pub fold_syntax);
+    lalrpop_mod!(pub syntax);
 
     #[test]
     fn test_valid_folds_1() {
-        let parser = fold_syntax::MainParser::new();
+        let parser = syntax::MainParser::new();
 
         let cay =
                 "fold \"~/dataset\": Dataset { name as school, .. } {
@@ -26,7 +26,7 @@ mod tests {
 
     #[test]
     fn test_valid_folds_2() {
-        let parser = fold_syntax::MainParser::new();
+        let parser = syntax::MainParser::new();
 
         let cay = "fold \"test\": MyDir {
             My => {
@@ -51,7 +51,7 @@ mod tests {
 
     #[test]
     fn test_invalid_folds() {
-        let parser = fold_syntax::MainParser::new();
+        let parser = syntax::MainParser::new();
 
         let test_folds = vec![
             "fold ~/dataset: Dataset", // Missing block

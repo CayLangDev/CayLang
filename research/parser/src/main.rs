@@ -1,4 +1,4 @@
-mod fold_ast;
+mod ast;
 mod tests;
 
 fn main() {
