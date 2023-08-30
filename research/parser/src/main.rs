@@ -59,8 +59,14 @@ fn main() {
 
     let input3 = r#"print {1 2.3 "hi" "" r"hi" r"" p"hi" p"" hello}"#;
 
+    // a/3 b/1
+    let input4 = r#"a 1 b 2"#; // evaluates to  (a 1 (b 2)); throws error on not enough arguments for a (in interpreter not parser)
+    let input5 = r#"a 1 (b) 2"#; // evaluate to (a 1 (b) 2); no error
+
     test(input1);
     test(input2);
     test(input3);
+    test(input4);
+    test(input5);
 
 }
