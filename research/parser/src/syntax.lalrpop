@@ -1,0 +1,50 @@
+use crate::ast::{Expr, Literal, stripstr, Ident, LabelledList, UnlabelledList, Pair};
+use std::str::FromStr;
+
+grammar;
+
+pub Main: Expr = expr;
+
+expr: Expr = basic_expr+  => Expr::expr_list(<>);
+
+basic_expr: Expr = {
+    ident => Expr::ident(<>),
+    literal => Expr::litr(<>),
+    labl_list => Expr::labl_list(<>),
+    unlabl_list => Expr::unlabl_list(<>)
+}
+
+// empty_list: UnlabelledList = "{" "}";
+unlabl_list: UnlabelledList = "{" <Comma<expr>> "}";
+labl_list: LabelledList = "{" <CommaM<pair>> "}";
+pair: Pair = <i:ident> ":" <e:expr> => Pair(<>);
+
+ident: Ident = r"[a-zA-Z]+[a-zA-Z0-9_]*" => String::from(<>);
+
+literal: Literal = {
+    r#""(?:[^\\"]|(?:\\"))*""# => Literal::lString(stripstr(<>, 1)),
+    r#"r"(?:[^\\"]|(?:\\"))*""# => Literal::lRegex(stripstr(<>, 2)),
+    r#"p"(?:[^\\"]|(?:\\"))*""# => Literal::lPath(stripstr(<>, 2)),
+    r"[0-9]+(?:\.[0-9]*)?" => Literal::lNumeric(f64::from_str(<>).unwrap())
+}
+
+
+// Comma Seperated Capture Rule of T, taken from LALRPOP documentation.
+Comma<T>: Vec<T> = { // (1)
+    <mut v:(<T> ",")*> <e:T?> => match e { // (2)
+        None => v,
+        Some(e) => {
+            v.push(e);
+            v
+        }
+    }
+};
+
+// Comma Seperated Capture Rule of T, must have atleast one T, taken from LALRPOP documentation.
+CommaM<T>: Vec<T> = { // (1)
+    <mut v:(<T> ",")*> <e:T> => { // (2)
+            v.push(e);
+            v
+        }
+};
+
