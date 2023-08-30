@@ -3,28 +3,35 @@ use std::str::FromStr;
 
 grammar;
 
-pub Main: Expr = expr;
+pub Main: Expr = Expr;
 
-expr: Expr = basic_expr+  => Expr::ExprList(<>);
+// expression is any series (space seperated) of basic expressions
+Expr: Expr = BasicExpr*  => Expr::ExprList(<>);
 
-basic_expr: Expr = {
-    ident => Expr::Ident(<>),
-    literal => Expr::Literal(<>),
-    labl_list => Expr::LabelledList(<>),
-    unlabl_list => Expr::UnlabelledList(<>)
+// basic expression is any single identifier, literal or compound literal.
+BasicExpr: Expr = {
+    Ident => Expr::Ident(<>),
+    Literal => Expr::Literal(<>),
+    LabelledList => Expr::LabelledList(<>),
+    UnlabelledList => Expr::UnlabelledList(<>)
 }
 
-unlabl_list: UnlabelledList = "{" <Comma<expr>> "}";
-labl_list: LabelledList = "{" <CommaM<pair>> "}";
-pair: Pair = <i:ident> ":" <e:expr> => Pair(<>);
+// "{" "}" refers to an empty unlabelled list
+// currently no way to write an empty labelled list
+UnlabelledList: UnlabelledList = "{" <Comma<Expr>> "}";
+LabelledList: LabelledList = "{" <CommaM<Pair>> "}";
+Pair: Pair = <i:Ident> ":" <e:Expr> => Pair(<>);
+// these should probably be considered literals
+// or part of a new CompoundLiteral enum
 
-ident: Ident = r"[a-zA-Z]+[a-zA-Z0-9_]*" => String::from(<>);
+// secret sauce
+Ident: Ident = r"[a-zA-Z]+[a-zA-Z0-9_]*" => String::from(<>);
 
-literal: Literal = {
-    r#""(?:[^\\"]|(?:\\"))*""# => Literal::String(stripstr(<>, 1)),
-    r#"r"(?:[^\\"]|(?:\\"))*""# => Literal::Regex(stripstr(<>, 2)),
-    r#"p"(?:[^\\"]|(?:\\"))*""# => Literal::Path(stripstr(<>, 2)),
-    r"[0-9]+(?:\.[0-9]*)?" => Literal::Numeric(f64::from_str(<>).unwrap())
+Literal: Literal = {
+    r#""(?:[^\\"]|(?:\\"))*""# => Literal::String(stripstr(<>, 1)), // arbitrary characters between "", except " which must be preceded by \.
+    r#"r"(?:[^\\"]|(?:\\"))*""# => Literal::Regex(stripstr(<>, 2)), // could add regex for checking regex, rn same as string.
+    r#"p"(?:[^\\"]|(?:\\"))*""# => Literal::Path(stripstr(<>, 2)), // can add path character set checking here from old fold regex, rn same as string.
+    r"[0-9]+(?:\.[0-9]*)?" => Literal::Numeric(f64::from_str(<>).unwrap()) // should add distinct integer and floating point type, currently all floats.
 }
 
 
@@ -39,7 +46,7 @@ Comma<T>: Vec<T> = { // (1)
     }
 };
 
-// Comma Seperated Capture Rule of T, must have atleast one T, taken from LALRPOP documentation.
+// Comma Seperated Capture Rule of T, must have atleast one T, modified from above.
 CommaM<T>: Vec<T> = { // (1)
     <mut v:(<T> ",")*> <e:T> => { // (2)
             v.push(e);
