@@ -1,8 +1,54 @@
 mod ast;
 mod tests;
+use lalrpop_util::{lalrpop_mod, ParseError};
+use std::env;
+use std::fmt::Debug;
+use std::fs;
+lalrpop_mod!(pub syntax);
+
+// A utility function to pretty-print anything implementing the Debug trait.
+fn pretty_print<T: Debug>(input: &T) -> String {
+    format!("{:#?}", input)
+}
 
 fn main() {
-    println!("Hello, world!");
+    // Parse command-line arguments
+    let args: Vec<String> = env::args().collect();
+    if args.len() < 2 {
+        println!("Usage: {} <path_to_cay_file>", args[0]);
+        return;
+    }
+    let cay_file = &args[1];
+
+    // Read the .cay file into a String
+    let cay_script = match fs::read_to_string(cay_file) {
+        Ok(script) => script,
+        Err(e) => {
+            println!("Error reading file: {:?}", e);
+            return;
+        }
+    };
+
+    // Create a new parser instance and parse the script
+    let parser = syntax::MainParser::new();
+    let result = parser.parse(&cay_script);
+
+    // Handle the parsing result
+    match result {
+        Ok(program) => {
+            // Pretty-print the parsed program (AST)
+            println!("Parsed program:\n{}", pretty_print(&program));
+        }
+        Err(e) => {
+            println!("Error: {:?}", e);
+            match e {
+                ParseError::InvalidToken { location } => {
+                    println!("char: {:?}", String::from(&cay_script[location..location + 1]));
+                }
+                _ => (),
+            }
+        }
+    }
 }
 
 // use lalrpop_util::{lalrpop_mod, ParseError};
