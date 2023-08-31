@@ -1,4 +1,4 @@
-use crate::ast::{Expr, Literal, Ident, Pair, Guard, Clause, Function, TypeDestructured, FoldExpr, Field, ClauseType, Destination};
+use crate::ast::{Expr, Literal, Ident, Pair, Guard, Clause, Function, TypeDestructured, FoldExpr, Field, ClauseType, Destination, LabelledList, UnlabelledList, stripstr};
 use std::str::FromStr;
 
 
@@ -16,8 +16,8 @@ ClosedExpr: Expr = {
 BasicExpr: Expr = {
     Ident => Expr::Ident(<>),
     Literal => Expr::Literal(<>),
-    // LabelledList => Expr::LabelledList(<>),
-    // UnlabelledList => Expr::UnlabelledList(<>),
+    LabelledList => Expr::LabelledList(<>),
+    UnlabelledList => Expr::UnlabelledList(<>),
     Fold => Expr::Fold(<>)
 }
 
@@ -73,8 +73,10 @@ Function: Function = {
 
 // "{" "}" refers to an empty unlabelled list
 // currently no way to write an empty labelled list
-// UnlabelledList: UnlabelledList = "{" <Comma<Expr>> "}";
-// LabelledList: LabelledList = "{" <CommaM<Pair>> "}";
+UnlabelledList: UnlabelledList = "{" <Comma<Expr>> "}";
+LabelledList: LabelledList = "{" <CommaM<Pair>> "}";
+
+#[inline]
 Pair: Pair = <i:Ident> ":" <e:Expr> => Pair(<>);
 // these should probably be considered literals
 // or part of a new CompoundLiteral enum
@@ -86,15 +88,10 @@ Ident: Ident = {
 } 
 
 Literal: Literal = {
-    r#""(?:[^\\"]|(?:\\"))*""# => Literal::String(String::from(<>)),
-
-    r"[0-9]+(?:\.[0-9]*)?" => Literal::Numeric(f64::from_str(<>).unwrap()) // should add distinct integer and floating point type, currently all floats.
-
-    // Commenting this out so we don't get ambiguous parsing errors
-
-    //r#""(?:[^\\"]|(?:\\"))*""# => Literal::String(stripstr(<>, 1)), // arbitrary characters between "", except " which must be preceded by \.
-    // r#"r"(?:[^\\"]|(?:\\"))*""# => Literal::Regex(stripstr(<>, 2)), // could add regex for checking regex, rn same as string.
-    // r#"p"(?:[^\\"]|(?:\\"))*""# => Literal::Path(stripstr(<>, 2)), // can add path character set checking here from old fold regex, rn same as string.
+    r"[0-9]+(?:\.[0-9]*)?" => Literal::Numeric(f64::from_str(<>).unwrap()), // should add distinct integer and floating point type, currently all floats.
+    r#""(?:[^\\"]|(?:\\"))*""# => Literal::String(stripstr(<>, 1)), // arbitrary characters between "", except " which must be preceded by \.
+    r#"r"(?:[^\\"]|(?:\\"))*""# => Literal::Regex(stripstr(<>, 2)), // could add regex for checking regex, rn same as string.
+    r#"p"(?:[^\\"]|(?:\\"))*""# => Literal::Path(stripstr(<>, 2)), // can add path character set checking here from old fold regex, rn same as string.
 }
 
 

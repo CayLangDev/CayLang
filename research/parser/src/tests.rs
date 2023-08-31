@@ -3,6 +3,14 @@ mod tests {
     use lalrpop_util::{lalrpop_mod, ParseError};
     lalrpop_mod!(pub syntax);
 
+    fn test_parsing(input: &str) {
+        let parser = syntax::MainParser::new();
+        match parser.parse(input) {
+            Err(err) => panic!("Failed to parse fold expression: {:?}", err),
+            _ => (),
+        }
+    }
+
     #[test]
     fn test_valid_folds_1() {
         let parser = syntax::MainParser::new();
@@ -47,6 +55,20 @@ mod tests {
             },
             _ => (),
         }
+    }
+
+    #[test]
+    fn test_dirset() {
+        let input = r#"DirectorySet SmallNumDir { Names: r"[123]", Tags: { num: asint name } }"#;
+        test_parsing(input);
+    }
+
+    #[test]
+    fn test_expr() {
+        let input1 = r#"print 1 2.3 "hi" "" r"hi" r"" p"hi" p"" hello"#;
+        let input2 = r#"print {1 2.3 "hi" "" r"hi" r"" p"hi" p"" hello}"#;
+        test_parsing(input1);
+        test_parsing(input2);
     }
 
     #[test]
