@@ -1,46 +1,97 @@
-use crate::ast::{Expr, Literal, stripstr, Ident, LabelledList, UnlabelledList, Pair};
+use crate::ast::{Expr, Literal, Ident, Pair, Guard, Clause, Function, TypeDestructured, FoldExpr, Field, ClauseType, Destination, LabelledList, UnlabelledList, stripstr};
 use std::str::FromStr;
+
 
 grammar;
 
 pub Main: Expr = Expr;
 
-// expression is any series (space seperated) of closed expressions
 Expr: Expr = ClosedExpr+ => Expr::ExprList(<>);
 
-// a closed expression is any independent expression, it's value is fully encapsulated in
-// its node in the ast.
-// i.e. "1" is exactly 1, "(f)" is exactly the function f with no arguments applied, "(f a)" is exactly f with the argument a applied
-// on the other hand: "f a" is the function f with a applied as an argument, it may have further arguments next to it that will be applied, and so is not a closed expression.
 ClosedExpr: Expr = {
     "(" <BasicExpr+> ")" => Expr::ExprList(<>),
     BasicExpr
 }
 
-// basic expression is any single identifier, literal or compound literal.
 BasicExpr: Expr = {
     Ident => Expr::Ident(<>),
     Literal => Expr::Literal(<>),
     LabelledList => Expr::LabelledList(<>),
-    UnlabelledList => Expr::UnlabelledList(<>)
+    UnlabelledList => Expr::UnlabelledList(<>),
+    Fold => Expr::Fold(<>)
+}
+
+// Fold expression: introduces folding operation
+Fold: FoldExpr = {
+    "fold" <d:Literal> ":" <t:TypeDestructured> "{" <c:Clause+> "}" => FoldExpr {
+        directory: match d {
+            Literal::String(s) => s,
+            _ => panic!("Expected string literal for directory path")
+        },
+        dir_type: t,
+        clauses: c,
+    }
+}
+
+Field: Field = {
+    // "as" is temporary
+    <name:Ident> <alias:("as" <Ident>)?> => Field {<>}
+}
+
+#[inline]
+TypeDestructured: TypeDestructured = {
+    <name:Ident> <fields:("{" <Comma<Field>> ".."? "}")?> => TypeDestructured {<>}
+    // You can add more specific DirElement types here
+}
+
+Destination: Destination = {
+    "." => Destination::NoChange,
+    <Literal> => Destination::Move(<>),
+}
+
+// Each clause in a Fold expression
+Clause: Clause = {
+    <d:TypeDestructured> <g:Guard+> => Clause { destructured_type: d, child: ClauseType::Guarded(g) },
+    <d:TypeDestructured> <o:Arrows<Function>> "=>" <p:Destination> => Clause {destructured_type: d, child: ClauseType::FileRead(o, p)},
+    <d:TypeDestructured> "=>" "{" <c:Clause+> "}" => Clause {destructured_type: d, child: ClauseType::SubClause(c)},
+}
+
+Guard: Guard = {
+    "|" <f:Function> <o:Arrows<Function>> "=>" <a:Literal> => Guard {
+        function: f,
+        action: match a {
+            Literal::String(s) => s,
+            _ => panic!("Expected string literal for action")
+        },
+        ops: o
+    }
+}
+
+Function: Function = {
+    <name:Ident> <args:ClosedExpr*> => Function {<>}
 }
 
 // "{" "}" refers to an empty unlabelled list
 // currently no way to write an empty labelled list
 UnlabelledList: UnlabelledList = "{" <Comma<Expr>> "}";
 LabelledList: LabelledList = "{" <CommaM<Pair>> "}";
+
+#[inline]
 Pair: Pair = <i:Ident> ":" <e:Expr> => Pair(<>);
 // these should probably be considered literals
 // or part of a new CompoundLiteral enum
 
 // secret sauce
-Ident: Ident = r"[a-zA-Z]+[a-zA-Z0-9_]*" => String::from(<>);
+Ident: Ident = {
+    r"[a-zA-Z_]+[a-zA-Z0-9_]*" => Ident::Variable(String::from(<>)),
+    "_" => Ident::Ignored
+} 
 
 Literal: Literal = {
+    r"[0-9]+(?:\.[0-9]*)?" => Literal::Numeric(f64::from_str(<>).unwrap()), // should add distinct integer and floating point type, currently all floats.
     r#""(?:[^\\"]|(?:\\"))*""# => Literal::String(stripstr(<>, 1)), // arbitrary characters between "", except " which must be preceded by \.
     r#"r"(?:[^\\"]|(?:\\"))*""# => Literal::Regex(stripstr(<>, 2)), // could add regex for checking regex, rn same as string.
     r#"p"(?:[^\\"]|(?:\\"))*""# => Literal::Path(stripstr(<>, 2)), // can add path character set checking here from old fold regex, rn same as string.
-    r"[0-9]+(?:\.[0-9]*)?" => Literal::Numeric(f64::from_str(<>).unwrap()) // should add distinct integer and floating point type, currently all floats.
 }
 
 
@@ -55,6 +106,11 @@ Comma<T>: Vec<T> = { // (1)
     }
 };
 
+#[inline]
+Arrows<T>: Vec<T> = { // (1)
+    <v:( "=>" <T> )*> => v
+};
+
 // Comma Seperated Capture Rule of T, must have atleast one T, modified from above.
 CommaM<T>: Vec<T> = { // (1)
     <mut v:(<T> ",")*> <e:T> => { // (2)
@@ -62,4 +118,3 @@ CommaM<T>: Vec<T> = { // (1)
             v
         }
 };
-

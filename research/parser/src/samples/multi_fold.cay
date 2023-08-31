@@ -1,0 +1,21 @@
+fold "~/dataset": Dataset { name as school, .. } {
+    Year { name as year, .. } => {
+        Subject { name as subject, .. } => {
+        File { name, .. }
+            | matches name "hi.txt" => "hello.txt"
+            | matches name "data*.txt" => "Flattened/{school}_{year}_{subject}_{name}"
+        }
+    }
+    _ => .
+}
+
+fold "test": MyDir {
+    My => {
+        Big => {
+            Cats => {
+                CsvFile { name, .. }
+                    | lengthGreaterThan10 name => head 5 => reverse => "~/Flattened/{name}"
+            }
+        }
+    }
+}

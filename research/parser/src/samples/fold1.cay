@@ -1,0 +1,10 @@
+fold "~/dataset": Dataset { name as school, .. } {
+    Year { name as year, .. } => {
+        Subject { name as subject, .. } => {
+        File { name, .. }
+            | matches name "hi.txt" => "hello.txt"
+            | matches name "data*.txt" => "Flattened/{school}_{year}_{subject}_{name}"
+        }
+    }
+    _ => .
+}

@@ -1,0 +1,10 @@
+fold "test": MyDir {
+    My => {
+        Big => {
+            Cats => {
+                CsvFile { name, .. }
+                    | lengthGreaterThan10 name => head 5 => reverse => "~/Flattened/{name}"
+            }
+        }
+    }
+}
