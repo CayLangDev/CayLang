@@ -5,6 +5,7 @@ use std::path::PathBuf;
 pub mod filesys;
 use crate::tree::{Tree, NodeIdx, root_idx, NodeType};
 use crate::filesys::{load_full_tree, write_full_tree};
+mod treeTests;
 
 fn dfs(tree: &Tree, current_idx: NodeIdx) {
 	let root = &tree.nodes[current_idx];
