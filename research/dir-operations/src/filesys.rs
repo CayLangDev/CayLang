@@ -3,6 +3,10 @@ use std::fs;
 use std::path::PathBuf;
 use crate::tree::{Tree, Node, NodeData, NodeType};
 
+pub fn copy_directory(from: &PathBuf, to: &PathBuf) {
+
+}
+
 pub fn load_full_tree(root: PathBuf) -> Tree {
     let mut tree: Tree = Tree::new();
     // let mut root: NodeIdx = root_idx();

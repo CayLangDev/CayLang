@@ -1,5 +1,6 @@
 use std::env;
 pub mod tree;
+pub mod vfs_dir_tests;
 use std::path::PathBuf;
 pub mod filesys;
 use crate::tree::{Tree, NodeIdx, root_idx, NodeType};
