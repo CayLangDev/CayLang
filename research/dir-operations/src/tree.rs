@@ -8,20 +8,31 @@ use std::path::Path;
 
 pub type NodeIdx = usize;
 
+/// Whether the node is a file or directory is represented with NodeType
 #[derive(Debug,Clone)]
 pub enum NodeType {
 	File,
 	Directory,
 }
 
+/// The metadata of a node is represented with NodeData
 #[derive(Debug,Clone)]
 pub struct NodeData {
+	/// The metadata contains the original path,
 	pub original_path: PathBuf,
+	/// the current path, and
 	pub path: PathBuf,
+	/// its type (file/directory)
 	pub node_type: NodeType,
 }
 
 impl NodeData {
+    /// Returns a NodeData object
+    ///
+    /// # Arguments
+    ///
+    /// * `original_path` - A PathBuf of the original path to the Node
+	/// * `node_type` - A NodeType describing the Node as a file/directory
 	pub fn new(original_path: PathBuf, node_type: NodeType) -> Self {
 		NodeData {
 			path: original_path.clone(),
@@ -31,14 +42,23 @@ impl NodeData {
 	}
 }
 
+/// A node in the tree is represented here 
 #[derive(Debug)]
 pub struct Node {
+	/// A node has a pointer to the parent
 	pub(crate) parent: NodeIdx,
+	/// a vector of pointers to the children, and
 	pub(crate) children: Vec<NodeIdx>,
+	/// its metadata
 	pub data: NodeData,
 }
 
 impl Node {
+	/// Returns a Node object
+    ///
+    /// # Arguments
+    ///
+    /// * `data` - A NodeData representing the metadata of the Node
 	pub fn new(data: NodeData) -> Self { 
 		Self{ parent: 0, children: vec![], data } 
 	}
