@@ -2,7 +2,9 @@
 
 ## Matching
 ```
-{{ex1}}
+  dataset 
+ ┌───┼───┐
+ 1   2   3 
 ```
 Matching using DirectorySet and Tree Directory Set
 
@@ -29,13 +31,21 @@ TreeDirectorySet NumDataSet {
 ```
 
 ```
-{{ex2}}
+                                                       dataset 
+                   ┌──────────────────────────────────────┼──────────────────────────────────────┐
+                   1                                      2                                      3 
+      ┌────────────┼────────────┐            ┌────────────┼────────────┐            ┌────────────┼────────────┐
+ file_a.txt   file_b.txt   file_c.txt   file_a.txt   file_b.txt   file_c.txt   file_a.txt   file_b.txt   file_c.txt 
 ```
 ...
 Right now our tree directory set doesn't specify how many SmallNumDir's are in the Nums layer, and how many Files are in the Files layes.
 
 ```
-{{ex3}}
+                                                                 dataset 
+             ┌─────────────────────────┬────────────────────────────┴──┬────────────────────────────────┬──────────────────┐
+             1                         1                               2                                3                  3 
+      ┌──────┴─────┐            ┌──────┴─────┐            ┌────────────┼────────────┐            ┌──────┴─────┐            │
+ file_a.txt   file_b.txt   file_a.txt   file_b.txt   file_a.txt   file_b.txt   file_c.txt   file_a.txt   file_b.txt   file_a.txt 
 ```
 So the above is a valid match.
 While this flexibility is useful, we'd like to be able to control it so we can be as specific (or partially specific) as we like.
@@ -75,7 +85,9 @@ from f"~" fold NumDataSet {
 
 Now we've flattened our dataset
 ```
-{{ex4}}
+                                                                dataset 
+       ┌──────────────┬──────────────┬──────────────┬──────────────┼──────────────┬──────────────┬──────────────┬──────────────┐
+ 1_file_a.txt   1_file_b.txt   1_file_c.txt   2_file_a.txt   2_file_b.txt   2_file_c.txt   3_file_a.txt   3_file_b.txt   3_file_c.txt 
 ```
 
 Alternatively we could write
@@ -152,11 +164,21 @@ TreeDirectorySet Dataset {
 tbd make the trees smaller
 Unstructured matching
 ```
-{{ex5.1}}
+                                                               root 
+                          ┌─────────────────────────────────────┴┬───────────┬───────────┬───────────┐
+                         000                                    001         002         003         004 
+           ┌──────────────┴──────────────┐                       │           │           │           │
+          000                           001                  502c3.txt   bf7f8.txt   77f66.txt   53d1d.txt 
+     ┌─────┴─────┐           ┌───────────┼───────────┐
+    000         001         002         003         004 
+     │           │           │           │           │
+ 8a398.txt   c3801.txt   081eb.txt   ff1ee.txt   4e295.txt 
 ```
 
 
 Flattened
 ```
-{{ex5.2}}
+                                                                                                                                                                root 
+                   ┌──────────────────────────────────────┬──────────────────────────────────────┬──────────────────────────────────────┬────────────────────────┴─────────────┬──────────────────────────────────┬──────────────────────────────┬──────────────────────────────┬──────────────────────────────┐
+ root_000_000_000_18215.txt_18215.txt   root_000_000_001_59dc6.txt_59dc6.txt   root_000_001_002_f8933.txt_f8933.txt   root_000_001_003_4d657.txt_4d657.txt   root_000_001_004_ba72f.txt_ba72f.txt   root_001_d48ef.txt_d48ef.txt   root_002_eddb2.txt_eddb2.txt   root_003_1ec63.txt_1ec63.txt   root_004_ecc7e.txt_ecc7e.txt 
 ```
