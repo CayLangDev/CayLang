@@ -1,0 +1,130 @@
+use crate::ast::{Expr, Literal, Ident, Pair, Guard, Clause, Function, TypeDestructured, FoldExpr, Field, ClauseType, Destination, LabelledList, UnlabelledList, stripstr};
+use std::str::FromStr;
+
+
+grammar;
+
+pub Main: Expr = Expr;
+
+Expr: Expr = ClosedExpr+ => Expr::ExprList(<>);
+
+ClosedExpr: Expr = {
+    "(" <BasicExpr+> ")" => Expr::ExprList(<>),
+    BasicExpr
+}
+
+BasicExpr: Expr = {
+    Ident => Expr::Ident(<>),
+    Literal => Expr::Literal(<>),
+    LabelledList => Expr::LabelledList(<>),
+    UnlabelledList => Expr::UnlabelledList(<>),
+    Fold => Expr::Fold(<>)
+}
+
+// Fold expression: introduces folding operation
+Fold: FoldExpr = {
+    "fold" <d:Literal> ":" <t:TypeDestructured> "{" <c:Clause+> "}" => FoldExpr {
+        directory: match d {
+            Literal::String(s) => s,
+            _ => panic!("Expected string literal for directory path")
+        },
+        dir_type: t,
+        clauses: c,
+    }
+}
+
+Field: Field = {
+    // "as" is temporary
+    <name:Ident> <alias:("as" <Ident>)?> => Field {<>}
+}
+
+#[inline]
+TypeDestructured: TypeDestructured = {
+    <name:Ident> <fields:("{" <Comma<Field>> ".."? "}")?> => TypeDestructured {<>}
+    // You can add more specific DirElement types here
+}
+
+Destination: Destination = {
+    "." => Destination::NoChange,
+    <Literal> => Destination::Move(<>),
+}
+
+// Each clause in a Fold expression
+Clause: Clause = {
+    <d:TypeDestructured> <g:Guard+> => Clause { destructured_type: d, child: ClauseType::Guarded(g) },
+    <d:TypeDestructured> <o:Arrows<Function>> "=>" <p:Destination> => Clause {destructured_type: d, child: ClauseType::FileRead(o, p)},
+    <d:TypeDestructured> "=>" "{" <c:Clause+> "}" => Clause {destructured_type: d, child: ClauseType::SubClause(c)},
+}
+
+Guard: Guard = {
+    "|" <c:Ands<Function>> <o:Arrows<Function>> "=>" <a:Destination> => Guard {
+        conditions: c,
+        child: ClauseType::FileRead(o, a)
+    },
+    "|" <c:Ands<Function>> "=>" "{" <s:Clause+> "}" => Guard {
+        conditions: c,
+        child: ClauseType::SubClause(s)
+    },
+}
+
+Function: Function = {
+    <name:Ident> <args:ClosedExpr*> => Function {<>}
+}
+
+// "{" "}" refers to an empty unlabelled list
+// currently no way to write an empty labelled list
+UnlabelledList: UnlabelledList = "{" <Comma<Expr>> "}";
+LabelledList: LabelledList = "{" <CommaM<Pair>> "}";
+
+#[inline]
+Pair: Pair = <i:Ident> ":" <e:Expr> => Pair(<>);
+// these should probably be considered literals
+// or part of a new CompoundLiteral enum
+
+// secret sauce
+Ident: Ident = {
+    r"[a-zA-Z_]+[a-zA-Z0-9_]*" => Ident::Variable(String::from(<>)),
+    "_" => Ident::Ignored
+} 
+
+Literal: Literal = {
+    r"[0-9]+(?:\.[0-9]*)?" => Literal::Numeric(f64::from_str(<>).unwrap()), // should add distinct integer and floating point type, currently all floats.
+    r#""(?:[^\\"]|(?:\\"))*""# => Literal::String(stripstr(<>, 1)), // arbitrary characters between "", except " which must be preceded by \.
+    r#"r"(?:[^\\"]|(?:\\"))*""# => Literal::Regex(stripstr(<>, 2)), // could add regex for checking regex, rn same as string.
+    r#"p"(?:[^\\"]|(?:\\"))*""# => Literal::Path(stripstr(<>, 2)), // can add path character set checking here from old fold regex, rn same as string.
+}
+
+
+// Comma Seperated Capture Rule of T, taken from LALRPOP documentation.
+Comma<T>: Vec<T> = { // (1)
+    <mut v:(<T> ",")*> <e:T?> => match e { // (2)
+        None => v,
+        Some(e) => {
+            v.push(e);
+            v
+        }
+    }
+};
+
+#[inline]
+Arrows<T>: Vec<T> = { // (1)
+    <v:( "=>" <T> )*> => v
+};
+
+Ands<T>: Vec<T> = { // (1)
+    <mut v:(<T> "&&")*> <e:T?> => match e { // (2)
+        None => v,
+        Some(e) => {
+            v.push(e);
+            v
+        }
+    }
+};
+
+// Comma Seperated Capture Rule of T, must have atleast one T, modified from above.
+CommaM<T>: Vec<T> = { // (1)
+    <mut v:(<T> ",")*> <e:T> => { // (2)
+            v.push(e);
+            v
+        }
+};

@@ -1,0 +1,11 @@
+fold "dir": MyDir {
+    SubDirOne => {
+        SubDirTwo => {
+            SubDirThree => {
+                CsvFile { name, .. }
+                    | lengthGreaterThan10 name => head 5 => reverse => "~/flattened/{name}"
+            }
+        }
+    }
+    _ => .
+}

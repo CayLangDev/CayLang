@@ -47,6 +47,55 @@ DirectorySet SmallNumDir {
 ```
 Here the DirectorySet construct will define a prototype named SmallNumDir that matches any directory with the name "1", "2", or "3"; with a tag `num`, a value associated.
 
+## Control Flow
+### Fold
+Folds are a powerful control flow mechanism in CayLang. It is the primary mechanism for operating over directories and files, whereby one tree structure is transformed into another. Folds pattern match on the structure of the input tree (similar to Rust's `match` expressions) and apply functions to files and directories, with Haskell-like guard conditions on attributes. A fold has the following form:
+
+> FoldExpression := `fold` Path `:` DestructuredType `{` \
+>&nbsp;&nbsp; (Clause)<sup>+</sup>\
+> `}`
+>
+> DestructuredType := \
+>&nbsp;&nbsp; Identifier ( `{` (Identifier (`as` Identifier)<sup>?</sup>`,` )<sup>*</sup> `..`<sup>?</sup> `}`)<sup>?</sup>
+>
+> Clause := \
+>&nbsp;&nbsp; DestructuredType `=>` `{` (Clause)<sup>+</sup> `}` \
+>&nbsp;&nbsp; DestructuredType (Guard)<sup>+</sup> \
+>&nbsp;&nbsp; DestructuredType (`=>` Function)<sup>\*</sup> `=>` Path
+>
+> Guard := \
+>&nbsp;&nbsp; `|` Function (`&&` Function) <sup>\*</sup> (`=>` Function)<sup>\*</sup> `=>` Path \
+>&nbsp;&nbsp; `|` Function (`&&` Function)<sup>*</sup> `=>` `{` (Clause)<sup>+</sup> `}`
+>
+> Path := `"`String`"`
+>
+
+The following example demonstrates a simple fold:
+
+```rust
+fold "dir": MyDir { .. } {
+    File { .. } => "out.txt"
+    _ => .
+}
+```
+
+In this example, we have a custom directory structure `MyDir`, and we're sending every file to a file `out.txt`. The first clause is a file read, and you can think of the first action being a shell `cat`, and the final action being a `>` write. In the case of multiple files going to the same outfile, they are appended to each other. Folds should be exhaustive matches, and the final clause is a special case which simply doesn't change anything else.
+
+```rust
+fold "dir": MyDir {
+    SubDirOne => {
+        SubDirTwo => {
+            SubDirThree => {
+                CsvFile { name, .. }
+                    | lengthGreaterThan10 name => head 5 => reverse => "~/flattened/{name}"
+            }
+        }
+    }
+    _ => .
+}
+```
+
+This example demonstrates a more complex nested fold. In this case, we're folding over a directory `dir/` with type `MyDir`, and going to the specific subdirectory matched by the type `SubDirThree`, which is parented by a `SubDirTwo`, which is parented by a `SubDirOne`. We then match on all CSV files and extract the name of each. If a CSV file has a name longer than 10 characters, we take the first 5 lines, reverse them, and write them to a file in the `~/flattened/` directory with the same name as the CSV file.
 
 ## Built Ins
 
@@ -115,16 +164,6 @@ The Structure field wraps the layers and edge labelled sets, which describes the
 
 
 ### Operation Constructs
-
-### Fold
-
-```
-fold {
-
-}
-
-```
-
 
 
 ### Built In Functions

@@ -1,0 +1,6 @@
+DirectorySet SmallNumDir {
+    Names: r"[123]",
+    Tags: {
+        num: asint name
+    }
+}
