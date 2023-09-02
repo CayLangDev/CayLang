@@ -43,7 +43,7 @@ def make_tree(layers: list[str]):
     return r
 
 def gen_randname():
-    return hashlib.sha1(os.urandom(4)).hexdigest()[:5]
+    return hashlib.sha1(random.randbytes(4)).hexdigest()[:5]
 
 def rand_node():
     return Tree(gen_randname())
