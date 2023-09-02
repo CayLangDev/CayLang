@@ -15,7 +15,19 @@ class Tree:
     def add_children(self, children):
         self.children.extend(children)
 
+    def fromdict(d: dict, root):
+        root_node = Tree(root)
+        print(root)
+        if isinstance(d[root], dict):
+            children = [Tree.fromdict(d[root], c) for c in d[root].keys()]
+            root_node.add_children(children)
+        elif isinstance(d[root], list):
+            root_node.add_children(Tree(c) for c in d[root])
+        return root_node
+
+
 print_tree = PrettyPrintTree(lambda x: x.children, lambda x: x.val)
+tree_to_str = PrettyPrintTree(lambda x: x.children, lambda x: x.val, return_instead_of_print=True, color=None)
 
 def _make_tree(current:list[Tree], layers: list[str]):
     if len(layers) == 0: return current

@@ -1,5 +1,5 @@
 import random
-from example_helpers import make_tree, print_tree, gen_tree, dfs_flatten
+from example_helpers import make_tree, print_tree, gen_tree, dfs_flatten, Tree
 
 tree = make_tree(["dataset",["1","2","3"]])
 print_tree(tree)
@@ -37,6 +37,6 @@ new_tree = Tree("root")
 dfs_flatten(new_tree, tree, "root")
 print_tree(new_tree)
 
-tree = make_tree(["dataset",["1","2","3"], ["A", "B", "C"], , ["A", "B", "C"]])
+tree = make_tree(["dataset",["1","2","3"], ["A", "B", "C"], ["A", "B", "C"]])
 print_tree(tree)
 print()
