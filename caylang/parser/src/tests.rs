@@ -20,7 +20,7 @@ mod tests {
                       Subject { name as subject, .. } => {
                         File { name, .. }
                           | matches name \"hi.txt\" => \"hello.txt\"
-                          | matches name \"data*.txt\" => \"Flattened/{school}_{year}_{subject}_{name}\"
+                          | matches name \"data*.txt\" && lengthGreaterThan name 10 => \"Flattened/{school}_{year}_{subject}_{name}\"
                       }
                     }
                     _ => .
@@ -43,7 +43,8 @@ mod tests {
                           | lengthGreaterThan10 name => head 5 => reverse => \"~/Flattened/{name}\"
                     }
                 }
-            }
+            },
+            _ => .
         }";
         match parser.parse(cay) {
             Err(err) => match err {

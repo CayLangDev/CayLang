@@ -49,7 +49,7 @@ Here the DirectorySet construct will define a prototype named SmallNumDir that m
 
 ## Control Flow
 ### Fold
-Folds are a powerful control flow mechanism in CayLang. It is the primary mechanism for operating over directories and files, whereby one tree structure is transformed into another. Folds pattern match on the structure of the input tree and apply functions to files and directories, with optional conditions on attributes. A fold has the following form:
+Folds are a powerful control flow mechanism in CayLang. It is the primary mechanism for operating over directories and files, whereby one tree structure is transformed into another. Folds pattern match on the structure of the input tree (similar to Rust's `match` expressions) and apply functions to files and directories, with Haskell-like guard conditions on attributes. A fold has the following form:
 
 > FoldExpression := `fold` Path `:` DestructuredType `{` \
 >&nbsp;&nbsp; (Clause)<sup>+</sup>\

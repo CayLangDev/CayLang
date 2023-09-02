@@ -19,3 +19,6 @@ lalrpop-util = { version = "0.20.0" }
 
 [build-dependencies]
 built = { version = "0.6.0", features = ["git2"] }
+
+[lib]
+doctest = false
