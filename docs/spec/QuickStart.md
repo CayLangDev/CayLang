@@ -2,9 +2,9 @@
 
 ## Matching
 ```
-  dataset
+  dataset 
  ┌───┼───┐
- 1   2   3
+ 1   2   3 
 ```
 Matching using DirectorySet and Tree Directory Set
 
@@ -31,21 +31,21 @@ TreeDirectorySet NumDataSet {
 ```
 
 ```
-                                                       dataset
+                                                       dataset 
                    ┌──────────────────────────────────────┼──────────────────────────────────────┐
-                   1                                      2                                      3
+                   1                                      2                                      3 
       ┌────────────┼────────────┐            ┌────────────┼────────────┐            ┌────────────┼────────────┐
- file_a.txt   file_b.txt   file_c.txt   file_a.txt   file_b.txt   file_c.txt   file_a.txt   file_b.txt   file_c.txt
+ file_a.txt   file_b.txt   file_c.txt   file_a.txt   file_b.txt   file_c.txt   file_a.txt   file_b.txt   file_c.txt 
 ```
 ...
 Right now our tree directory set doesn't specify how many SmallNumDir's are in the Nums layer, and how many Files are in the Files layes.
 
 ```
-                                                                 dataset
+                                                                 dataset 
              ┌─────────────────────────┬────────────────────────────┴──┬────────────────────────────────┬──────────────────┐
-             1                         1                               2                                3                  3
+             1                         1                               2                                3                  3 
       ┌──────┴─────┐            ┌──────┴─────┐            ┌────────────┼────────────┐            ┌──────┴─────┐            │
- file_a.txt   file_b.txt   file_a.txt   file_b.txt   file_a.txt   file_b.txt   file_c.txt   file_a.txt   file_b.txt   file_a.txt
+ file_a.txt   file_b.txt   file_a.txt   file_b.txt   file_a.txt   file_b.txt   file_c.txt   file_a.txt   file_b.txt   file_a.txt 
 ```
 So the above is a valid match.
 While this flexibility is useful, we'd like to be able to control it so we can be as specific (or partially specific) as we like.
@@ -86,9 +86,9 @@ fold "~": NumDataSet {
 
 Now we've flattened our dataset
 ```
-                                                                dataset
+                                                                dataset 
        ┌──────────────┬──────────────┬──────────────┬──────────────┼──────────────┬──────────────┬──────────────┬──────────────┐
- 1_file_a.txt   1_file_b.txt   1_file_c.txt   2_file_a.txt   2_file_b.txt   2_file_c.txt   3_file_a.txt   3_file_b.txt   3_file_c.txt
+ 1_file_a.txt   1_file_b.txt   1_file_c.txt   2_file_a.txt   2_file_b.txt   2_file_c.txt   3_file_a.txt   3_file_b.txt   3_file_c.txt 
 ```
 
 Alternatively we could write
@@ -163,21 +163,21 @@ TreeDirectorySet Dataset {
 tbd make the trees smaller
 Unstructured matching
 ```
-                                                               root
-                          ┌─────────────────────────────────────┴┬───────────┬───────────┬───────────┐
-                         000                                    001         002         003         004
-           ┌──────────────┴──────────────┐                       │           │           │           │
-          000                           001                  76413.txt   10540.txt   50952.txt   c41fa.txt
-     ┌─────┴─────┐           ┌───────────┼───────────┐
-    000         001         002         003         004
-     │           │           │           │           │
- 9d012.txt   a4d40.txt   4f772.txt   bb861.txt   98df1.txt
+                                                                              root 
+                                ┌──────────────────────────────────────────────┴─────────┬───────────┬───────────┬───────────┐
+                               000                                                      001         002         003         004 
+           ┌────────────────────┴────────────────────┐                                   │           │           │           │
+          000                                       001                              179b3.txt   d9f43.txt   3b021.txt   705bd.txt 
+     ┌─────┴─────┐           ┌───────────┬───────────┼───────────┬───────────┐
+    000         001         002         003         004         005         006 
+     │           │           │           │           │           │           │
+ 2a6b6.txt   ba270.txt   cb321.txt   faded.txt   f5212.txt   82180.txt   f9cf3.txt 
 ```
 
 
 Flattened
 ```
-                      root
-                   ┌──────────────────────────────────────┬──────────────────────────────────────┬──────────────────────────────────────┬────────────────────────┴─────────────┬──────────────────────────────────┬──────────────────────────────┬──────────────────────────────┬──────────────────────────────┐
- root_000_000_000_03987.txt_03987.txt   root_000_000_001_f8968.txt_f8968.txt   root_000_001_002_0ecb1.txt_0ecb1.txt   root_000_001_003_e7543.txt_e7543.txt   root_000_001_004_4e928.txt_4e928.txt   root_001_5cd9b.txt_5cd9b.txt   root_002_95da8.txt_95da8.txt   root_003_7c3c7.txt_7c3c7.txt   root_004_3bcaf.txt_3bcaf.txt
+                                                                                                                                                                                                       root 
+                   ┌──────────────────────────────────────┬──────────────────────────────────────┬──────────────────────────────────────┬──────────────────────────────────────┬────────────────────────┴─────────────┬──────────────────────────────────────┬──────────────────────────────────┬──────────────────────────────┬──────────────────────────────┬──────────────────────────────┐
+ root_000_000_000_2a6b6.txt_2a6b6.txt   root_000_000_001_ba270.txt_ba270.txt   root_000_001_002_cb321.txt_cb321.txt   root_000_001_003_faded.txt_faded.txt   root_000_001_004_f5212.txt_f5212.txt   root_000_001_005_82180.txt_82180.txt   root_000_001_006_f9cf3.txt_f9cf3.txt   root_001_179b3.txt_179b3.txt   root_002_d9f43.txt_d9f43.txt   root_003_3b021.txt_3b021.txt   root_004_705bd.txt_705bd.txt 
 ```
