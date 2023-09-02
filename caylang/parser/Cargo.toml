@@ -10,3 +10,6 @@ lalrpop = "0.20.0"
 
 [dependencies]
 lalrpop-util = { version = "0.20.0", features = ["lexer", "unicode"] }
+
+[lib]
+doctest = false

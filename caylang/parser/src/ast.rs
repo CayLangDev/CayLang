@@ -31,9 +31,8 @@ pub struct Clause {
 
 #[derive(Debug)]
 pub struct Guard {
-    pub function: Function,
-    pub action: String,
-    pub ops: Vec<Function>,
+    pub conditions: Vec<Function>,
+    pub child: ClauseType,
 }
 
 #[derive(Debug)]
