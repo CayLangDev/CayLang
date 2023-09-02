@@ -73,15 +73,16 @@ Suppose we have our dataset located as a subfolder of our home directory ("~"), 
 Then we can flatten our dataset as follows.
 
 ```
-from f"~" fold NumDataSet {
-  root => {
-    nums => {
-      files => `{root}/{nums}_{files}`
+fold "~": NumDataSet {
+  Root {name as root, ..} => {
+    SmallNumDir {name as nums, ..} => {
+      File {name as files, ..} => `{root}/{nums}_{files}`
     }
   }
+  _ => .
 }
 ```
-`Operation syntax is WIP, see Operations.md`
+`Operation syntax is WIP, see LanguageSpec.md and Operations.md`
 
 Now we've flattened our dataset
 ```
@@ -92,21 +93,19 @@ Now we've flattened our dataset
 
 Alternatively we could write
 ```
-from f"~" fold NumDataSet {
-  root => {
-    r"1" num => { // r"1" is regex matching only 1, num is an identifier capturing the match
-      files => `{root}/{num}_{files}
-    },
-    r"2" => { // if we don't care about the match's value we can omit the identifier
-      files => `{root}/2_{files}
-    },
-    r"." num => { // but sometimes we need it
-      files => `{root}/{num}_{files}
+fold "~": NumDataSet {
+  Root { name as root, .. } => {
+    Num { name as num, .. } => {
+      File { name as files, .. }
+        | matches num r"1" => `{root}/{num}_{files} // r"1" is regex matching only 1
+        | matches num r"2" => `{root}/2_{files}
+        | matches num r"." => `{root}/{num}_{files}
     }
   }
 }
 ```
-`Operation syntax is WIP, see Operations.md`
+`Operation syntax is WIP, see LanguageSpec.md and Operations.md`
+
 The former is more useful for edge cases, especially when there are different types of files.
 
 

@@ -1,4 +1,3 @@
-#[cfg(test)]
 mod tests {
     use lalrpop_util::{lalrpop_mod, ParseError};
     lalrpop_mod!(pub syntax);
