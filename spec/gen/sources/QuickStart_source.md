@@ -44,7 +44,7 @@ While this flexibility is useful, we'd like to be able to control it so we can b
 TreeDirectorySet NumDataSet {
     Names: f"dataset",
     Structure: {
-        layers {
+        layers: {
             Nums: SmallNumDir,
             Files: File
         }

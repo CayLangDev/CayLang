@@ -68,9 +68,9 @@ def rand_dist_2(max, k):
 def gen_tree(level, max_width):
     while level:
         width = random.randint(2, max_width)
-        print(width)
+        # print(width)
         child_counts = [int(c) for c in rand_dist(width, len(level))]
-        print(child_counts )
+        # print(child_counts )
         next_level = []
         f = 0
         for i, count in enumerate(child_counts):
