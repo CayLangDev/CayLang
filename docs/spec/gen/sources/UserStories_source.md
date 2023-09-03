@@ -68,7 +68,28 @@ Now our tree is as follows
 {{librispeech_folded_r_c}}
 ```
 
-Now suppose we want to change the structure so that the subset layer is followed by a chapter layer which is followed by a reader layer; each chapter folder contains a folder for each reader who has read it rather than vice versa.
+Now suppose we want to change our structure so that the subset layer is followed by a reader layer, which has the chapter layer folded into it.
+
+```
+fold "~": LSDataSet {
+  Subset: Dir {name as subset} => {
+    Reader: ReaderDir {name as reader} => {
+      Chapter: ChapterDir {name as chapter} => {
+        Audio: File<r"*.flac"> { .. } => cat_all => `{root}/{subset}/{reader}/{reader}-{chapter}.flac`
+        Transcript: File<r"*.trans.txt"> {name as transcipt} => `{root}/{subset}/{reader}/{transcipt}`
+      }
+    }
+  }
+}
+```
+
+Now our structure is as follows.
+
+```
+{{librispeech_partflattened}}
+```
+
+Now suppose instead we want to change the structure so that the subset layer is followed by a chapter layer which is followed by a reader layer; each chapter folder contains a folder for each reader who has read it rather than vice versa.
 
 ```
 fold "~": LSDataSet {

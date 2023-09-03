@@ -134,7 +134,46 @@ Now our tree is as follows
                        └ RD131-CH275.trans.txt 
 ```
 
-Now suppose we want to change the structure so that the subset layer is followed by a chapter layer which is followed by a reader layer; each chapter folder contains a folder for each reader who has read it rather than vice versa.
+Now suppose we want to change our structure so that the subset layer is followed by a reader layer, which has the chapter layer folded into it.
+
+```
+fold "~": LSDataSet {
+  Subset: Dir {name as subset} => {
+    Reader: ReaderDir {name as reader} => {
+      Chapter: ChapterDir {name as chapter} => {
+        Audio: File<r"*.flac"> { .. } => cat_all => `{root}/{subset}/{reader}/{reader}-{chapter}.flac`
+        Transcript: File<r"*.trans.txt"> {name as transcipt} => `{root}/{subset}/{reader}/{transcipt}`
+      }
+    }
+  }
+}
+```
+
+Now our structure is as follows.
+
+```
+                               ┌ RD129-CH275.flac 
+                               │
+                               ├ RD129-CH275.trans.txt 
+                       ┌ RD129 ┤
+                       │       ├ RD129-CH276.flac 
+                       │       │
+                       │       └ RD129-CH276.trans.txt 
+                       │
+                       │       ┌ RD130-CH276.flac 
+- Librispeech ─ subset ┤       │
+                       │       ├ RD130-CH276.trans.txt 
+                       ├ RD130 ┤
+                       │       ├ RD130-CH277.flac 
+                       │       │
+                       │       └ RD130-CH277.trans.txt 
+                       │
+                       │       ┌ RD131-CH275.flac 
+                       └ RD131 ┤
+                               └ RD131-CH275.trans.txt 
+```
+
+Now suppose instead we want to change the structure so that the subset layer is followed by a chapter layer which is followed by a reader layer; each chapter folder contains a folder for each reader who has read it rather than vice versa.
 
 ```
 fold "~": LSDataSet {
