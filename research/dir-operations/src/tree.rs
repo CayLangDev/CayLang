@@ -125,7 +125,7 @@ impl Tree {
 		return new_tree;
 	}
 
-	/// Returns a vector of file names using a BFS. Used for testing atm.
+	/// Returns a vector of file names. Used for testing atm.
 	pub fn get_file_names(&self) -> Vec<String> {
 
 		let mut file_names = Vec::<String>::new();
