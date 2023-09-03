@@ -1,6 +1,6 @@
 import random
 from example_helpers import make_tree, tree_to_str, gen_tree, dfs_flatten, Tree
-from simple_spec_gen import specfunc, gen
+from simple_spec_gen import specfunc, gen, demo
 from PrettyPrint import PrettyPrintTree
 # examples for UserStories.md
 
@@ -20,6 +20,17 @@ def make_libritree(libridict, fn=14):
         d[speaker] = cd
     return {"Librispeech": {"subset": d}}
 
+# speaker
+def make_libritree_fl1_cat(libridict, fn=14):
+    d = {}
+    for speaker, chapters in libridict.items():
+        cd = []
+        for c in chapters:
+            cd.append(f"{speaker}-{c}.flac")
+            cd.append(f"{speaker}-{c}.trans.txt")
+        d[speaker] = cd
+    return {"Librispeech": {"subset": d}}
+
 def makeup_libridata(ch_n, rd_n):
     d = {}
     ch_s = random.randint(0, 2**10)
@@ -32,9 +43,9 @@ def makeup_libridata(ch_n, rd_n):
         # print(d[rd_id])
     return d
 
-def librispeech_tree():
+def librispeech_tree(maker=make_libritree):
     random.seed(1)
-    d = make_libritree(makeup_libridata(3, 3), fn=4)
+    d = maker(makeup_libridata(3, 3), fn=4)
     return Tree.fromdict(d, "Librispeech")
 
 @specfunc("librispeech")
@@ -63,6 +74,11 @@ def libri_joined_spec(trace, leaves):
     speaker, chapter = trace.split("_")[2:]
     return f"{speaker}-{chapter}.flac", f"{speaker}-{chapter}.trans.txt"
 
+
+@specfunc("librispeech_partflattened")
+def librispeech_partflattened():
+    tree = librispeech_tree(maker=make_libritree_fl1_cat)
+    return tree_to_str(tree, orientation = PrettyPrintTree.HORIZONTAL)
 
 @specfunc("librispeech_flattened")
 def librispeech_flattened():
@@ -110,11 +126,13 @@ def librispeech_folded_c_r():
     file_leaves(tree)
     return tree_to_str(tree)
 
+def get_all():
+    return [librispeech, librispeech_partflattened, librispeech_flattened, librispeech_folded_r_c, librispeech_folded_c_r]
+
 def gen_all(source, pub):
-    l = [librispeech, librispeech_flattened, librispeech_folded_r_c, librispeech_folded_c_r]
-    gen(source, pub, l)
+    gen(source, pub, get_all())
 
 if __name__ == "__main__":
-    l = [librispeech, librispeech_flattened, librispeech_folded_r_c, librispeech_folded_c_r]
+    # l = [librispeech, librispeech_partflattened, librispeech_flattened, librispeech_folded_r_c, librispeech_folded_c_r]
     # demo(l)
-    gen("UserStories_source.md", "UserStories.md", l)
+    demo(get_all())

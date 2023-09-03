@@ -50,9 +50,9 @@ def rand_node():
 
 def rand_dist(max, k):
     l = [abs(random.uniform(0,max)) for i in range(k)]
-    print(l)
+    # print(l)
     c = max/sum(l)
-    print(c)
+    # print(c)
     return [c*n for n in l]
 
 def middle_meet(l):
