@@ -124,6 +124,29 @@ impl Tree {
 		return new_tree;
 	}
 
+	/// Returns a vector of file names using a BFS. Used for testing atm.
+	pub fn get_file_names(&self) -> Vec<String> {
+
+		let mut file_names = Vec<String>::new();
+
+		let mut queue = VecDeque::new();
+		queue.push_back(0);
+		
+		while let Some(current_node_idx) = queue.pop_front() {
+			
+			if &self.nodes[current_node_idx].node_type == NodeType::File {
+				let name = &self.nodes[current_node_idx].data.original_path.file_name();
+				file_names.push(name);
+			}
+
+			for &child_idx in &self.nodes[current_node_idx].children {
+				queue.push_back(child_idx);
+			}
+		}
+
+		return file_names
+	}	
+
 	pub fn add_node(&mut self, child_data: NodeData)
 	{
 		let ancestors: Vec<&Path> = child_data.path.ancestors().collect();	
