@@ -2,9 +2,38 @@ use jwalk::{WalkDir};
 use std::fs;
 use std::path::PathBuf;
 use crate::tree::{Tree, Node, NodeData, NodeType};
+extern crate fs_extra;
+use fs_extra::dir;
+use fs_extra::dir::copy;
 
-pub fn copy_directory(from: &PathBuf, to: &PathBuf) {
+use dir_diff::{is_different};
+use std::fs::File;
+use std::io::{self, Write};
+use tempdir::TempDir;
 
+use std::env;
+
+pub fn run_test(path: &str, f: fn(&Tree)-> Tree)
+{
+    let test_path = PathBuf::from(path);
+    let mut in_path = test_path.clone();
+    in_path.push("in");
+    let mut out_path = test_path.clone();
+    out_path.push("out");
+
+    let tmp_dir = TempDir::new("test").unwrap();
+    let root_path = PathBuf::from(tmp_dir.path());
+    
+    let options = dir::CopyOptions::new(); 
+    // options.mirror_copy = true; // To mirror copy the whole structure of the source directory
+    copy(&test_path, &root_path, &options);
+
+    let tree = load_full_tree(root_path.clone());
+    let new_tree = f(&tree);
+
+    write_full_tree(&tree, &new_tree);
+
+    assert!(!is_different(out_path.to_str().unwrap(), root_path.to_str().unwrap()).unwrap());
 }
 
 pub fn load_full_tree(root: PathBuf) -> Tree {
