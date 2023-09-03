@@ -2,8 +2,6 @@ extern crate tempdir;
 
 pub mod tree;
 pub mod filesys;
-pub mod vfs_dir_tests;
-
 
 #[cfg(test)]
 mod tests {

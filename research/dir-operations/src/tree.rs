@@ -3,6 +3,7 @@
 // https://doc.rust-lang.org/rust-by-example/fn/methods.html
 // https://doc.rust-lang.org/rust-by-example/trait.html
 use std::collections::HashMap;
+use std::collections::VecDeque;
 use std::path::PathBuf;
 use std::path::Path;
 
@@ -127,21 +128,13 @@ impl Tree {
 	/// Returns a vector of file names using a BFS. Used for testing atm.
 	pub fn get_file_names(&self) -> Vec<String> {
 
-		let mut file_names = Vec<String>::new();
-
-		let mut queue = VecDeque::new();
-		queue.push_back(0);
+		let mut file_names = Vec::<String>::new();
 		
-		while let Some(current_node_idx) = queue.pop_front() {
-			
-			if &self.nodes[current_node_idx].node_type == NodeType::File {
-				let name = &self.nodes[current_node_idx].data.original_path.file_name();
-				file_names.push(name);
-			}
-
-			for &child_idx in &self.nodes[current_node_idx].children {
-				queue.push_back(child_idx);
-			}
+		for node in &self.nodes {
+			if let NodeType::File = node.data.node_type {
+				let name = node.data.original_path.file_name().map(|os_str| os_str.to_string_lossy().to_string());
+		 		name.map(|s| file_names.push(s));
+		 	}	
 		}
 
 		return file_names
