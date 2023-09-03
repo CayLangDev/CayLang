@@ -7,26 +7,15 @@ Example generated below.
 {{librispeech}}
 ```
 
-We set up simple directory sets for matching our different directory types
-```
-DirectorySet ReaderDir {
-    Names: r"RD\d{4,}"
-}
-
-DirectorySet ChapterDir {
-    Names: r"CH\d{4,}"
-}
-```
-
-
+We set up a simple tree directory set for matching our structure.
 ```
 TreeDirectorySet LSDataSet {
     Names: f"Librispeech",
     Structure: {
         layers: {
             Subset: Dir,
-            Reader: ReaderDir,
-            Chapter: ChapterDir
+            Reader: Dir<r"RD\d+">,
+            Chapter: Dir<r"CH\d+">,
         }
         edges: {
             Audio: File<r"*.flac">,
@@ -34,14 +23,15 @@ TreeDirectorySet LSDataSet {
         }
     }
     Specialisations: {
-        Reader: atleast 1
-        Chapter: atleast 1
-        Audio: atleast 1
+        Subset: atleast 1,
+        Reader: atleast 1,
+        Chapter: atleast 1,
+        Audio: atleast 1,
         Transcript: exactly 1
     }
 }
 ```
-Fairly compact description, we're not verifying the names of the audio files or transcript.
+Fairly compact description, we're not verifying the names of the audio files or transcript, or breaking our subdirectory and file prototypes into seperate DirectorySets to extract metadata.
 
 Good enough for a programmer to hack on, not ideal for a distributor.
 
@@ -138,21 +128,21 @@ The distributor can also strengthen the conditions on the dataset prototype, all
 
 ```
 DirectorySet ReaderDir {
-    Names: r"RD\d{4,}",
+    Names: r"RD\d+",
     Tags: {
       id: asint name[2:] // store integer id as a tag
     }
 }
 
 DirectorySet ChapterDir {
-    Names: r"CH\d{4,}"
+    Names: r"CH\d+"
     Tags: {
       id: asint name[2:] // store integer id as a tag
     }
 }
 
 FileSet RecordingFile {
-  names: f"RD\d{4,}-CH\d{4,}-\d{1,}.flac"
+  names: r"RD\d+-CH\d+-\d+.flac"
   Tags: {
     parts: split name.stem "-",
     reader_id: asint parts[0][2:],
@@ -162,7 +152,7 @@ FileSet RecordingFile {
 }
 
 FileSet TranscriptFile {
-  names: f"RD\d{4,}-CH\d{4,}.trans.txt"
+  names: r"RD\d+-CH\d+.trans.txt"
   Tags: {
     parts: split name.stem "-",
     reader_id: asint parts[0][2:],
@@ -189,10 +179,11 @@ TreeDirectorySet LSDataSet {
         }
     },
     Specialisations: {
+        Subset: atleast 1,
         Reader: atleast 1,
         Chapter: atleast 1,
-        Audio: has range 0 ((max ..num) + 1) 1 == ..num atleast 1 has ..reader_id == Reader.id has ..chapter_id == Chapter.id,
-        Transcript: exactly 1 has ..reader_id == Reader.id has ..chapter_id == Chapter.id
+        Audio: has (range 0 ((max ..num) + 1) 1 == ..num) atleast 1 has (..reader_id == Reader.id && ..chapter_id == Chapter.id),
+        Transcript: exactly 1 has (..reader_id == Reader.id && ..chapter_id == Chapter.id)
     }
 }
 ```
@@ -226,16 +217,26 @@ TreeDirectorySet LSDataSet {
         }
     },
     Specialisations: {
+        Subset: atleast 1,
         Reader: atleast 1,
         Chapter: atleast 1,
-        Audio: has range 0 ((max ..num) + 1) 1 == ..num atleast 1 has ..reader_id == Reader.id has ..chapter_id == Chapter.id,
-        Transcript: exactly 1 has ..reader_id == Reader.id has ..chapter_id == Chapter.id
+        Audio: has (range 0 ((max ..num) + 1) 1 == ..num) atleast 1 has (..reader_id == Reader.id && ..chapter_id == Chapter.id),
+        Transcript: exactly 1 has (..reader_id == Reader.id && ..chapter_id == Chapter.id)
     },
     LayerSpecialisations: {
-        Reader: has range 0 ((max ..id) + 1) == ..id,
-        Chapter: has range 0 ((max ..id) + 1) == ..id
+        Reader: has (range min ..id ((max ..id) + 1) == ..id),
+        Chapter: has (range min ..id ((max ..id) + 1) == ..id)
     }
 }
 ```
 
-These specialisations apply across every matching of the labelled prototype, not just those beneath a specific node.
+Specialisations in LayerSpecialisation apply across every matching of the labelled prototype, not just those beneath a specific node.
+These Layer Specialisations in particular check that for each id-ed layer there are no ids in the range presented by the smallest ids and largest ids that are missing from the dataset.
+That there are no "gaps".
+
+We could define helpers to make our last two normal specialisations and our layer specialisations neater.
+```
+def gapless(seq) -> range min seq ((max seq) + 1) == seq
+def complete(seq) -> range 0 ((max seq) + 1) == seq
+```
+Function definition sequence WIP.
