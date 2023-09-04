@@ -4,6 +4,8 @@ from simple_spec_gen import specfunc, gen, demo
 from PrettyPrint import PrettyPrintTree
 # examples for UserStories.md
 
+def opendictify(opendata):
+    return {"OpenSpeech": {"subset": opendata}}
 
 # speaker, chapters
 def make_opentree(opendict):
@@ -103,7 +105,7 @@ def file_leaves(tree: Tree, trace = None):
 @specfunc("openspeech_folded_c_r")
 def openspeech_folded_c_r():
     tree = openspeech_tree()
-    tree = Tree.fromdict({"root":reverse_map(openspeech_map(tree))}, "root")
+    tree = Tree.fromdict(opendictify(reverse_map(openspeech_map(tree))), "OpenSpeech")
     file_leaves(tree)
     return tree_to_str(tree)
 

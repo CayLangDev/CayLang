@@ -109,25 +109,25 @@ The fold operation rebuilds our tree from the root, allowing this change in stru
 
 Now our tree is as follows
 ```
-                       ┌ RD129-CH275.flac 
-               ┌ RD129 ┤
-               │       └ RD129-CH275.trans.txt 
-       ┌ CH275 ┤
-       │       │       ┌ RD131-CH275.flac 
-       │       └ RD131 ┤
-       │               └ RD131-CH275.trans.txt 
-       │
-       │               ┌ RD129-CH276.flac 
-- root ┤       ┌ RD129 ┤
-       │       │       └ RD129-CH276.trans.txt 
-       ├ CH276 ┤
-       │       │       ┌ RD130-CH276.flac 
-       │       └ RD130 ┤
-       │               └ RD130-CH276.trans.txt 
-       │
-       │               ┌ RD130-CH277.flac 
-       └ CH277 ─ RD130 ┤
-                       └ RD130-CH277.trans.txt 
+                                      ┌ subset-RD129-CH275.flac 
+                              ┌ RD129 ┤
+                              │       └ subset-RD129-CH275.trans.txt 
+                      ┌ CH275 ┤
+                      │       │       ┌ subset-RD131-CH275.flac 
+                      │       └ RD131 ┤
+                      │               └ subset-RD131-CH275.trans.txt 
+                      │
+                      │               ┌ subset-RD129-CH276.flac 
+- OpenSpeech ─ subset ┤       ┌ RD129 ┤
+                      │       │       └ subset-RD129-CH276.trans.txt 
+                      ├ CH276 ┤
+                      │       │       ┌ subset-RD130-CH276.flac 
+                      │       └ RD130 ┤
+                      │               └ subset-RD130-CH276.trans.txt 
+                      │
+                      │               ┌ subset-RD130-CH277.flac 
+                      └ CH277 ─ RD130 ┤
+                                      └ subset-RD130-CH277.trans.txt 
 ```
 
 
