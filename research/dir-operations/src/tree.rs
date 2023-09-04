@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use std::collections::VecDeque;
 use std::path::PathBuf;
 use std::path::Path;
+use display_tree::{format_tree, CharSet, DisplayTree, Style, StyleBuilder};
 
 pub type NodeIdx = usize;
 
@@ -65,6 +66,7 @@ impl Node {
 	}
 }
 
+// TODO: DisplayTree
 #[derive(Debug)]
 pub struct Tree {
 	pub nodes: Vec<Node>,
@@ -205,6 +207,28 @@ impl Tree {
 		child_path.push(file_name);
 
 		return self.path_map.get(&child_path);
+	}
+
+	pub fn bfs(&self) {
+
+		let mut queue = VecDeque::new();
+		queue.push_back(0);
+		while !queue.is_empty() {
+			let level_size = queue.len();
+
+			for _ in 0..level_size {
+                let current_node_idx = queue.pop_front().unwrap();
+				for &child_idx in &self.nodes[current_node_idx].children {
+					queue.push_back(child_idx);
+				}
+				if level_size == 1 {
+					print!("root ->");
+				} else {
+					print!("{} -> ", &self.nodes[current_node_idx].data.path.to_string_lossy().to_string());
+				}
+			}
+			println!();
+		}
 	}
 }
 
