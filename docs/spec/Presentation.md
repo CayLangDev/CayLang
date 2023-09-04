@@ -34,8 +34,8 @@ TreeDirectorySet OSDataSet {
         layers: {
             Subset: Dir,
             Reader: Dir,
-            Chapter: Dir,
-        }
+            Chapter: Dir
+        },
         edges: {
             Audio: FlacFile,
             Transcript: TextFile
