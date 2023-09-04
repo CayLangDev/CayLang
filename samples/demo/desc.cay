@@ -1,0 +1,21 @@
+TreeDirectorySet OSDataSet {
+    Names: r"OpenSpeech",
+    Structure: {
+        layers: {
+            Subset: Dir,
+            Reader: Dir,
+            Chapter: Dir,
+        }
+        edges: {
+            Audio: FlacFile,
+            Transcript: TextFile
+        }
+    },
+    Specialisations: {
+        Subset: atleast 1,
+        Reader: atleast 1,
+        Chapter: atleast 1,
+        Audio: exactly 1,
+        Transcript: exactly 1
+    }
+}
