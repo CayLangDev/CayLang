@@ -25,7 +25,7 @@ pub enum ClauseType {
 
 #[derive(Debug)]
 pub struct Clause {
-    pub label: Ident,
+    pub label: Option<Ident>,
     pub destructured_type: TypeDestructured,
     pub child: ClauseType,
 }
