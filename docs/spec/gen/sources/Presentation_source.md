@@ -1,4 +1,7 @@
-Take for example the structure used by the openspeech* dataset. A root Openspeech folder, with a layer of subset folders, with a layer of reader folders, with numbered flac files and a transcription of the reading at the edges.
+
+The structure used by the openspeech* dataset is a root OpenSpeech folder, followed by a layer of subset folders (we'll include only one), followed by a layer of reader folders, with a single flac file and a text file containing a transcription of the reading at the edges.
+
+*A fictional dataset based very closely on LibriSpeech, a target dataset of our client for this project.
 
 Example generated below.
 ```
@@ -8,7 +11,7 @@ Example generated below.
 We set up a simple tree directory set for matching our structure.
 ```
 TreeDirectorySet OSDataSet {
-    Names: f"OpenSpeech",
+    Names: r"OpenSpeech",
     Structure: {
         layers: {
             Subset: Dir,
@@ -53,7 +56,6 @@ Now our tree is as follows
 {{openspeech_partflattened}}
 ```
 
-
 Now suppose instead we want to change the structure so that the subset layer is followed by a chapter layer which is followed by a reader layer; each chapter folder contains a folder for each reader who has read it rather than vice versa.
 
 ```
@@ -61,13 +63,14 @@ fold "~": OSDataSet {
   Subset: Dir {name as subset} => {
     Reader: Dir {name as reader} => {
       Chapter: Dir {name as chapter} => {
-        Audio: FlacFile { .. } => `{root}/{subset}/{chapter}/{reader}/{reader}-{chapter}.flac`
+        Audio: FlacFile { name as audio } => `{root}/{subset}/{chapter}/{reader}/{audio}`
         Transcript: TextFile {name as transcipt} => `{root}/{subset}/{chapter}/{reader}/{transcipt}`
       }
     }
   }
 }
 ```
+
 Note now we write ``{root}/{subset}/{chapter}/{reader}/...`` not `{root}/{subset}/{reader}/{chapter}/...`.
 The fold operation rebuilds our tree from the root, allowing this change in structure.
 
