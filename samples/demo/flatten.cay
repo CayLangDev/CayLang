@@ -2,8 +2,8 @@ fold "~": OSDataSet {
   Subset: Dir {name as subset} => {
     Reader: Dir {name as reader} => {
       Chapter: Dir {name as chapter} => {
-        Audio: FlacFile { name as audio } => `{root}/{subset}/{reader}/{audio}`
-        Transcript: TextFile {name as transcipt} => `{root}/{subset}/{reader}/{transcipt}`
+            Audio: FlacFile {name as audio} => `{root}/{subset}/{reader}/{audio}`
+            Transcript: TextFile {name as transcipt} => `{root}/{subset}/{reader}/{transcipt}`
       }
     }
   }
