@@ -1,4 +1,5 @@
 use caylang_parser::{syntax};
+use caylang_interpreter::{interp};
 use lalrpop_util::{ParseError};
 
 use std::fmt::Debug;

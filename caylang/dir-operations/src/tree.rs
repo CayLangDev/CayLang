@@ -105,3 +105,30 @@ impl Iterator for Children<'_> {
 		return Some(curr_idx);
 	}
 }
+
+// 'a is life-time shit
+pub struct Leaves<'a> {
+	tree: &'a Tree,
+	current: usize
+}
+
+impl Iterator for Leaves<'_> {
+	type Item = NodeIdx;
+	fn next(&mut self) -> Option<Self::Item> {
+		if self.current == tree.nodes.len() {
+			return None
+		}
+
+		while tree.nodes[self.current].children.len() > 0 {
+			self.current += 1;
+			if self.current == tree.nodes.len() {
+				return None
+			}
+		}
+
+		let curr_idx = self.current;
+		self.current += 1;
+
+		return Some(curr_idx);
+	}
+}
