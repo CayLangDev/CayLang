@@ -1,0 +1,3 @@
+[workspace]
+members = ["caylang/*"]
+resolver = "2"
