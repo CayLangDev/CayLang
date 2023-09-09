@@ -6,6 +6,7 @@ use std::iter::{zip};
 use std::collections::{VecDeque};
 use regex::{Regex};
 use crate::from_ast::{TreePrototype, FoldOperation, Rename};
+use std::path::Path;
 // use caylang_io::tree::NodeData;
 
 fn validate(tree: &Tree, prototype: TreePrototype) -> bool {
@@ -20,23 +21,31 @@ fn validate(tree: &Tree, prototype: TreePrototype) -> bool {
 
 
 pub fn to_fold(tree: &Tree, fold_desc: FoldOperation) -> (Vec<PathBuf>, Vec<PathBuf>) {
-	let old_paths = vec![];
-	let new_paths = vec![];
+	let mut old_paths = vec![];
+	let mut new_paths = vec![];
 	for l in tree.data_iter(tree.leaves()) {
-		for (o, t) in zip(fold_desc.options, fold_desc.targets) {
+		for (o, t) in zip(&fold_desc.options, &fold_desc.targets) {
 			if o.matches(l) {
-				old_paths.push(l.path);
-				new_paths.push(new_name(l.path, t));
+				old_paths.push(l.path.clone());
+				new_paths.push(new_name(&l.path, t.to_vec()));
 			}
 		}
 	}
 	return (old_paths, new_paths);
 }
 
-pub fn new_name(path: PathBuf, target: Rename) -> PathBuf {
+pub fn make_full_path<'a>(i: impl Iterator<Item = &'a Path> + 'a) -> PathBuf {
+	let mut b = PathBuf::from("");
+	for p in i {
+		b.push(p);
+	}
+	return b;
+}
+
+pub fn new_name(path: &PathBuf, target: Rename) -> PathBuf {
 	// let comps = path.components().collect();
-	let target_q = VecDeque::from(target);
-	let name_comps = vec![];
+	let mut target_q = VecDeque::from(target);
+	let mut name_comps = vec![];
 	for (i, comp) in path.components().enumerate() {
 		let c = target_q.front();
 		if let Some(j) = c {
@@ -49,5 +58,7 @@ pub fn new_name(path: PathBuf, target: Rename) -> PathBuf {
 			break;
 		}
 	}
-	return name_comps.join("/");
+	return make_full_path(name_comps.iter().map(|c| c.as_ref()));
 }
+
+// pub fn interp()
