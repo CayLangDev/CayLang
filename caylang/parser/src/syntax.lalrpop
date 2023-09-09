@@ -51,9 +51,9 @@ Destination: Destination = {
 
 // Each clause in a Fold expression
 Clause: Clause = {
-    <d:TypeDestructured> <g:Guard+> => Clause { destructured_type: d, child: ClauseType::Guarded(g) },
-    <d:TypeDestructured> <o:Arrows<Function>> "=>" <p:Destination> => Clause {destructured_type: d, child: ClauseType::FileRead(o, p)},
-    <d:TypeDestructured> "=>" "{" <c:Clause+> "}" => Clause {destructured_type: d, child: ClauseType::SubClause(c)},
+    <l:(<Ident> ":")?> <d:TypeDestructured> <g:Guard+> => Clause { destructured_type: d, child: ClauseType::Guarded(g), label: l },
+    <l:(<Ident> ":")?> <d:TypeDestructured> <o:Arrows<Function>> "=>" <p:Destination> => Clause {destructured_type: d, child: ClauseType::FileRead(o, p), label: l},
+    <l:(<Ident> ":")?> <d:TypeDestructured> "=>" "{" <c:Clause+> "}" => Clause {destructured_type: d, child: ClauseType::SubClause(c), label: l},
 }
 
 Guard: Guard = {
@@ -90,6 +90,8 @@ Ident: Ident = {
 Literal: Literal = {
     r"[0-9]+(?:\.[0-9]*)?" => Literal::Numeric(f64::from_str(<>).unwrap()), // should add distinct integer and floating point type, currently all floats.
     r#""(?:[^\\"]|(?:\\"))*""# => Literal::String(stripstr(<>, 1)), // arbitrary characters between "", except " which must be preceded by \.
+    r#"`(?:[^\\`]|(?:\\`))*`"# => Literal::FString(stripstr(<>, 1)),
+    
     r#"r"(?:[^\\"]|(?:\\"))*""# => Literal::Regex(stripstr(<>, 2)), // could add regex for checking regex, rn same as string.
     r#"p"(?:[^\\"]|(?:\\"))*""# => Literal::Path(stripstr(<>, 2)), // can add path character set checking here from old fold regex, rn same as string.
 }

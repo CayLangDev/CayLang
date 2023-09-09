@@ -25,6 +25,7 @@ pub enum ClauseType {
 
 #[derive(Debug)]
 pub struct Clause {
+    pub label: Option<Ident>,
     pub destructured_type: TypeDestructured,
     pub child: ClauseType,
 }
@@ -68,6 +69,7 @@ pub enum Destination {
 #[derive(Debug)]
 pub enum Literal {
     String(String),
+    FString(String),
     Regex(String),
     Path(String),
     Numeric(f64),

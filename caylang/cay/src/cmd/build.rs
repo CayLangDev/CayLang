@@ -9,6 +9,10 @@ use std::fs;
 pub struct Args {
     /// The Cay script to build.
     cay_file: String,
+
+    /// Whether to print the AST or not.
+    #[arg(short, long, default_value_t = false)]
+    verbose: bool
 }
 
 fn pretty_print<T: Debug>(input: &T) -> String {
@@ -18,9 +22,10 @@ fn pretty_print<T: Debug>(input: &T) -> String {
 pub fn exec(
     Args {
         cay_file,
+        verbose,
     }: Args
 ) {
-    let cay_script = match fs::read_to_string(cay_file) {
+    let cay_script = match fs::read_to_string(&cay_file) {
         Ok(script) => script,
         Err(e) => {
             println!("Error reading file: {:?}", e);
@@ -36,7 +41,11 @@ pub fn exec(
     match result {
         Ok(program) => {
             // Pretty-print the parsed program (AST)
-            println!("Parsed program:\n{}", pretty_print(&program));
+            println!("Successfully parsed {}!", &cay_file);
+
+            if verbose {
+                println!("Parsed program:\n{}", pretty_print(&program));
+            } 
         }
         Err(e) => {
             println!("Error: {:?}", e);
