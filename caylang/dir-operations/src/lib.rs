@@ -7,7 +7,9 @@ pub mod filesys;
 
 #[cfg(test)]
 mod tests {
-    use crate::filesys::{load_full_tree, write_full_tree, copy_directory, run_test};
+    use crate::filesys::{load_full_tree, write_full_tree, run_test};
+    use std::path::PathBuf;
+    use crate::tree::Tree;
 
     #[test]
     fn flatten_test() {

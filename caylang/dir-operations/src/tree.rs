@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use std::collections::VecDeque;
 use std::path::PathBuf;
 use std::path::Path;
+use std::iter::Map;
 
 pub type NodeIdx = usize;
 
@@ -195,8 +196,12 @@ impl Tree {
 		}
     }
 
-    pub fn get_children(&self, parent_idx: NodeIdx) -> Children<'_> {
-        Children {tree: &self, parent_idx, current: 0}
+    // pub fn get_children(&self, parent_idx: NodeIdx) -> Children<'_> {
+    //     Children {tree: &self, parent_idx, current: 0}
+    // }
+
+    pub fn get_children(&self, parent_idx: NodeIdx) -> impl Iterator<Item = usize> + '_ {
+        return self.nodes[parent_idx].children.iter().map(|i| i.clone());
     }
 
 	pub fn get_child(&self, parent_idx: NodeIdx, file_name: String) -> Option<&NodeIdx> {
@@ -206,27 +211,72 @@ impl Tree {
 
 		return self.path_map.get(&child_path);
 	}
+
+	pub fn leaves(&self) -> impl Iterator<Item = usize> + '_ {
+		return self.nodes.iter()
+						 .enumerate()
+						 .filter(|(_i, x)| x.children.len() == 0)
+						 .map(|(i, _x)| i);
+	}
+
+	pub fn layers(&self) -> Layers {
+		return Layers{tree: self, current_v: vec![root_idx()], next_v: vec![]};
+	}
+
+	pub fn data_iter<'a>(&'a self, i: impl Iterator<Item = usize> + 'a ) -> impl Iterator<Item = &'a NodeData> + '_  {
+		return i.map(|j| &self.nodes[j].data)
+	}
 }
 
 // 'a is life-time shit
-pub struct Children<'a> {
+// pub struct Children<'a> {
+// 	tree: &'a Tree,
+// 	parent_idx: NodeIdx,
+// 	current: usize
+// }
+//
+// impl Iterator for Children<'_> {
+// 	type Item = NodeIdx;
+// 	fn next(&mut self) -> Option<Self::Item> {
+// 		let parent_node = &self.tree.nodes[self.parent_idx];
+//
+// 		if self.current >= parent_node.children.len() {
+// 			return None;
+// 		}
+//
+// 		let curr_idx = parent_node.children[self.current];
+// 		self.current += 1;
+//
+// 		return Some(curr_idx);
+// 	}
+// }
+
+// // 'a is life-time shit
+pub struct Layers<'a> {
 	tree: &'a Tree,
-	parent_idx: NodeIdx,
-	current: usize
+	current_v: Vec<usize>,
+	next_v: Vec<usize>
+
 }
 
-impl Iterator for Children<'_> {
+impl Iterator for Layers<'_> {
 	type Item = NodeIdx;
 	fn next(&mut self) -> Option<Self::Item> {
-		let parent_node = &self.tree.nodes[self.parent_idx];
+		if self.current_v.len() == 0 {
+			if self.next_v.len() == 0 {
+				return None;
+			}
+			else {
+				std::mem::swap(&mut self.next_v, &mut self.current_v);
+			}
 
-		if self.current >= parent_node.children.len() {
-			return None;
 		}
 
-		let curr_idx = parent_node.children[self.current];
-		self.current += 1;
+		let c_idx = self.current_v.pop().unwrap();
+		for c in &self.tree.nodes[c_idx].children {
+			self.next_v.push(c.clone());
+		}
 
-		return Some(curr_idx);
+		return Some(c_idx);
 	}
 }
