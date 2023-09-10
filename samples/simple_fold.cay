@@ -1,0 +1,4 @@
+fold "dir": MyDir { .. } {
+    File { .. } => "out.txt"
+    _ => .
+}
