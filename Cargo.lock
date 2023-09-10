@@ -134,6 +134,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "caylang-io"
+version = "0.1.0"
+dependencies = [
+ "dir-diff",
+ "fs_extra",
+ "jwalk",
+ "tempdir",
+]
+
+[[package]]
 name = "caylang-parser"
 version = "0.1.0"
 dependencies = [
@@ -292,16 +302,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2860407d7d7e2e004bb2128510ad9e8d669e76fa005ccf567977b5d71b8b4a0b"
 dependencies = [
  "walkdir",
-]
-
-[[package]]
-name = "dir-operations"
-version = "0.1.0"
-dependencies = [
- "dir-diff",
- "fs_extra",
- "jwalk",
- "tempdir",
 ]
 
 [[package]]
