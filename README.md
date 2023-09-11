@@ -13,3 +13,8 @@ This will create a `target/release` directory containing the binaries. To run th
 ./target/release/cay <command>
 ```
 Calling `./target/release/cay help` will display a list of commands.
+
+Several sample programs are available in the samples directory, to run one execute:
+```bash
+./target/release/cay build samples/<program>
+```
