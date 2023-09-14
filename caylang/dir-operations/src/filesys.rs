@@ -39,7 +39,7 @@ pub fn run_test(path: &str, f: fn(&Tree) -> Tree) {
     let tree = load_full_tree(&tmp_out);
     let new_tree = f(&tree);
 
-    write_full_tree(&tree, &new_tree, &tmp_out);
+    write_full_tree(&tmp_out, &tmp_out, &tree, &new_tree);
     dfs(&tree, 0);
     dfs(&new_tree, 0);
 
@@ -85,11 +85,11 @@ fn create_all_parents(path: &PathBuf) {
     std::fs::create_dir_all(prefix).unwrap();
 }
 
-pub fn write_full_tree(from_tree: &Tree, to_tree: &Tree, root: &PathBuf) {
+pub fn write_full_tree(from_path: &PathBuf, to_path: &PathBuf, from_tree: &Tree, to_tree: &Tree) {
     for node in to_tree.nodes.iter() {
-        let mut abs_path = root.clone();
+        let mut abs_path = to_path.clone();
         abs_path.push(&node.data.path);
-        let mut abs_original_path = root.clone();
+        let mut abs_original_path = from_path.clone();
         abs_original_path.push(&node.data.original_path);
 
         match node.data.node_type {
@@ -103,9 +103,9 @@ pub fn write_full_tree(from_tree: &Tree, to_tree: &Tree, root: &PathBuf) {
     }
 
     for node in from_tree.nodes.iter() {
-        let mut abs_path = root.clone();
+        let mut abs_path = to_path.clone();
         abs_path.push(&node.data.path);
-        let mut abs_original_path = root.clone();
+        let mut abs_original_path = from_path.clone();
         abs_original_path.push(&node.data.original_path);
 
         println!("{} {}", node.data.path.display(), abs_path.display());
@@ -119,7 +119,6 @@ pub fn write_full_tree(from_tree: &Tree, to_tree: &Tree, root: &PathBuf) {
                     }
                     Some(_) => (),
                 }
-                let _ = fs::rename(&abs_original_path, &abs_path);
             }
             _ => (),
         }
