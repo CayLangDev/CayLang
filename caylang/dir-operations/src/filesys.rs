@@ -36,17 +36,17 @@ pub fn run_test(path: &str, f: fn(&Tree) -> Tree) {
     tmp_out.push("out");
     let _ = fs::rename(&tmp_in, &tmp_out);
 
-    let tree = load_full_tree(root_path.clone());
+    let tree = load_full_tree(&tmp_out);
     let new_tree = f(&tree);
 
-    write_full_tree(&tree, &new_tree);
+    write_full_tree(&tree, &new_tree, &tmp_out);
     dfs(&tree, 0);
     dfs(&new_tree, 0);
 
     assert!(!is_different(out_path.to_str().unwrap(), tmp_out.to_str().unwrap()).unwrap());
 }
 
-pub fn load_full_tree(root: PathBuf) -> Tree {
+pub fn load_full_tree(root: &PathBuf) -> Tree {
     let mut tree: Tree = Tree::new();
     // let mut root: NodeIdx = root_idx();
 
@@ -63,12 +63,16 @@ pub fn load_full_tree(root: PathBuf) -> Tree {
             false => NodeType::Directory,
         };
 
+        let relative_path = PathBuf::from(PathBuf::from(entry.path()).strip_prefix(&root).unwrap());
+
+        println!("root: {} path: {}", root.display(), relative_path.display());
+
         match parent_idx {
             Some(idx) => {
-                tree.add_child(*idx, NodeData::new(entry.path(), node_type));
+                tree.add_child(*idx, NodeData::new(relative_path, node_type));
             }
             None => {
-                tree.add_child(0, NodeData::new(entry.path(), node_type));
+                tree.add_child(0, NodeData::new(relative_path, node_type));
             }
         }
     }
@@ -81,29 +85,41 @@ fn create_all_parents(path: &PathBuf) {
     std::fs::create_dir_all(prefix).unwrap();
 }
 
-pub fn write_full_tree(from_tree: &Tree, to_tree: &Tree) {
+pub fn write_full_tree(from_tree: &Tree, to_tree: &Tree, root: &PathBuf) {
     for node in to_tree.nodes.iter() {
+        let mut abs_path = root.clone();
+        abs_path.push(&node.data.path);
+        let mut abs_original_path = root.clone();
+        abs_original_path.push(&node.data.original_path);
+
         match node.data.node_type {
             NodeType::File => {
                 // println!("{} -> {}", node.data.original_path.display(), node.data.path.display());
-                create_all_parents(&node.data.path);
-                let _ = fs::rename(&node.data.original_path, &node.data.path);
+                create_all_parents(&abs_path);
+                let _ = fs::rename(&abs_original_path, &abs_path);
             }
             _ => (),
         }
     }
 
     for node in from_tree.nodes.iter() {
+        let mut abs_path = root.clone();
+        abs_path.push(&node.data.path);
+        let mut abs_original_path = root.clone();
+        abs_original_path.push(&node.data.original_path);
+
+        println!("{} {}", node.data.path.display(), abs_path.display());
+
         match node.data.node_type {
             NodeType::Directory => {
                 match to_tree.path_map.get(&node.data.path) {
                     None => {
-                        let _ = fs::remove_dir_all(&node.data.path);
-                        let _ = fs::remove_dir(&node.data.path);
+                        let _ = fs::remove_dir_all(&abs_path);
+                        let _ = fs::remove_dir(&abs_path);
                     }
                     Some(_) => (),
                 }
-                let _ = fs::rename(&node.data.original_path, &node.data.path);
+                let _ = fs::rename(&abs_original_path, &abs_path);
             }
             _ => (),
         }
