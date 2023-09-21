@@ -22,6 +22,7 @@ impl NodePrototype {
 }
 
 pub struct TreePrototype {
+	regex: Regex,
 	pub layers: Vec<NodePrototype>,
 	pub edges: Vec<NodePrototype>
 }
@@ -84,4 +85,6 @@ use caylang_parser::ast::{Expr, Ident, Function, FoldExpr, Field, ClauseType, De
 // impl toInterpObject for Vec<Expr> {
 //
 // }
+
+//
 

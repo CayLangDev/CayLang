@@ -2,6 +2,7 @@
 pub enum Expr {
     ExprList(Vec<Expr>),
     Fold(FoldExpr),
+    PrototypeDeclaration(PrototypeDeclaration),
     LabelledList(LabelledList),
     UnlabelledList(UnlabelledList),
     Ident(Ident),
@@ -86,3 +87,32 @@ pub type UnlabelledList = Vec<Expr>;
 
 #[derive(Debug)]
 pub struct Pair(pub Ident, pub Expr);
+
+#[derive(Debug)]
+pub struct PrototypeDeclaration {
+    pub name: Ident,
+    pub prototype: Prototype
+}
+
+#[derive(Debug)]
+pub enum Prototype {
+    NodePrototype(NodePrototype),
+    TreePrototype(TreePrototype)
+}
+
+#[derive(Debug)]
+pub struct TreePrototype {
+    pub regex: String,
+    pub layers: Vec<NodePrototype>,
+	pub edges: Vec<NodePrototype>
+}
+
+#[derive(Debug)]
+pub enum NodeType {File, Dir}
+
+#[derive(Debug)]
+pub struct NodePrototype {
+    pub regex: String,
+    pub node_type: NodeType
+}
+
