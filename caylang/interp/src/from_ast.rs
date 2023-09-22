@@ -33,7 +33,7 @@ pub struct TreePrototype {
 pub type Rename = Vec<usize>;
 
 pub struct FoldOperation {
-    pub options: Vec<NodePrototype>,
+    pub options: Vec<(Ident, NodePrototype)>,
     pub targets: Vec<Rename>,
 }
 
@@ -142,7 +142,7 @@ impl toInterpObject for FoldExpr {
         }
 
 		// TODO: Once NodePrototypes are properly parsed, can do proper options here.
-        let options: Vec<NodePrototype> = vec![NodePrototype { regex: Regex::new(r".*").unwrap()}; rename_template.len()];
+        let options: Vec<(Ident, NodePrototype)> = vec![(Ident::Variable("SomePrototypeName".to_string()), NodePrototype { regex: Regex::new(r".*").unwrap()}); rename_template.len()];
 
         Some(InterpObject::Application(OperationApplication {
             from: self.directory.clone(),
