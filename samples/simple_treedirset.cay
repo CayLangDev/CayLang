@@ -1,0 +1,12 @@
+TreeDirectorySet SmallTreeDir {
+    Names: r"[123]",
+    Structure: {
+        layers: {
+            A: Directory,
+            B: Directory
+        },
+        edges: {
+            F: File
+        }
+    }
+}

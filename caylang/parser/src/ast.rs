@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+use std::collections::hash_map::RandomState;
+
 #[derive(Debug)]
 pub enum Expr {
     ExprList(Vec<Expr>),
@@ -56,9 +59,19 @@ pub struct TypeDestructured {
 }
 
 #[derive(Debug)]
+#[derive(Eq, Hash, PartialEq)]
 pub enum Ident {
     Variable(String),
     Ignored,
+}
+
+pub fn to_ident(s: &str) -> Ident {
+    if s == "_" {
+        return Ident::Ignored;
+    }
+    else {
+        return Ident::Variable(s.to_string());
+    }
 }
 
 #[derive(Debug)]
@@ -83,6 +96,88 @@ pub fn stripstr(s: &str, i: usize) -> String {
 
 pub type LabelledList = Vec<Pair>;
 
+pub trait GetValue {
+    fn get_value<T: PartialEq<String>>(self, target: T) -> Option<Expr>;
+    fn get_value_r<'a, T: PartialEq<&'a String>>(&'a self, target: T) -> Option<&'a Expr>;
+
+    fn get_values<const N: usize>(self, targets: [Ident; N]) -> [Option<Expr>; N];
+}
+
+impl GetValue for LabelledList {
+    fn get_value<T: PartialEq<String>>(self, target: T) -> Option<Expr> {
+        for Pair(key, value) in self {
+            if let Ident::Variable(key) = key {
+                if target == key {
+                    return Some(value);
+                }
+            }
+        }
+        return None;
+    }
+
+    fn get_values<const N: usize>(mut self, targets: [Ident; N]) -> [Option<Expr>; N] {
+
+        let mut map: HashMap<Ident, Expr, RandomState> = HashMap::from_iter(self.into_iter().map(|Pair(k,v)| (k,v)));
+
+        return targets.map(|x| map.remove(&x));
+    }
+
+    fn get_value_r<'a, T: PartialEq<&'a String>>(&'a self, target: T) -> Option<&'a Expr> {
+        for Pair(key, value) in self {
+            if let Ident::Variable(key) = key {
+                if target == key {
+                    return Some(value);
+                }
+            }
+        }
+        return None;
+    }
+}
+
+// pub fn singular_expr<'a>(e: &'a Expr) -> Option<&'a Expr> {
+//     if let Expr::ExprList(e) = e {
+//         if e.len() == 1 {
+//             let e = &e[0];
+//             if let Expr::ExprList(_) = e {
+//                 return None
+//             }
+//             else {
+//                 return Some(e);
+//             }
+//         }
+//         else {
+//             return None
+//         }
+//     }
+//     else {
+//         return Some(&e)
+//     }
+// }
+
+
+
+pub fn v_singular_expr(e: Vec<Expr>) -> Option<Expr> {
+    if e.len() == 1 {
+        // wow what an awesome language
+        // I love rust so cool
+        let mut e = e;
+        return e.pop()
+    }
+    else {
+        return None
+    }
+}
+
+pub fn singular_expr(e: Expr) -> Option<Expr> {
+    if let Expr::ExprList(e) = e {
+        return v_singular_expr(e);
+    }
+    else {
+        return Some(e);
+    }
+}
+
+
 pub type UnlabelledList = Vec<Expr>;
 
 #[derive(Debug)]
@@ -103,9 +198,13 @@ pub enum Prototype {
 #[derive(Debug)]
 pub struct TreePrototype {
     pub regex: String,
-    pub layers: Vec<NodePrototype>,
-	pub edges: Vec<NodePrototype>
+    pub layers: Vec<StructurePair>,
+	pub edges: Vec<StructurePair>
 }
+
+// .0 refers to prototype label, .1 refers to prototype identifier
+// no expression prototypes rn
+pub struct StructurePair(pub Ident, pub Ident);
 
 #[derive(Debug)]
 pub enum NodeType {File, Dir}
