@@ -93,7 +93,6 @@ use caylang_parser::ast::{
 
 impl toInterpObject for FoldExpr {
     fn to_interp_object(&self) -> Option<InterpObject> {
-        let mut depths: Vec<Option<String>> = vec![];
         let mut rename_template: Vec<Vec<usize>> = vec![];
         let mut variable_depth_map: HashMap<String, usize> = HashMap::new();
 
@@ -101,7 +100,6 @@ impl toInterpObject for FoldExpr {
         fn dfs(
             clause: &Clause,
             depth: usize,
-            depths: &mut Vec<Option<String>>,
             variable_depth_map: &mut HashMap<String, usize>,
             rename_template: &mut Vec<Vec<usize>>,
         ) {
@@ -112,17 +110,14 @@ impl toInterpObject for FoldExpr {
                     .and_then(|field| field.alias.as_ref().or(Some(&field.name)))
                     .map(|ident| ident.to_string());
 
-                depths.push(name_var.clone());
                 if let Some(name) = name_var {
                     variable_depth_map.insert(name, depth);
                 }
-            } else {
-                depths.push(None);
             }
             match &clause.child {
                 ClauseType::SubClause(subclauses) => {
                     for subclause in subclauses {
-                        dfs(subclause, depth + 1, depths, variable_depth_map,rename_template);
+                        dfs(subclause, depth + 1, variable_depth_map,rename_template);
                     }
                 }
                 ClauseType::FileRead(_, dest) => {
@@ -140,11 +135,10 @@ impl toInterpObject for FoldExpr {
                 }
                 _ => {}
             }
-            depths.pop();
         }
 
         for clause in &self.clauses {
-            dfs(clause, 0, &mut depths, &mut variable_depth_map, &mut rename_template);
+            dfs(clause, 0, &mut variable_depth_map, &mut rename_template);
         }
 
 		// TODO: Once NodePrototypes are properly parsed, can do proper options here.
