@@ -54,10 +54,19 @@ pub struct TypeDestructured {
     pub fields: Option<Vec<Field>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub enum Ident {
     Variable(String),
     Ignored,
+}
+
+impl Ident {
+    pub fn to_string(&self) -> String {
+        match self {
+            Ident::Variable(s) => s.to_string(),
+            Ident::Ignored => "_".to_string(),
+        }
+    }
 }
 
 #[derive(Debug)]
