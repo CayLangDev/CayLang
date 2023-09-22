@@ -3,6 +3,7 @@ use std::{collections::HashMap, string};
 use caylang_io::tree::NodeData;
 use regex::Regex;
 
+#[derive(Clone)]
 pub struct NodePrototype {
     regex: Regex,
 }
@@ -125,7 +126,6 @@ impl toInterpObject for FoldExpr {
                     }
                 }
                 ClauseType::FileRead(_, dest) => {
-                    //todo
 					if let Destination::Move(Literal::FString(path)) = dest {
 						let elems = path.split('/').map(|s| {
 							// Remove the "{" and "}"
@@ -140,24 +140,22 @@ impl toInterpObject for FoldExpr {
                 }
                 _ => {}
             }
-            let last_name_var = depths.pop().unwrap();
+            depths.pop();
         }
 
         for clause in &self.clauses {
             dfs(clause, 0, &mut depths, &mut variable_depth_map, &mut rename_template);
         }
 
-		// TODO: Once NodePrototypes are properly parsed, can put in all options here.
-        let options: Vec<NodePrototype> = vec![NodePrototype { regex: Regex::new(r".*").unwrap()}];
-
-        let operation = FoldOperation {
-            options,
-            targets: vec![], 
-        };
+		// TODO: Once NodePrototypes are properly parsed, can do proper options here.
+        let options: Vec<NodePrototype> = vec![NodePrototype { regex: Regex::new(r".*").unwrap()}; rename_template.len()];
 
         Some(InterpObject::Application(OperationApplication {
             from: self.directory.clone(),
-            operation,
+            operation: FoldOperation {
+				options,
+				targets: rename_template, 
+			},
         }))
     }
 }
