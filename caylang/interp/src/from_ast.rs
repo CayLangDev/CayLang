@@ -62,8 +62,8 @@ trait toInterpObject {
 }
 
 use caylang_parser::ast::{
-    Clause, ClauseType, Destination, Expr, Field, FoldExpr, Function, Ident, LabelledList,
-    UnlabelledList, Literal,
+    Clause, ClauseType, Destination, Expr, Field, FoldExpr, Function, Ident, LabelledList, Literal,
+    UnlabelledList,
 };
 
 //  Todo
@@ -117,21 +117,24 @@ impl toInterpObject for FoldExpr {
             match &clause.child {
                 ClauseType::SubClause(subclauses) => {
                     for subclause in subclauses {
-                        dfs(subclause, depth + 1, variable_depth_map,rename_template);
+                        dfs(subclause, depth + 1, variable_depth_map, rename_template);
                     }
                 }
                 ClauseType::FileRead(_, dest) => {
-					if let Destination::Move(Literal::FString(path)) = dest {
-						let elems = path.split('/').map(|s| {
-							// Remove the "{" and "}"
-							let mut chars = s.chars();
-							chars.next();
-							chars.next_back();
-							let t = chars.as_str();
-							variable_depth_map.get(t).unwrap().clone()
-						} ).collect();
-						rename_template.push(elems);
-					}
+                    if let Destination::Move(Literal::FString(path)) = dest {
+                        let elems = path
+                            .split('/')
+                            .map(|s| {
+                                // Remove the "{" and "}"
+                                let mut chars = s.chars();
+                                chars.next();
+                                chars.next_back();
+                                let t = chars.as_str();
+                                variable_depth_map.get(t).unwrap().clone()
+                            })
+                            .collect();
+                        rename_template.push(elems);
+                    }
                 }
                 _ => {}
             }
@@ -141,15 +144,23 @@ impl toInterpObject for FoldExpr {
             dfs(clause, 0, &mut variable_depth_map, &mut rename_template);
         }
 
-		// TODO: Once NodePrototypes are properly parsed, can do proper options here.
-        let options: Vec<(Ident, NodePrototype)> = vec![(Ident::Variable("SomePrototypeName".to_string()), NodePrototype { regex: Regex::new(r".*").unwrap()}); rename_template.len()];
+        // TODO: Once NodePrototypes are properly parsed, can do proper options here.
+        let options: Vec<(Ident, NodePrototype)> = vec![
+            (
+                Ident::Variable("SomePrototypeName".to_string()),
+                NodePrototype {
+                    regex: Regex::new(r".*").unwrap()
+                }
+            );
+            rename_template.len()
+        ];
 
         Some(InterpObject::Application(OperationApplication {
             from: self.directory.clone(),
             operation: FoldOperation {
-				options,
-				targets: rename_template, 
-			},
+                options,
+                targets: rename_template,
+            },
         }))
     }
 }
