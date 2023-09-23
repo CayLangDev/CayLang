@@ -78,44 +78,44 @@ TreePrototype: PrototypeDeclaration = {
     "TreeDirectorySet" <name:Ident> <d:LabelledList> => {
         let [names, structure] = d.get_values([to_ident("Names"), to_ident("Structure")]);
         println!("{:?} {:?}", name, structure);
-        return PrototypeDeclaration {name, prototype: Prototype::TreePrototype(
-            TreePrototype {
-                regex: "".to_string(),
-                layers: vec![],
-                edges: vec![]
+
+        let names = d.get_value("Names");
+        let structure = d.get_value("Structure");
+        let (layers, edges) = {
+            if let Some(structure) = structure {
+                if let Some(Expr::LabelledList(l)) = singular_expr(structure) {
+                    let (layers, edges) = (l.get_value("layers"), l.get_value("edges"));
+                    (layers, edges)
+                }
+                else {
+                    (vec![], vec![])
+                }
+            } else {
+                (vec![], vec![])
             }
-        )};
-        // let names = d.get_value("Names");
-        // let structure = d.get_value("Structure");
-        // let layers, edges = {
-        //     if let Some(structure) = structure {
-        //         if let Some(Expr::LabelledList(l)) = singular_expr(&structure) {
-        //             let layers, edges = l.get_value("layers"), l.get_value("edges");
-        //             if let
-        //         }
-        //     }
-        //     return vec![], vec![];
-        // }
-        //
-        // return PrototypeDeclaration {name,
-        //     prototype: Prototype::TreePrototype(
-        //         TreePrototype {
-        //             regex: {
-        //                 if let Some(names) = names {
-        //                     if let Some(Expr::Literal(Literal::Regex(r))) = singular_expr(&names) {
-        //                         return r;
-        //                     }
-        //                 }
-        //                 return "";
-        //             },
-        //             layers: layers,
-        //             edges: edges
-        //         }
-        //     )
-        // }
+        };
 
+        let regex = {
+            if let Some(names) = names {
+                if let Some(Expr::Literal(Literal::Regex(r))) = singular_expr(names) {
+                    r
+                } else {
+                    "".to_string()
+                }
+            } else {
+                "".to_string()
+            }
+        };
 
-
+        PrototypeDeclaration {name,
+            prototype: Prototype::TreePrototype(
+                TreePrototype {
+                    regex: regex,
+                    layers: layers,
+                    edges: edges
+                }
+            )
+        }
     }
 }
 
@@ -218,3 +218,12 @@ CommaM<T>: Vec<T> = { // (1)
             v
         }
 };
+
+
+        // return PrototypeDeclaration {name, prototype: Prototype::TreePrototype(
+        //     TreePrototype {
+        //         regex: "".to_string(),
+        //         layers: vec![],
+        //         edges: vec![]
+        //     }
+        // )};

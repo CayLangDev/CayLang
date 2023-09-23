@@ -1,37 +1,38 @@
-use regex::{Regex};
 use caylang_io::tree::NodeData;
+use regex::Regex;
 
 pub struct NodePrototype {
-	regex: Regex
+    regex: Regex,
 }
 
 impl NodePrototype {
-	pub fn new(regex: &str) -> Self {
-		return Self {regex: Regex::new(format!(r"^{}$", regex).as_str()).unwrap() };
-	}
+    pub fn new(regex: &str) -> Self {
+        return Self {
+            regex: Regex::new(format!(r"^{}$", regex).as_str()).unwrap(),
+        };
+    }
 
-	pub fn matches(&self, node: &NodeData) -> bool {
-		let p = node.path.as_os_str().to_str();
-		if let Some(s) = p {
-			return self.regex.is_match(s);
-		}
-		else {
-			return false;
-		}
-	}
+    pub fn matches(&self, node: &NodeData) -> bool {
+        let p = node.path.as_os_str().to_str();
+        if let Some(s) = p {
+            return self.regex.is_match(s);
+        } else {
+            return false;
+        }
+    }
 }
 
 pub struct TreePrototype {
-	regex: Regex,
-	pub layers: Vec<NodePrototype>,
-	pub edges: Vec<NodePrototype>
+    regex: Regex,
+    pub layers: Vec<NodePrototype>,
+    pub edges: Vec<NodePrototype>,
 }
 
 pub type Rename = Vec<usize>;
 
 pub struct FoldOperation {
-	pub options: Vec<NodePrototype>,
-	pub targets: Vec<Rename>
+    pub options: Vec<NodePrototype>,
+    pub targets: Vec<Rename>,
 }
 
 pub enum Prototype {
@@ -41,24 +42,27 @@ pub enum Prototype {
 
 pub struct Declaration {
     name: String,
-    prototype: Prototype
+    prototype: Prototype,
 }
 
 pub struct OperationApplication {
     from: String,
-    operation: FoldOperation
+    operation: FoldOperation,
 }
 
 pub enum InterpObject {
     declaration(Declaration),
-    operation_application(OperationApplication)
+    operation_application(OperationApplication),
 }
 
 trait toInterpObject {
     fn to_interp_object(&self) -> Option<InterpObject>;
 }
 
-use caylang_parser::ast::{Expr, Ident, Function, FoldExpr, Field, ClauseType, Destination, LabelledList, UnlabelledList, Clause};
+use caylang_parser::ast::{
+    Clause, ClauseType, Destination, Expr, Field, FoldExpr, Function, Ident, LabelledList,
+    UnlabelledList,
+};
 
 //  Todo
 // dfs through fold expr clauses
@@ -87,4 +91,3 @@ use caylang_parser::ast::{Expr, Ident, Function, FoldExpr, Field, ClauseType, De
 // }
 
 //
-

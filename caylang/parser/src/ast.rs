@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use std::collections::hash_map::RandomState;
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub enum Expr {
@@ -58,8 +58,7 @@ pub struct TypeDestructured {
     pub fields: Option<Vec<Field>>,
 }
 
-#[derive(Debug)]
-#[derive(Eq, Hash, PartialEq)]
+#[derive(Debug, Eq, Hash, PartialEq)]
 pub enum Ident {
     Variable(String),
     Ignored,
@@ -68,8 +67,7 @@ pub enum Ident {
 pub fn to_ident(s: &str) -> Ident {
     if s == "_" {
         return Ident::Ignored;
-    }
-    else {
+    } else {
         return Ident::Variable(s.to_string());
     }
 }
@@ -77,7 +75,7 @@ pub fn to_ident(s: &str) -> Ident {
 #[derive(Debug)]
 pub enum Destination {
     NoChange,
-    Move(Literal)
+    Move(Literal),
 }
 
 #[derive(Debug)]
@@ -116,8 +114,8 @@ impl GetValue for LabelledList {
     }
 
     fn get_values<const N: usize>(mut self, targets: [Ident; N]) -> [Option<Expr>; N] {
-
-        let mut map: HashMap<Ident, Expr, RandomState> = HashMap::from_iter(self.into_iter().map(|Pair(k,v)| (k,v)));
+        let mut map: HashMap<Ident, Expr, RandomState> =
+            HashMap::from_iter(self.into_iter().map(|Pair(k, v)| (k, v)));
 
         return targets.map(|x| map.remove(&x));
     }
@@ -154,29 +152,24 @@ impl GetValue for LabelledList {
 //     }
 // }
 
-
-
 pub fn v_singular_expr(e: Vec<Expr>) -> Option<Expr> {
     if e.len() == 1 {
         // wow what an awesome language
         // I love rust so cool
         let mut e = e;
-        return e.pop()
-    }
-    else {
-        return None
+        return e.pop();
+    } else {
+        return None;
     }
 }
 
 pub fn singular_expr(e: Expr) -> Option<Expr> {
     if let Expr::ExprList(e) = e {
         return v_singular_expr(e);
-    }
-    else {
+    } else {
         return Some(e);
     }
 }
-
 
 pub type UnlabelledList = Vec<Expr>;
 
@@ -186,32 +179,35 @@ pub struct Pair(pub Ident, pub Expr);
 #[derive(Debug)]
 pub struct PrototypeDeclaration {
     pub name: Ident,
-    pub prototype: Prototype
+    pub prototype: Prototype,
 }
 
 #[derive(Debug)]
 pub enum Prototype {
     NodePrototype(NodePrototype),
-    TreePrototype(TreePrototype)
+    TreePrototype(TreePrototype),
 }
 
 #[derive(Debug)]
 pub struct TreePrototype {
     pub regex: String,
     pub layers: Vec<StructurePair>,
-	pub edges: Vec<StructurePair>
+    pub edges: Vec<StructurePair>,
 }
 
 // .0 refers to prototype label, .1 refers to prototype identifier
 // no expression prototypes rn
+#[derive(Debug)]
 pub struct StructurePair(pub Ident, pub Ident);
 
 #[derive(Debug)]
-pub enum NodeType {File, Dir}
+pub enum NodeType {
+    File,
+    Dir,
+}
 
 #[derive(Debug)]
 pub struct NodePrototype {
     pub regex: String,
-    pub node_type: NodeType
+    pub node_type: NodeType,
 }
-
