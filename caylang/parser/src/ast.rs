@@ -171,6 +171,37 @@ pub fn singular_expr(e: Expr) -> Option<Expr> {
     }
 }
 
+pub fn as_regex(e: Expr) -> Option<String> {
+    if let Some(e) = e {
+        if let Some(Expr::Literal(Literal::Regex(r))) = singular_expr(e) {
+            r.to_string();
+        }
+    }
+    return None;
+}
+
+pub fn as_labelled_list(e: Expr) -> Option<LabelledList> {
+    if let Some(e) = e {
+        if let Some(Expr::LabelledList(l)) = singular_expr(e) {
+            return l;
+        }
+    }
+    return None;
+}
+
+pub fn as_ident(e: Expr) -> Option<Ident> {
+    if let Some(e) = e {
+        if let Some(Expr::Ident(i)) = singular_expr(e) {
+            return i;
+        }
+    }
+    return None;
+}
+
+pub fn as_structure_list(l: LabelledList) -> Option<StructureList> {
+    return l.map(|Pair(i, e)| StructurePair(i, as_ident(e)?));
+}
+
 pub type UnlabelledList = Vec<Expr>;
 
 #[derive(Debug)]
@@ -191,14 +222,16 @@ pub enum Prototype {
 #[derive(Debug)]
 pub struct TreePrototype {
     pub regex: String,
-    pub layers: Vec<StructurePair>,
-    pub edges: Vec<StructurePair>,
+    pub layers: StructureList,
+    pub edges: StructureList,
 }
 
 // .0 refers to prototype label, .1 refers to prototype identifier
 // no expression prototypes rn
 #[derive(Debug)]
 pub struct StructurePair(pub Ident, pub Ident);
+
+type StructureList = Vec<StructurePair>;
 
 #[derive(Debug)]
 pub enum NodeType {

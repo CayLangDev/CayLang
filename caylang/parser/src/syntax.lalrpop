@@ -2,7 +2,7 @@ use crate::ast::{Expr, Literal, Ident, Pair, Guard, Clause, Function,
                  TypeDestructured, FoldExpr, Field, ClauseType, Destination,
                  LabelledList, UnlabelledList, stripstr, PrototypeDeclaration, TreePrototype,
                  Prototype, NodePrototype, NodeType, singular_expr, GetValue,
-                to_ident};
+                to_ident, as_regex, as_structure_list, as_labelled_list};
 use std::str::FromStr;
 
 
@@ -42,80 +42,82 @@ Fold: FoldExpr = {
 
 DirPrototype: PrototypeDeclaration = {
     "DirectorySet" <name:Ident> <d:LabelledList> => {
-        let names = d.get_value("Names");
-        if let Some(names) = names {
-            if let Some(Expr::Literal(Literal::Regex(r))) = singular_expr(names) {
-                return PrototypeDeclaration {
-                        name,
-                        prototype: Prototype::NodePrototype(
-                            NodePrototype {regex: r.to_string(), node_type: NodeType::Dir}
-                            )
-                        }
-            }
+        let prototype = {
+            let names = d.get_value("Names")?;
+            let regex = as_regex(names)?;
+            Some(
+                PrototypeDeclaration {
+                    name,
+                    prototype: Prototype::NodePrototype(
+                        NodePrototype {regex, node_type: NodeType::Dir}
+                    )
+                }
+            )
         }
+        if let Some(prototype) = prototype {
+            return prototype;
+        }
+
         return PrototypeDeclaration {name, prototype: Prototype::NodePrototype(NodePrototype {regex: "".to_string(), node_type: NodeType::Dir})}
     }
 }
 
 FilePrototype: PrototypeDeclaration = {
     "FileSet" <name:Ident> <d:LabelledList> => {
-        let names = d.get_value("Names");
-        if let Some(names) = names {
-            if let Some(Expr::Literal(Literal::Regex(r))) = singular_expr(names) {
-                return PrototypeDeclaration {
+        let prototype = {
+            let names = d.get_value("Names")?;
+            let regex = as_regex(names)?;
+            Some(
+                PrototypeDeclaration {
                         name,
                         prototype: Prototype::NodePrototype(
-                            NodePrototype {regex: r.to_string(), node_type: NodeType::File}
-                            )
-                        }
-            }
+                            NodePrototype {regex, node_type: NodeType::File}
+                        )
+                }
+            )
         }
+        if let Some(prototype) = prototype {
+            return prototype;
+        }
+
         return PrototypeDeclaration {name, prototype: Prototype::NodePrototype(NodePrototype {regex: "".to_string(), node_type: NodeType::File})}
     }
 }
 
 TreePrototype: PrototypeDeclaration = {
     "TreeDirectorySet" <name:Ident> <d:LabelledList> => {
-        let [names, structure] = d.get_values([to_ident("Names"), to_ident("Structure")]);
-        println!("{:?} {:?}", name, structure);
 
-        let names = d.get_value("Names");
-        let structure = d.get_value("Structure");
-        let (layers, edges) = {
-            if let Some(structure) = structure {
-                if let Some(Expr::LabelledList(l)) = singular_expr(structure) {
-                    let (layers, edges) = (l.get_value("layers"), l.get_value("edges"));
-                    (layers, edges)
+
+        let prototype = {
+            let [names, structure] = d.get_values([to_ident("Names"), to_ident("Structure")]);
+            names?;
+            let regex = as_regex(names)?;
+            let (layers, edges) = {
+                if let Some(structure) = as_labelled_list(structure) {
+                    let [layers, edges] = structure.get_values([to_ident("layers"), to_ident("edges")]);
+                    let layers = if layers.is_none() { Some(vec![]) } else { as_structure_list(as_labelled_list(layers)) };
+                    let edges = if edges.is_none() { Some(vec![]) } else { as_structure_list(as_labelled_list(edges)) };
+                    Some((layers?, edges?))
                 }
                 else {
-                    (vec![], vec![])
+                    Some((vec![], vec![]))
                 }
-            } else {
-                (vec![], vec![])
-            }
-        };
+            }?
 
-        let regex = {
-            if let Some(names) = names {
-                if let Some(Expr::Literal(Literal::Regex(r))) = singular_expr(names) {
-                    r
-                } else {
-                    "".to_string()
-                }
-            } else {
-                "".to_string()
-            }
-        };
-
-        PrototypeDeclaration {name,
-            prototype: Prototype::TreePrototype(
-                TreePrototype {
-                    regex: regex,
-                    layers: layers,
-                    edges: edges
+            Some(
+                PrototypeDeclaration {
+                    name,
+                    prototype: Prototype::TreePrototype(
+                        TreePrototype { regex, layers, edges }
+                    )
                 }
             )
         }
+        if let Some(prototype) = prototype {
+            return prototype;
+        }
+
+        return PrototypeDeclaration {name, prototype: Prototype::TreePrototype(TreePrototype {regex: "".to_string(), layers: vec![], edges: vec![]})}
     }
 }
 
