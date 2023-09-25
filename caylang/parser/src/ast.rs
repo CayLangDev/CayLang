@@ -58,17 +58,27 @@ pub struct TypeDestructured {
     pub fields: Option<Vec<Field>>,
 }
 
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone)]
 pub enum Ident {
     Variable(String),
     Ignored,
 }
+
 
 pub fn to_ident(s: &str) -> Ident {
     if s == "_" {
         return Ident::Ignored;
     } else {
         return Ident::Variable(s.to_string());
+    }
+}
+
+impl Ident {
+    pub fn to_string(&self) -> String {
+        match self {
+            Ident::Variable(s) => s.to_string(),
+            Ident::Ignored => "_".to_string(),
+        }
     }
 }
 
@@ -131,26 +141,6 @@ impl GetValue for LabelledList {
         return None;
     }
 }
-
-// pub fn singular_expr<'a>(e: &'a Expr) -> Option<&'a Expr> {
-//     if let Expr::ExprList(e) = e {
-//         if e.len() == 1 {
-//             let e = &e[0];
-//             if let Expr::ExprList(_) = e {
-//                 return None
-//             }
-//             else {
-//                 return Some(e);
-//             }
-//         }
-//         else {
-//             return None
-//         }
-//     }
-//     else {
-//         return Some(&e)
-//     }
-// }
 
 pub fn v_singular_expr(e: Vec<Expr>) -> Option<Expr> {
     if e.len() == 1 {
