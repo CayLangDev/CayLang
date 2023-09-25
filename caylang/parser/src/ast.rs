@@ -171,35 +171,65 @@ pub fn singular_expr(e: Expr) -> Option<Expr> {
     }
 }
 
-pub fn as_regex(e: Expr) -> Option<String> {
+pub fn as_regex(e: Option<Expr>) -> Option<String> {
     if let Some(e) = e {
         if let Some(Expr::Literal(Literal::Regex(r))) = singular_expr(e) {
-            r.to_string();
+            Some(r.to_string());
         }
     }
     return None;
 }
 
-pub fn as_labelled_list(e: Expr) -> Option<LabelledList> {
+pub fn as_labelled_list(e: Option<Expr>) -> Option<LabelledList> {
     if let Some(e) = e {
         if let Some(Expr::LabelledList(l)) = singular_expr(e) {
-            return l;
+            return Some(l);
         }
     }
     return None;
 }
 
-pub fn as_ident(e: Expr) -> Option<Ident> {
+pub fn as_ident(e: Option<Expr>) -> Option<Ident> {
     if let Some(e) = e {
         if let Some(Expr::Ident(i)) = singular_expr(e) {
-            return i;
+            return Some(i);
         }
     }
     return None;
 }
 
 pub fn as_structure_list(l: LabelledList) -> Option<StructureList> {
-    return l.map(|Pair(i, e)| StructurePair(i, as_ident(e)?));
+    let mut out = vec![];
+    for Pair(i, e) in l {
+        if let Some(v) = as_ident(Some(e)) {
+            out.push(StructurePair(i, v));
+        }
+        else {
+            return None;
+        }
+    }
+    return Some(out);
+}
+
+// coerces all errors into an empty structure list
+// evil hack
+pub fn force_expr_to_structure_list(e: Option<Expr>) -> StructureList {
+    let l = as_labelled_list(e);
+    if let Some(l) = l {
+        if let Some(r) = as_structure_list(l) {
+            return r;
+        }
+    }
+    return vec![];
+}
+
+// coerces all errors into an empty string
+// evil hack
+pub fn force_expr_to_regex(e: Option<Expr>) -> String {
+    if let Some(r) = as_regex(e) {
+        return r;
+    }
+    return "".to_string();
 }
 
 pub type UnlabelledList = Vec<Expr>;
@@ -245,11 +275,11 @@ pub struct NodePrototype {
     pub node_type: NodeType,
 }
 
-pub fn dodgy_or<T>(o: Option<T>, alt: T) {
-    if let Some(r) = o {
-        return r;
-    }
-    else {
-        return alt;
-    }
-}
+// pub fn dodgy_or<T>(o: Option<T>, alt: T) {
+//     if let Some(r) = o {
+//         return r;
+//     }
+//     else {
+//         return alt;
+//     }
+// }
