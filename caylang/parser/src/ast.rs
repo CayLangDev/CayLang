@@ -1,7 +1,11 @@
+use std::collections::hash_map::RandomState;
+use std::collections::HashMap;
+
 #[derive(Debug)]
 pub enum Expr {
     ExprList(Vec<Expr>),
     Fold(FoldExpr),
+    PrototypeDeclaration(PrototypeDeclaration),
     LabelledList(LabelledList),
     UnlabelledList(UnlabelledList),
     Ident(Ident),
@@ -54,10 +58,19 @@ pub struct TypeDestructured {
     pub fields: Option<Vec<Field>>,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, Hash, PartialEq, Clone)]
 pub enum Ident {
     Variable(String),
     Ignored,
+}
+
+
+pub fn to_ident(s: &str) -> Ident {
+    if s == "_" {
+        return Ident::Ignored;
+    } else {
+        return Ident::Variable(s.to_string());
+    }
 }
 
 impl Ident {
@@ -72,7 +85,7 @@ impl Ident {
 #[derive(Debug)]
 pub enum Destination {
     NoChange,
-    Move(Literal)
+    Move(Literal),
 }
 
 #[derive(Debug)]
@@ -91,7 +104,172 @@ pub fn stripstr(s: &str, i: usize) -> String {
 
 pub type LabelledList = Vec<Pair>;
 
+pub trait GetValue {
+    fn get_value<T: PartialEq<String>>(self, target: T) -> Option<Expr>;
+    fn get_value_r<'a, T: PartialEq<&'a String>>(&'a self, target: T) -> Option<&'a Expr>;
+
+    fn get_values<const N: usize>(self, targets: [Ident; N]) -> [Option<Expr>; N];
+}
+
+impl GetValue for LabelledList {
+    fn get_value<T: PartialEq<String>>(self, target: T) -> Option<Expr> {
+        for Pair(key, value) in self {
+            if let Ident::Variable(key) = key {
+                if target == key {
+                    return Some(value);
+                }
+            }
+        }
+        return None;
+    }
+
+    fn get_values<const N: usize>(mut self, targets: [Ident; N]) -> [Option<Expr>; N] {
+        let mut map: HashMap<Ident, Expr, RandomState> =
+            HashMap::from_iter(self.into_iter().map(|Pair(k, v)| (k, v)));
+
+        return targets.map(|x| map.remove(&x));
+    }
+
+    fn get_value_r<'a, T: PartialEq<&'a String>>(&'a self, target: T) -> Option<&'a Expr> {
+        for Pair(key, value) in self {
+            if let Ident::Variable(key) = key {
+                if target == key {
+                    return Some(value);
+                }
+            }
+        }
+        return None;
+    }
+}
+
+pub fn v_singular_expr(e: Vec<Expr>) -> Option<Expr> {
+    if e.len() == 1 {
+        // wow what an awesome language
+        // I love rust so cool
+        let mut e = e;
+        return e.pop();
+    } else {
+        return None;
+    }
+}
+
+pub fn singular_expr(e: Expr) -> Option<Expr> {
+    if let Expr::ExprList(e) = e {
+        return v_singular_expr(e);
+    } else {
+        return Some(e);
+    }
+}
+
+pub fn as_regex(e: Option<Expr>) -> Option<String> {
+    if let Some(e) = e {
+        if let Some(Expr::Literal(Literal::Regex(r))) = singular_expr(e) {
+            Some(r.to_string());
+        }
+    }
+    return None;
+}
+
+pub fn as_labelled_list(e: Option<Expr>) -> Option<LabelledList> {
+    if let Some(e) = e {
+        if let Some(Expr::LabelledList(l)) = singular_expr(e) {
+            return Some(l);
+        }
+    }
+    return None;
+}
+
+pub fn as_ident(e: Option<Expr>) -> Option<Ident> {
+    if let Some(e) = e {
+        if let Some(Expr::Ident(i)) = singular_expr(e) {
+            return Some(i);
+        }
+    }
+    return None;
+}
+
+pub fn as_structure_list(l: LabelledList) -> Option<StructureList> {
+    let mut out = vec![];
+    for Pair(i, e) in l {
+        if let Some(v) = as_ident(Some(e)) {
+            out.push(StructurePair(i, v));
+        }
+        else {
+            return None;
+        }
+    }
+    return Some(out);
+}
+
+// coerces all errors into an empty structure list
+// evil hack
+pub fn force_expr_to_structure_list(e: Option<Expr>) -> StructureList {
+    let l = as_labelled_list(e);
+    if let Some(l) = l {
+        if let Some(r) = as_structure_list(l) {
+            return r;
+        }
+    }
+    return vec![];
+}
+
+// coerces all errors into an empty string
+// evil hack
+pub fn force_expr_to_regex(e: Option<Expr>) -> String {
+    if let Some(r) = as_regex(e) {
+        return r;
+    }
+    return "".to_string();
+}
+
 pub type UnlabelledList = Vec<Expr>;
 
 #[derive(Debug)]
 pub struct Pair(pub Ident, pub Expr);
+
+#[derive(Debug)]
+pub struct PrototypeDeclaration {
+    pub name: Ident,
+    pub prototype: Prototype,
+}
+
+#[derive(Debug)]
+pub enum Prototype {
+    NodePrototype(NodePrototype),
+    TreePrototype(TreePrototype),
+}
+
+#[derive(Debug)]
+pub struct TreePrototype {
+    pub regex: String,
+    pub layers: StructureList,
+    pub edges: StructureList,
+}
+
+// .0 refers to prototype label, .1 refers to prototype identifier
+// no expression prototypes rn
+#[derive(Debug)]
+pub struct StructurePair(pub Ident, pub Ident);
+
+type StructureList = Vec<StructurePair>;
+
+#[derive(Debug)]
+pub enum NodeType {
+    File,
+    Dir,
+}
+
+#[derive(Debug)]
+pub struct NodePrototype {
+    pub regex: String,
+    pub node_type: NodeType,
+}
+
+// pub fn dodgy_or<T>(o: Option<T>, alt: T) {
+//     if let Some(r) = o {
+//         return r;
+//     }
+//     else {
+//         return alt;
+//     }
+// }

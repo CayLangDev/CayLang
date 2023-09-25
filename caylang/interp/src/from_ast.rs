@@ -1,7 +1,9 @@
-use std::{collections::HashMap, string};
-
 use caylang_io::tree::NodeData;
 use regex::Regex;
+use std::{collections::HashMap, string};
+
+// use caylang_io::tree::NodeData;
+// use regex::Regex;
 
 #[derive(Clone)]
 pub struct NodePrototype {
@@ -26,6 +28,7 @@ impl NodePrototype {
 }
 
 pub struct TreePrototype {
+    regex: Regex,
     pub layers: Vec<NodePrototype>,
     pub edges: Vec<NodePrototype>,
 }
@@ -164,11 +167,3 @@ impl toInterpObject for FoldExpr {
         }))
     }
 }
-
-// impl toInterpObject for Expr {
-//
-// }
-//
-// impl toInterpObject for Vec<Expr> {
-//
-// }

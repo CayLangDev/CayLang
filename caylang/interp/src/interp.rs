@@ -23,7 +23,7 @@ pub fn to_fold(tree: &Tree, fold_desc: FoldOperation) -> (Vec<PathBuf>, Vec<Path
     let mut old_paths = vec![];
     let mut new_paths = vec![];
     for l in tree.data_iter(tree.leaves()) {
-        for (o, t) in zip(&fold_desc.options, &fold_desc.targets) {
+        for ((_, o), t) in zip(&fold_desc.options, &fold_desc.targets) {
             if o.matches(l) {
                 old_paths.push(l.path.clone());
                 new_paths.push(new_name(&l.path, t.to_vec()));
