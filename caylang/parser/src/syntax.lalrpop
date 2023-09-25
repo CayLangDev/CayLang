@@ -2,7 +2,7 @@ use crate::ast::{Expr, Literal, Ident, Pair, Guard, Clause, Function,
                  TypeDestructured, FoldExpr, Field, ClauseType, Destination,
                  LabelledList, UnlabelledList, stripstr, PrototypeDeclaration, TreePrototype,
                  Prototype, NodePrototype, NodeType, singular_expr, GetValue,
-                to_ident, as_regex, as_structure_list, as_labelled_list};
+                to_ident, as_regex, as_structure_list, as_labelled_list, dodgy_or};
 use std::str::FromStr;
 
 
@@ -95,12 +95,15 @@ TreePrototype: PrototypeDeclaration = {
             let (layers, edges) = {
                 if let Some(structure) = as_labelled_list(structure) {
                     let [layers, edges] = structure.get_values([to_ident("layers"), to_ident("edges")]);
-                    let layers = if layers.is_none() { Some(vec![]) } else { as_structure_list(as_labelled_list(layers)) };
-                    let edges = if edges.is_none() { Some(vec![]) } else { as_structure_list(as_labelled_list(edges)) };
-                    Some((layers?, edges?))
+                    let layers = as_structure_list(dodgy_or(as_labelled_list(dodgy_or(layers, Expr::LabelledList(vec![]))), Expr::LabelledList(vec![])));
+                    let layers = dodgy_or(as_structure_list(as_labelled_list(layers), vec![]);
+
+                    let layers = (if layers.is_none() { Some(vec![]) } else { as_structure_list(as_labelled_list(layers)) })?;
+                    let edges = (if edges.is_none() { Some(vec![]) } else { as_structure_list(as_labelled_list(edges)) })?;
+                    Some((layers, edges))
                 }
                 else {
-                    Some((vec![], vec![]))
+                    (vec![], vec![])
                 }
             }?
 

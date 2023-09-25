@@ -244,3 +244,12 @@ pub struct NodePrototype {
     pub regex: String,
     pub node_type: NodeType,
 }
+
+pub fn dodgy_or<T>(o: Option<T>, alt: T) {
+    if let Some(r) = o {
+        return r;
+    }
+    else {
+        return alt;
+    }
+}
