@@ -12,7 +12,10 @@ pub struct Args {
 
     /// Whether to print the AST or not.
     #[arg(short, long, default_value_t = false)]
-    verbose: bool
+    verbose: bool,
+
+    #[arg(short, long, default_value_t = false)]
+    run: bool
 }
 
 fn pretty_print<T: Debug>(input: &T) -> String {
@@ -23,6 +26,7 @@ pub fn exec(
     Args {
         cay_file,
         verbose,
+        run,
     }: Args
 ) {
     let cay_script = match fs::read_to_string(&cay_file) {
@@ -46,6 +50,9 @@ pub fn exec(
             if verbose {
                 println!("Parsed program:\n{}", pretty_print(&program));
             } 
+            if run {
+                println!("Trying to run");
+            }
         }
         Err(e) => {
             println!("Error: {:?}", e);

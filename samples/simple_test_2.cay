@@ -1,0 +1,24 @@
+DirectorySet SmallNumDir {
+    Names: r"[123]"
+}
+
+TreeDirectorySet SmallTreeDir {
+    Names: r"test2",
+    Structure: {
+        layers: {
+            A: SmallNumDir,
+            B: Directory
+        },
+        edges: {
+            F: File
+        }
+    }
+}
+
+fold "test": SmallTreeDir {
+    A { name as a } => {
+        B { name as b } => {
+            F {name as f} => `{b}/{a}/{f}`
+        }
+    }
+}
