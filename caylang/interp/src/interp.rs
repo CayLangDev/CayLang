@@ -68,6 +68,7 @@ pub fn new_name(path: &PathBuf, target: Rename) -> PathBuf {
 pub fn interpret(ast: Expr) {
     let mut defn_map = new_defn_map();
     let operations = defn_map.load_objects(ast);
+    defn_map.add_defaults();
     println!("defns {:?}", defn_map);
     println!("operations {:?}", operations);
     return;

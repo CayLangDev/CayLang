@@ -1,5 +1,5 @@
 use crate::from_ast::toInterpObject;
-use caylang_parser::ast::{Expr, Ident};
+use caylang_parser::ast::{Expr, Ident, NodePrototype, NodeType};
 use crate::from_ast::{InterpObject, Prototype, OperationApplication};
 use std::collections::HashMap;
 
@@ -29,6 +29,16 @@ pub fn new_defn_map() -> DefnMap {
 }
 
 impl DefnMap {
+    // add default values
+    pub fn add_defaults(&mut self) {
+        let defaults = vec![("Directory", NodePrototype {regex: r".*".to_string(), node_type: NodeType::Dir}),
+                            ("File", NodePrototype {regex: r".*".to_string(), node_type: NodeType::File})];
+        for (name, prototype) in defaults {
+            _ = self.add_object(Ident::Variable(name.to_string()), Prototype::Node(prototype));
+            // should probably throw if there's an overwrite here, means user redefined a default
+        }
+    }
+
     // loads all top level declarations, returns vector of remaining operations
     pub fn load_objects(&mut self, exprs: Expr) -> Vec<OperationApplication> {
         let mut operations = vec![];
