@@ -253,13 +253,13 @@ pub struct StructurePair(pub Ident, pub Ident);
 
 type StructureList = Vec<StructurePair>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum NodeType {
     File,
     Dir,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NodePrototype {
     pub regex: String,
     pub node_type: NodeType,

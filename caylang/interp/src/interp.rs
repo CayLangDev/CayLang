@@ -1,4 +1,6 @@
-use crate::from_ast::{FoldOperation, Rename, TreePrototype};
+use crate::from_ast::{FoldOperation, Rename, Matches};
+use crate::defn_map::{DefnMap, new_defn_map};
+use caylang_parser::ast::{Expr, TreePrototype};
 use caylang_io::filesys::load_full_tree;
 use caylang_io::tree::{root_idx, Node, NodeData, NodeIdx, Tree};
 use regex::Regex;
@@ -7,17 +9,21 @@ use std::env;
 use std::iter::zip;
 use std::path::Path;
 use std::path::PathBuf;
+
 // use caylang_io::tree::NodeData;
 
-fn validate(tree: &Tree, prototype: TreePrototype) -> bool {
-    for (l, p_l) in zip(tree.data_iter(tree.layers()), prototype.layers) {
-        if !p_l.matches(l) {
-            return false;
-        }
-    }
-    return true;
-    // don't verify files idgaf'
-}
+
+// needs to access prototypes by identifiers from a defn_map
+// fn validate(tree: &Tree, prototype: TreePrototype) -> bool {
+//     for (l, (_, p_l)) in zip(tree.data_iter(tree.layers()), prototype.layers) {
+//
+//         if !p_l.matches(l) {
+//             return false;
+//         }
+//     }
+//     return true;
+//     // don't verify files idgaf'
+// }
 
 pub fn to_fold(tree: &Tree, fold_desc: FoldOperation) -> (Vec<PathBuf>, Vec<PathBuf>) {
     let mut old_paths = vec![];
@@ -59,4 +65,10 @@ pub fn new_name(path: &PathBuf, target: Rename) -> PathBuf {
     return make_full_path(name_comps.iter().map(|c| c.as_ref()));
 }
 
-// pub fn interp()
+pub fn interpret(ast: Expr) {
+    let mut defn_map = new_defn_map();
+    let operations = defn_map.load_objects(ast);
+    println!("defns {:?}", defn_map);
+    println!("operations {:?}", operations);
+    return;
+}

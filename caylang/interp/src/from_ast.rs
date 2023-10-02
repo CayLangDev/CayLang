@@ -1,55 +1,72 @@
 use caylang_io::tree::NodeData;
 use regex::Regex;
 use std::{collections::HashMap, string};
+use caylang_parser::ast::{
+    Clause, ClauseType, Destination, Expr, Field, FoldExpr, Function, Ident, LabelledList, Literal,
+    UnlabelledList,
+    NodePrototype,
+    TreePrototype,
+    NodeType
+};
 
 // use caylang_io::tree::NodeData;
 // use regex::Regex;
 
-#[derive(Clone)]
-pub struct NodePrototype {
-    regex: Regex,
+// #[derive(Clone, Debug)]
+// pub struct NodePrototype {
+//     regex: Regex,
+// }
+
+pub trait Matches {
+    fn matches(&self, node: &NodeData) -> bool;
 }
 
-impl NodePrototype {
-    pub fn new(regex: &str) -> Self {
-        return Self {
-            regex: Regex::new(format!(r"^{}$", regex).as_str()).unwrap(),
-        };
-    }
+impl Matches for NodePrototype {
+    // pub fn new(regex: &str) -> Self {
+    //     return Self {
+    //         regex: Regex::new(format!(r"^{}$", regex).as_str()).unwrap(),
+    //     };
+    // }
 
-    pub fn matches(&self, node: &NodeData) -> bool {
+    fn matches(&self, node: &NodeData) -> bool {
         let p = node.path.as_os_str().to_str();
         if let Some(s) = p {
-            return self.regex.is_match(s);
+            let r = Regex::new(format!(r"^{}$", self.regex).as_str()).unwrap();
+            return r.is_match(s);
         } else {
             return false;
         }
     }
 }
 
-pub struct TreePrototype {
-    regex: Regex,
-    pub layers: Vec<NodePrototype>,
-    pub edges: Vec<NodePrototype>,
-}
+// #[derive(Debug)]
+// pub struct TreePrototype {
+//     regex: Regex,
+//     pub layers: Vec<NodePrototype>,
+//     pub edges: Vec<NodePrototype>,
+// }
 
 pub type Rename = Vec<usize>;
 
+#[derive(Debug)]
 pub struct FoldOperation {
     pub options: Vec<(Ident, NodePrototype)>,
     pub targets: Vec<Rename>,
 }
 
+#[derive(Debug)]
 pub enum Prototype {
     Node(NodePrototype),
     Tree(TreePrototype),
 }
 
+#[derive(Debug)]
 pub struct Declaration {
-    name: String,
-    prototype: Prototype,
+    pub name: String,
+    pub prototype: Prototype,
 }
 
+#[derive(Debug)]
 pub struct OperationApplication {
     from: String,
     operation: FoldOperation,
@@ -60,14 +77,10 @@ pub enum InterpObject {
     Application(OperationApplication),
 }
 
-trait toInterpObject {
+
+pub trait toInterpObject {
     fn to_interp_object(&self) -> Option<InterpObject>;
 }
-
-use caylang_parser::ast::{
-    Clause, ClauseType, Destination, Expr, Field, FoldExpr, Function, Ident, LabelledList, Literal,
-    UnlabelledList,
-};
 
 //  Todo
 // dfs through fold expr clauses
@@ -93,6 +106,15 @@ use caylang_parser::ast::{
 
 // 	}
 // }
+
+impl toInterpObject for Expr {
+    fn to_interp_object(&self) -> Option<InterpObject> {
+        match self {
+            Expr::Fold(f) => f.to_interp_object(),
+            _ => None
+        }
+    }
+}
 
 impl toInterpObject for FoldExpr {
     fn to_interp_object(&self) -> Option<InterpObject> {
@@ -152,7 +174,8 @@ impl toInterpObject for FoldExpr {
             (
                 Ident::Variable("SomePrototypeName".to_string()),
                 NodePrototype {
-                    regex: Regex::new(r".*").unwrap()
+                    regex: r".*".to_string(),
+                    node_type: NodeType::File
                 }
             );
             rename_template.len()

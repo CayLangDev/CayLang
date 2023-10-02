@@ -1,4 +1,5 @@
 use caylang_parser::{syntax};
+use caylang_interpreter::interp::{interpret};
 use lalrpop_util::{ParseError};
 
 use std::fmt::Debug;
@@ -52,6 +53,7 @@ pub fn exec(
             } 
             if run {
                 println!("Trying to run");
+                interpret(program);
             }
         }
         Err(e) => {
