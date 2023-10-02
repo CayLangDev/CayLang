@@ -82,7 +82,7 @@ pub fn load_full_tree(root: &PathBuf) -> Tree {
 
 fn create_all_parents(path: &PathBuf) {
     let prefix = path.as_path().parent().unwrap();
-    std::fs::create_dir_all(prefix).unwrap();
+    let _ = std::fs::create_dir_all(prefix);
 }
 
 pub fn write_full_tree(from_path: &PathBuf, to_path: &PathBuf, from_tree: &Tree, to_tree: &Tree) {
@@ -111,15 +111,13 @@ pub fn write_full_tree(from_path: &PathBuf, to_path: &PathBuf, from_tree: &Tree,
         println!("{} {}", node.data.path.display(), abs_path.display());
 
         match node.data.node_type {
-            NodeType::Directory => {
-                match to_tree.path_map.get(&node.data.path) {
-                    None => {
-                        let _ = fs::remove_dir_all(&abs_path);
-                        let _ = fs::remove_dir(&abs_path);
-                    }
-                    Some(_) => (),
+            NodeType::Directory => match to_tree.path_map.get(&node.data.path) {
+                None => {
+                    let _ = fs::remove_dir_all(&abs_path);
+                    let _ = fs::remove_dir(&abs_path);
                 }
-            }
+                Some(_) => (),
+            },
             _ => (),
         }
     }
