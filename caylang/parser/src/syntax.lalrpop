@@ -44,6 +44,7 @@ Fold: FoldExpr = {
 DirPrototype: PrototypeDeclaration = {
     "DirectorySet" <name:Ident> <d:LabelledList> => {
         let names = d.get_value("Names");
+        println!("{:?}", names);
         let regex = force_expr_to_regex(names);
         PrototypeDeclaration {
             name,
