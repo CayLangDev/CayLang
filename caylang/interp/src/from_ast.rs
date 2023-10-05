@@ -4,8 +4,10 @@ use std::{collections::HashMap, string};
 use caylang_parser::ast::{
     Clause, ClauseType, Destination, Expr, Field, FoldExpr, Function, Ident, LabelledList, Literal,
     UnlabelledList,
+    Prototype,
     NodePrototype,
     TreePrototype,
+    PrototypeDeclaration,
     NodeType
 };
 
@@ -54,11 +56,11 @@ pub struct FoldOperation {
     pub targets: Vec<Rename>,
 }
 
-#[derive(Debug)]
-pub enum Prototype {
-    Node(NodePrototype),
-    Tree(TreePrototype),
-}
+// #[derive(Debug)]
+// pub enum Prototype {
+//     Node(NodePrototype),
+//     Tree(TreePrototype),
+// }
 
 #[derive(Debug)]
 pub struct Declaration {
@@ -73,13 +75,17 @@ pub struct OperationApplication {
 }
 
 pub enum InterpObject {
-    declaration(Declaration),
+    Declaration(Declaration),
     Application(OperationApplication),
 }
 
 
 pub trait toInterpObject {
     fn to_interp_object(&self) -> Option<InterpObject>;
+}
+
+pub trait intoInterpObject {
+    fn to_interp_object(self) -> Option<InterpObject>;
 }
 
 //  Todo
@@ -107,14 +113,35 @@ pub trait toInterpObject {
 // 	}
 // }
 
-impl toInterpObject for Expr {
-    fn to_interp_object(&self) -> Option<InterpObject> {
+impl intoInterpObject for Expr {
+    fn to_interp_object(self) -> Option<InterpObject> {
         match self {
             Expr::Fold(f) => f.to_interp_object(),
+            Expr::PrototypeDeclaration(p) => p.to_interp_object(),
             _ => None
         }
     }
 }
+
+impl intoInterpObject for PrototypeDeclaration {
+    fn to_interp_object(self) -> Option<InterpObject> {
+        match self.name {
+            Ident::Variable(s) => Some(InterpObject::Declaration(Declaration {name: s, prototype: self.prototype})),
+            Ident::Ignored => None
+        }
+    }
+}
+
+
+// impl toInterpObject for Prototype {
+//     fn to_interp_object(&self) -> Option<InterpObject> {
+//         match self.name {
+//             Ident::Variable(s) => Some(InterpObject::Declaration(Declaration {name: s, prototype: prototype})),
+//             Ident::Ignored => None
+//         }
+//     }
+// }
+
 
 impl toInterpObject for FoldExpr {
     fn to_interp_object(&self) -> Option<InterpObject> {

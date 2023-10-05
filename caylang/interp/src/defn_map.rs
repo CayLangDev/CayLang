@@ -1,6 +1,6 @@
-use crate::from_ast::toInterpObject;
-use caylang_parser::ast::{Expr, Ident, NodePrototype, NodeType};
-use crate::from_ast::{InterpObject, Prototype, OperationApplication};
+use crate::from_ast::{intoInterpObject, toInterpObject};
+use caylang_parser::ast::{Expr, Ident, NodePrototype, NodeType, Prototype};
+use crate::from_ast::{InterpObject, OperationApplication};
 use std::collections::HashMap;
 
 // map from variable names to values, that handles the ignore identifier cleanly
@@ -34,7 +34,7 @@ impl DefnMap {
         let defaults = vec![("Directory", NodePrototype {regex: r".*".to_string(), node_type: NodeType::Dir}),
                             ("File", NodePrototype {regex: r".*".to_string(), node_type: NodeType::File})];
         for (name, prototype) in defaults {
-            _ = self.add_object(Ident::Variable(name.to_string()), Prototype::Node(prototype));
+            _ = self.add_object(Ident::Variable(name.to_string()), Prototype::NodePrototype(prototype));
             // should probably throw if there's an overwrite here, means user redefined a default
         }
     }
@@ -49,7 +49,7 @@ impl DefnMap {
                     match obj {
                         Some(obj) => {
                             match obj {
-                                InterpObject::declaration(dec) => {
+                                InterpObject::Declaration(dec) => {
                                     _ = self.add_object(Ident::Variable(dec.name), dec.prototype);
                                 }
                                 InterpObject::Application(op) => {
