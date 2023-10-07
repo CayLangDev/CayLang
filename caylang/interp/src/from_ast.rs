@@ -6,25 +6,11 @@ use caylang_parser::ast::{
     Prototype, NodePrototype, PrototypeDeclaration, NodeType
 };
 
-// use caylang_io::tree::NodeData;
-// use regex::Regex;
-
-// #[derive(Clone, Debug)]
-// pub struct NodePrototype {
-//     regex: Regex,
-// }
-
 pub trait Matches {
     fn matches(&self, node: &NodeData) -> bool;
 }
 
 impl Matches for NodePrototype {
-    // pub fn new(regex: &str) -> Self {
-    //     return Self {
-    //         regex: Regex::new(format!(r"^{}$", regex).as_str()).unwrap(),
-    //     };
-    // }
-
     fn matches(&self, node: &NodeData) -> bool {
         let p = node.path.as_os_str().to_str();
         if let Some(s) = p {
@@ -36,26 +22,13 @@ impl Matches for NodePrototype {
     }
 }
 
-// #[derive(Debug)]
-// pub struct TreePrototype {
-//     regex: Regex,
-//     pub layers: Vec<NodePrototype>,
-//     pub edges: Vec<NodePrototype>,
-// }
-
 pub type Rename = Vec<usize>;
 
 #[derive(Debug)]
 pub struct FoldOperation {
-    pub options: Vec<(Ident, NodePrototype)>,
+    pub options: Vec<Ident>,
     pub targets: Vec<Rename>,
 }
-
-// #[derive(Debug)]
-// pub enum Prototype {
-//     Node(NodePrototype),
-//     Tree(TreePrototype),
-// }
 
 #[derive(Debug)]
 pub struct Declaration {
@@ -65,8 +38,8 @@ pub struct Declaration {
 
 #[derive(Debug)]
 pub struct OperationApplication {
-    from: String,
-    operation: FoldOperation,
+    pub from: String,
+    pub operation: FoldOperation,
 }
 
 pub enum InterpObject {
@@ -83,7 +56,7 @@ pub trait IntoInterpObject {
     fn to_interp_object(self) -> Option<InterpObject>;
 }
 
-//  Todo
+// TODO
 // dfs through fold expr clauses
 // keep track of depth for each node, associate depth with variable assigned to name
 // at file move clause create new rename template, but with depths instead of variable names
@@ -95,18 +68,6 @@ pub trait IntoInterpObject {
 // join each ancestor idx in dirs into a new ancestor path, in the stored order
 // join each ancestor idx in names with the original name into a new name
 // the new path is the new ancestor path with the new name added at the end.
-
-// impl toInterpObject for FoldExpr {
-// 	fn to_interp_object(&self) -> Option<InterpObject> {
-
-// 		for clause in self.clauses {
-
-// 		}
-
-// 		return Some(InterpObject::Application( OperationApplication {from: self.directory, operation: ""}));
-
-// 	}
-// }
 
 impl IntoInterpObject for Expr {
     fn to_interp_object(self) -> Option<InterpObject> {
@@ -127,16 +88,8 @@ impl IntoInterpObject for PrototypeDeclaration {
     }
 }
 
-
-// impl toInterpObject for Prototype {
-//     fn to_interp_object(&self) -> Option<InterpObject> {
-//         match self.name {
-//             Ident::Variable(s) => Some(InterpObject::Declaration(Declaration {name: s, prototype: prototype})),
-//             Ident::Ignored => None
-//         }
-//     }
-// }
-
+// TODO
+//
 
 impl ToInterpObject for FoldExpr {
     fn to_interp_object(&self) -> Option<InterpObject> {
@@ -192,16 +145,7 @@ impl ToInterpObject for FoldExpr {
         }
 
         // TODO: Once NodePrototypes are properly parsed, can do proper options here.
-        let options: Vec<(Ident, NodePrototype)> = vec![
-            (
-                Ident::Variable("SomePrototypeName".to_string()),
-                NodePrototype {
-                    regex: r".*".to_string(),
-                    node_type: NodeType::File
-                }
-            );
-            rename_template.len()
-        ];
+        let options: Vec<Ident> = vec![Ident::Variable("File".to_string()); rename_template.len()];
 
         Some(InterpObject::Application(OperationApplication {
             from: self.directory.clone(),
