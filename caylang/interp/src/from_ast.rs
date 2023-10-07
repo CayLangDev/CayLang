@@ -75,11 +75,11 @@ pub enum InterpObject {
 }
 
 
-pub trait toInterpObject {
+pub trait ToInterpObject {
     fn to_interp_object(&self) -> Option<InterpObject>;
 }
 
-pub trait intoInterpObject {
+pub trait IntoInterpObject {
     fn to_interp_object(self) -> Option<InterpObject>;
 }
 
@@ -108,7 +108,7 @@ pub trait intoInterpObject {
 // 	}
 // }
 
-impl intoInterpObject for Expr {
+impl IntoInterpObject for Expr {
     fn to_interp_object(self) -> Option<InterpObject> {
         match self {
             Expr::Fold(f) => f.to_interp_object(),
@@ -118,7 +118,7 @@ impl intoInterpObject for Expr {
     }
 }
 
-impl intoInterpObject for PrototypeDeclaration {
+impl IntoInterpObject for PrototypeDeclaration {
     fn to_interp_object(self) -> Option<InterpObject> {
         match self.name {
             Ident::Variable(s) => Some(InterpObject::Declaration(Declaration {name: s, prototype: self.prototype})),
@@ -138,7 +138,7 @@ impl intoInterpObject for PrototypeDeclaration {
 // }
 
 
-impl toInterpObject for FoldExpr {
+impl ToInterpObject for FoldExpr {
     fn to_interp_object(&self) -> Option<InterpObject> {
         let mut rename_template: Vec<Vec<usize>> = vec![];
         let mut variable_depth_map: HashMap<String, usize> = HashMap::new();

@@ -1,4 +1,4 @@
-use crate::from_ast::{intoInterpObject, toInterpObject};
+use crate::from_ast::{IntoInterpObject};
 use caylang_parser::ast::{Expr, Ident, NodePrototype, NodeType, Prototype};
 use crate::from_ast::{InterpObject, OperationApplication};
 use std::collections::HashMap;
@@ -8,13 +8,13 @@ use std::collections::HashMap;
 
 
 pub enum LookupError {
-    ignore_lookup,
-    variable_not_found
+    IgnoreLookup,
+    VariableNotFound
 }
 
 pub enum AddStatus {
-    old_replaced,
-    ignored
+    OldReplaced,
+    Ignored
 }
 
 pub type Object = Prototype;
@@ -71,10 +71,10 @@ impl DefnMap {
             Ident::Variable(s) => {
                 match self.data.get(s) {
                     Some(val) => Ok(val),
-                    None => Err(LookupError::variable_not_found)
+                    None => Err(LookupError::VariableNotFound)
                 }
             }
-            Ident::Ignored => Err(LookupError::ignore_lookup)
+            Ident::Ignored => Err(LookupError::IgnoreLookup)
         }
     }
 
@@ -82,11 +82,11 @@ impl DefnMap {
         match name {
             Ident::Variable(s) => {
                 match self.data.insert(s, obj) {
-                    Some(_val) => Err(AddStatus::old_replaced),
+                    Some(_val) => Err(AddStatus::OldReplaced),
                     None => Ok(()) // added a new object with a new name
                 }
             }
-            Ident::Ignored => Err(AddStatus::ignored)
+            Ident::Ignored => Err(AddStatus::Ignored)
         }
     }
 }

@@ -1,11 +1,11 @@
 use crate::from_ast::{FoldOperation, Rename, Matches};
-use crate::defn_map::{DefnMap, new_defn_map};
-use caylang_parser::ast::{Expr, TreePrototype};
-use caylang_io::filesys::load_full_tree;
-use caylang_io::tree::{root_idx, Node, NodeData, NodeIdx, Tree};
-use regex::Regex;
+use crate::defn_map::{new_defn_map};
+use caylang_parser::ast::{Expr};
+
+use caylang_io::tree::{Tree};
+
 use std::collections::VecDeque;
-use std::env;
+
 use std::iter::zip;
 use std::path::Path;
 use std::path::PathBuf;
