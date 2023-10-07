@@ -2,8 +2,7 @@ use crate::ast::{Expr, Literal, Ident, Pair, Guard, Clause, Function,
                  TypeDestructured, FoldExpr, Field, ClauseType, Destination,
                  LabelledList, UnlabelledList, stripstr, PrototypeDeclaration, TreePrototype,
                  Prototype, NodePrototype, NodeType, singular_expr, GetValue,
-                to_ident, as_regex, as_structure_list, as_labelled_list,
-                force_expr_to_structure_list, force_expr_to_regex};
+                 to_ident, as_labelled_list, force_expr_to_structure_list, force_expr_to_regex};
 use std::str::FromStr;
 
 

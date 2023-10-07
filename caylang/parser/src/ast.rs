@@ -123,7 +123,7 @@ impl GetValue for LabelledList {
         return None;
     }
 
-    fn get_values<const N: usize>(mut self, targets: [Ident; N]) -> [Option<Expr>; N] {
+    fn get_values<const N: usize>(self, targets: [Ident; N]) -> [Option<Expr>; N] {
         let mut map: HashMap<Ident, Expr, RandomState> =
             HashMap::from_iter(self.into_iter().map(|Pair(k, v)| (k, v)));
 

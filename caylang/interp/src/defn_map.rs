@@ -82,7 +82,7 @@ impl DefnMap {
         match name {
             Ident::Variable(s) => {
                 match self.data.insert(s, obj) {
-                    Some(val) => Err(AddStatus::old_replaced),
+                    Some(_val) => Err(AddStatus::old_replaced),
                     None => Ok(()) // added a new object with a new name
                 }
             }

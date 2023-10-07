@@ -1,14 +1,9 @@
 use caylang_io::tree::NodeData;
 use regex::Regex;
-use std::{collections::HashMap, string};
+use std::{collections::HashMap};
 use caylang_parser::ast::{
-    Clause, ClauseType, Destination, Expr, Field, FoldExpr, Function, Ident, LabelledList, Literal,
-    UnlabelledList,
-    Prototype,
-    NodePrototype,
-    TreePrototype,
-    PrototypeDeclaration,
-    NodeType
+    Clause, ClauseType, Destination, Expr, FoldExpr, Ident, Literal,
+    Prototype, NodePrototype, PrototypeDeclaration, NodeType
 };
 
 // use caylang_io::tree::NodeData;
