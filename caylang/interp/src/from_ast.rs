@@ -1,75 +1,62 @@
 use caylang_io::tree::NodeData;
 use regex::Regex;
-use std::{collections::HashMap, string};
+use std::{collections::HashMap};
+use caylang_parser::ast::{
+    Clause, ClauseType, Destination, Expr, FoldExpr, Ident, Literal,
+    Prototype, NodePrototype, PrototypeDeclaration, NodeType
+};
 
-// use caylang_io::tree::NodeData;
-// use regex::Regex;
-
-#[derive(Clone)]
-pub struct NodePrototype {
-    regex: Regex,
+pub trait Matches {
+    fn matches(&self, node: &NodeData) -> bool;
 }
 
-impl NodePrototype {
-    pub fn new(regex: &str) -> Self {
-        return Self {
-            regex: Regex::new(format!(r"^{}$", regex).as_str()).unwrap(),
-        };
-    }
-
-    pub fn matches(&self, node: &NodeData) -> bool {
+impl Matches for NodePrototype {
+    fn matches(&self, node: &NodeData) -> bool {
         let p = node.path.as_os_str().to_str();
         if let Some(s) = p {
-            return self.regex.is_match(s);
+            let r = Regex::new(format!(r"^{}$", self.regex).as_str()).unwrap();
+            return r.is_match(s);
         } else {
             return false;
         }
     }
 }
 
-pub struct TreePrototype {
-    regex: Regex,
-    pub layers: Vec<NodePrototype>,
-    pub edges: Vec<NodePrototype>,
-}
-
 pub type Rename = Vec<usize>;
 
+#[derive(Debug)]
 pub struct FoldOperation {
-    pub options: Vec<(Ident, NodePrototype)>,
+    pub options: Vec<Ident>,
     pub targets: Vec<Rename>,
 }
 
-pub enum Prototype {
-    Node(NodePrototype),
-    Tree(TreePrototype),
-}
-
+#[derive(Debug)]
 pub struct Declaration {
-    name: String,
-    prototype: Prototype,
+    pub name: String,
+    pub prototype: Prototype,
 }
 
+#[derive(Debug)]
 pub struct OperationApplication {
-    from: String,
-    operation: FoldOperation,
+    pub from: String,
+    pub operation: FoldOperation,
 }
 
 pub enum InterpObject {
-    declaration(Declaration),
+    Declaration(Declaration),
     Application(OperationApplication),
 }
 
-trait toInterpObject {
+
+pub trait ToInterpObject {
     fn to_interp_object(&self) -> Option<InterpObject>;
 }
 
-use caylang_parser::ast::{
-    Clause, ClauseType, Destination, Expr, Field, FoldExpr, Function, Ident, LabelledList, Literal,
-    UnlabelledList,
-};
+pub trait IntoInterpObject {
+    fn to_interp_object(self) -> Option<InterpObject>;
+}
 
-//  Todo
+// TODO
 // dfs through fold expr clauses
 // keep track of depth for each node, associate depth with variable assigned to name
 // at file move clause create new rename template, but with depths instead of variable names
@@ -82,19 +69,29 @@ use caylang_parser::ast::{
 // join each ancestor idx in names with the original name into a new name
 // the new path is the new ancestor path with the new name added at the end.
 
-// impl toInterpObject for FoldExpr {
-// 	fn to_interp_object(&self) -> Option<InterpObject> {
+impl IntoInterpObject for Expr {
+    fn to_interp_object(self) -> Option<InterpObject> {
+        match self {
+            Expr::Fold(f) => f.to_interp_object(),
+            Expr::PrototypeDeclaration(p) => p.to_interp_object(),
+            _ => None
+        }
+    }
+}
 
-// 		for clause in self.clauses {
+impl IntoInterpObject for PrototypeDeclaration {
+    fn to_interp_object(self) -> Option<InterpObject> {
+        match self.name {
+            Ident::Variable(s) => Some(InterpObject::Declaration(Declaration {name: s, prototype: self.prototype})),
+            Ident::Ignored => None
+        }
+    }
+}
 
-// 		}
+// TODO
+//
 
-// 		return Some(InterpObject::Application( OperationApplication {from: self.directory, operation: ""}));
-
-// 	}
-// }
-
-impl toInterpObject for FoldExpr {
+impl ToInterpObject for FoldExpr {
     fn to_interp_object(&self) -> Option<InterpObject> {
         let mut rename_template: Vec<Vec<usize>> = vec![];
         let mut variable_depth_map: HashMap<String, usize> = HashMap::new();
@@ -148,15 +145,7 @@ impl toInterpObject for FoldExpr {
         }
 
         // TODO: Once NodePrototypes are properly parsed, can do proper options here.
-        let options: Vec<(Ident, NodePrototype)> = vec![
-            (
-                Ident::Variable("SomePrototypeName".to_string()),
-                NodePrototype {
-                    regex: Regex::new(r".*").unwrap()
-                }
-            );
-            rename_template.len()
-        ];
+        let options: Vec<Ident> = vec![Ident::Variable("File".to_string()); rename_template.len()];
 
         Some(InterpObject::Application(OperationApplication {
             from: self.directory.clone(),

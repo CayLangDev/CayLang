@@ -123,7 +123,7 @@ impl GetValue for LabelledList {
         return None;
     }
 
-    fn get_values<const N: usize>(mut self, targets: [Ident; N]) -> [Option<Expr>; N] {
+    fn get_values<const N: usize>(self, targets: [Ident; N]) -> [Option<Expr>; N] {
         let mut map: HashMap<Ident, Expr, RandomState> =
             HashMap::from_iter(self.into_iter().map(|Pair(k, v)| (k, v)));
 
@@ -163,8 +163,9 @@ pub fn singular_expr(e: Expr) -> Option<Expr> {
 
 pub fn as_regex(e: Option<Expr>) -> Option<String> {
     if let Some(e) = e {
-        if let Some(Expr::Literal(Literal::Regex(r))) = singular_expr(e) {
-            Some(r.to_string());
+        let l = singular_expr(e);
+        if let Some(Expr::Literal(Literal::Regex(r))) = l {
+            return Some(r.to_string());
         }
     }
     return None;
@@ -216,7 +217,8 @@ pub fn force_expr_to_structure_list(e: Option<Expr>) -> StructureList {
 // coerces all errors into an empty string
 // evil hack
 pub fn force_expr_to_regex(e: Option<Expr>) -> String {
-    if let Some(r) = as_regex(e) {
+    let l = as_regex(e);
+    if let Some(r) = l {
         return r;
     }
     return "".to_string();
@@ -253,13 +255,13 @@ pub struct StructurePair(pub Ident, pub Ident);
 
 type StructureList = Vec<StructurePair>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum NodeType {
     File,
     Dir,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NodePrototype {
     pub regex: String,
     pub node_type: NodeType,

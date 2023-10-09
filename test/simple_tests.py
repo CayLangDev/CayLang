@@ -75,57 +75,58 @@ def make_rand_prototype():
 # B: Directory
 # F: File
 # test flatten
-def gen_test_1():
+def gen_test_1(root):
     r = make_rand_prototype()
-    layers = [(layerize(r, l), None) for l in ("A", "B", "C")]
-    edges = [(layerize(r, "F"), None)]
-    gen_nice_test("test_1", layers, edges)
+    layers = [(layerize(r, l), 3) for l in ("A", "B")]
+    edges = [(layerize(r, "F"), 3)]
+    gen_nice_test(f"{root}/test_1", layers, edges)
     
 
 # A: SmallNumDir == Directory<r"A-00[123]">
 # B: Directory
 # F: File
 # Test matching prototype correctness
-def gen_test_2():
+def gen_test_2(root):
     r = make_rand_prototype()
     n = make_simple_prototype()
-    layers = [(n, 3), (r, 2), (r, 2)]
-    layers = [(layerize(p, l), s) for ((p, s), l)  in zip(layers, ("A", "B", "C"))]
+    layers = [(n, 3), (r, 2)]
+    layers = [(layerize(p, l), s) for ((p, s), l)  in zip(layers, ("A", "B"))]
     edges = [(layerize(r, "F"), None)]
-    gen_nice_test("test_2", layers, edges)
+    gen_nice_test(f"{root}/test_2", layers, edges)
 
 # A: ANumDir == Directory<r"A-\d{3}">
 # B: BNumDir == Directory<r"B-\d{3}">
 # C: CNumDir == Directory<r"C-\d{3}">
 # F: FNumFile == File<r"C-\d{3}">
 # Test reverse
-def gen_test_3():
+def gen_test_3(root):
     n = make_simple_prototype()
     r = make_rand_prototype()
     layers = [(layerize(n, l), None) for l in ("A", "B", "C")]
     edges = [(layerize(r, "F"), None)]
-    gen_nice_test("test_3", layers, edges, ub = 4)
+    gen_nice_test(f"{root}/test_3", layers, edges, ub = 4)
 
 
-def main():
-    gen_test_1()
-    gen_test_2()
-    gen_test_3()
+def main(r):
+    gen_test_1(r)
+    gen_test_2(r)
+    gen_test_3(r)
 
-def display(tests):
+def display(r, tests):
     for d in tests:
-        os.system(f"tree {d}")
+        os.system(f"tree {r}/{d}")
 
-def clean(tests):
+def clean(r, tests):
     for d in tests:
-        os.system(f"rm -r {d}")
+        os.system(f"rm -r {r}/{d}")
 
 if __name__ == "__main__":
+    root = "test/testbed"
     random.seed(1)
     tests = ["test_1", "test_2", "test_3"]
-    clean(tests)
-    main()
+    # clean(root, tests)
+    main(root)
     tests = ["test_1", "test_2", "test_3"]
-    display(tests)
-    clean(tests)
+    display(root, tests)
+    # clean(root, tests)
 
