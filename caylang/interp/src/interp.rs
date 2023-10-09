@@ -27,7 +27,7 @@ use std::path::Component;
 //     // don't verify files idgaf'
 // }
 
-pub fn to_fold(d: &DefnMap, tree: &Tree, fold_desc: FoldOperation) -> (Vec<PathBuf>, Vec<PathBuf>) {
+pub fn to_fold(d: &DefnMap, tree: &Tree, fold_desc: FoldOperation, root_len: usize) -> (Vec<PathBuf>, Vec<PathBuf>) {
     let mut old_paths = vec![];
     let mut new_paths = vec![];
     for l in tree.data_iter(tree.leaves()) {
@@ -37,7 +37,7 @@ pub fn to_fold(d: &DefnMap, tree: &Tree, fold_desc: FoldOperation) -> (Vec<PathB
                 Ok(Prototype::NodePrototype(o)) => {
                     if o.matches(l) {
                         old_paths.push(l.path.clone());
-                        new_paths.push(new_name(&l.path, t.to_vec()));
+                        new_paths.push(new_name(&l.path, t.to_vec(), root_len));
                     }
                 }
                 _ => {}
@@ -55,7 +55,7 @@ pub fn make_full_path<'a>(i: impl Iterator<Item = &'a Path> + 'a) -> PathBuf {
     return b;
 }
 
-pub fn new_name(path: &PathBuf, target: Rename) -> PathBuf {
+pub fn new_name(path: &PathBuf, target: Rename, root_len: usize) -> PathBuf {
     // let comps = path.components().collect();
     // let mut target_q = VecDeque::from(target);
     // let mut name_comps = vec![];
@@ -79,8 +79,12 @@ pub fn new_name(path: &PathBuf, target: Rename) -> PathBuf {
     // }
 
     let mut name_comps = vec![];
-    for i in target {
+    for i in    0..root_len {
         name_comps.push(comps[i]);
+    }
+
+    for i in target {
+        name_comps.push(comps[root_len+i]);
     }
     return make_full_path(name_comps.iter().map(|c| c.as_ref()));
 }
@@ -93,9 +97,12 @@ pub fn interpret(ast: Expr) {
     println!("operations {:?}", operations);
     // now run to_fold
     for op in operations {
-        let tree = load_full_tree(op.from.into());
-        let f = to_fold(&defn_map, &tree, op.operation);
-        println!("{:?}", f);
+        let root: PathBuf = op.from.into();
+        let root_len = root.components().count();
+        let tree = load_full_tree(root);
+        let (old_paths, new_paths) = to_fold(&defn_map, &tree, op.operation, root_len);
+        println!("old paths: {:?}", old_paths);
+        println!("new paths: {:?}", new_paths);
     }
     return;
 }

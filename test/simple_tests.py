@@ -77,8 +77,8 @@ def make_rand_prototype():
 # test flatten
 def gen_test_1(root):
     r = make_rand_prototype()
-    layers = [(layerize(r, l), None) for l in ("A", "B", "C")]
-    edges = [(layerize(r, "F"), None)]
+    layers = [(layerize(r, l), 3) for l in ("A", "B")]
+    edges = [(layerize(r, "F"), 3)]
     gen_nice_test(f"{root}/test_1", layers, edges)
     
 
@@ -89,8 +89,8 @@ def gen_test_1(root):
 def gen_test_2(root):
     r = make_rand_prototype()
     n = make_simple_prototype()
-    layers = [(n, 3), (r, 2), (r, 2)]
-    layers = [(layerize(p, l), s) for ((p, s), l)  in zip(layers, ("A", "B", "C"))]
+    layers = [(n, 3), (r, 2)]
+    layers = [(layerize(p, l), s) for ((p, s), l)  in zip(layers, ("A", "B"))]
     edges = [(layerize(r, "F"), None)]
     gen_nice_test(f"{root}/test_2", layers, edges)
 
