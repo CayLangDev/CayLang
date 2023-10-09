@@ -56,30 +56,10 @@ pub fn make_full_path<'a>(i: impl Iterator<Item = &'a Path> + 'a) -> PathBuf {
 }
 
 pub fn new_name(path: &PathBuf, target: Rename, root_len: usize) -> PathBuf {
-    // let comps = path.components().collect();
-    // let mut target_q = VecDeque::from(target);
-    // let mut name_comps = vec![];
-    // for (i, comp) in path.components().enumerate() {
-    //     let c = target_q.front();
-    //     if let Some(j) = c {
-    //         if &i == j {
-    //             name_comps.push(comp);
-    //             target_q.pop_front();
-    //         }
-    //     } else {
-    //         break;
-    //     }
-    // }
-    // return make_full_path(name_comps.iter().map(|c| c.as_ref()));
-    // println!("{:?}", path);
     let comps: Vec<Component> = path.components().collect();
-    // let m = vec![];
-    // for c in comps {
-        // m.push(c);
-    // }
 
     let mut name_comps = vec![];
-    for i in    0..root_len {
+    for i in 0..root_len {
         name_comps.push(comps[i]);
     }
 
