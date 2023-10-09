@@ -3,7 +3,7 @@ use crate::defn_map::{new_defn_map, DefnMap};
 use caylang_parser::ast::{Expr, Prototype, NodePrototype};
 
 use caylang_io::tree::{Tree};
-use caylang_io::filesys::{load_full_tree};
+use caylang_io::filesys::{load_full_tree, write_full_tree};
 
 use std::collections::VecDeque;
 
@@ -100,9 +100,13 @@ pub fn interpret(ast: Expr) {
         let root: PathBuf = op.from.into();
         let root_len = root.components().count();
         let tree = load_full_tree(root);
+        tree.print();
         let (old_paths, new_paths) = to_fold(&defn_map, &tree, op.operation, root_len);
         println!("old paths: {:?}", old_paths);
         println!("new paths: {:?}", new_paths);
+        let new_tree = Tree::from_fold(&tree, old_paths, new_paths);
+        new_tree.print();
+        write_full_tree(&tree, &new_tree);
     }
     return;
 }
