@@ -121,7 +121,7 @@ def clean(r, tests):
         os.system(f"rm -r {r}/{d}")
 
 if __name__ == "__main__":
-    root = "test"
+    root = "test/testbed"
     random.seed(1)
     tests = ["test_1", "test_2", "test_3"]
     # clean(root, tests)
