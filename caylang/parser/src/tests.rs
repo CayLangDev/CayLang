@@ -10,6 +10,16 @@ mod tests {
         }
     }
 
+    fn show_parsing(input: &str) {
+        let parser = syntax::MainParser::new();
+        match parser.parse(input) {
+            Err(err) => panic!("Failed to parse fold expression: {:?}", err),
+            Ok(program) => {
+                println!("{:?}", program);
+            }
+        }
+    }
+
     #[test]
     fn test_valid_folds_1() {
         let parser = syntax::MainParser::new();
@@ -85,5 +95,19 @@ mod tests {
                 panic!("Incorrectly parsed invalid fold expression");
             }
         }
+    }
+
+    #[test]
+    fn test_fold_sugar() {
+        let fold_sugar = r#"fold "~": LSDataSet {
+            Subset: Dir {name as subset};
+            Reader: ReaderDir {name as reader};
+            Chapter: ChapterDir {name as chapter} => {
+              Audio: File { name as audio } => `{root}/{subset}/{reader}/{chapter}/{audio}.flac`
+              Transcript: File {name as transcipt} => `{root}/{subset}/{reader}/{chapter}/{transcipt}`
+            }
+          }"#;
+
+        test_parsing(fold_sugar);
     }
 }
