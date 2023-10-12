@@ -1,0 +1,49 @@
+# For barebones testing maybe use simple and literal list based tree definition
+
+node = lambda name, children: ...
+leaf = lambda name: ...
+
+# starting conditions
+f_start = node("test_1", [
+				node("A-1", [
+					node("B-1", [
+						leaf("F-1")
+					])
+				]), 
+				node("A-2", [
+					node("B-1", [
+						leaf("F-1")
+					])
+				])
+			])
+
+# caylang start
+TreeDirectorySet SmallTreeDir {
+    Names: r"test_1",
+    Structure: {
+        layers: {
+            A: Directory,
+            B: Directory
+        },
+        edges: {
+            F: File
+        }
+    }
+}
+
+fold "test/testbed/test_1": SmallTreeDir {
+    A { name as a } => {
+        B { name as b } => {
+            F {name as f} => `{b}/{a}/{f}`
+        }
+    }
+}
+# caylang done
+
+# expected output
+f_end = node("test_1", [
+				node("B-1", [
+					node("A-1",[leaf("F-1")]), 
+					node("A-2",[leaf("F-1")])
+				])
+			])

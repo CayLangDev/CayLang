@@ -1,4 +1,8 @@
-use crate::ast::{Expr, Literal, Ident, Pair, Guard, Clause, Function, TypeDestructured, FoldExpr, Field, ClauseType, Destination, LabelledList, UnlabelledList, stripstr};
+use crate::ast::{Expr, Literal, Ident, Pair, Guard, Clause, Function,
+                 TypeDestructured, FoldExpr, Field, ClauseType, Destination,
+                 LabelledList, UnlabelledList, stripstr, PrototypeDeclaration, TreePrototype,
+                 Prototype, NodePrototype, NodeType, GetValue,
+                 to_ident, as_labelled_list, force_expr_to_structure_list, force_expr_to_regex};
 use std::str::FromStr;
 
 
@@ -18,7 +22,10 @@ BasicExpr: Expr = {
     Literal => Expr::Literal(<>),
     LabelledList => Expr::LabelledList(<>),
     UnlabelledList => Expr::UnlabelledList(<>),
-    Fold => Expr::Fold(<>)
+    Fold => Expr::Fold(<>),
+    DirPrototype => Expr::PrototypeDeclaration(<>),
+    FilePrototype => Expr::PrototypeDeclaration(<>),
+    TreePrototype => Expr::PrototypeDeclaration(<>)
 }
 
 // Fold expression: introduces folding operation
@@ -32,6 +39,56 @@ Fold: FoldExpr = {
         clauses: c,
     }
 }
+
+DirPrototype: PrototypeDeclaration = {
+    "DirectorySet" <name:Ident> <d:LabelledList> => {
+        let names = d.get_value("Names");
+        let regex = force_expr_to_regex(names);
+        PrototypeDeclaration {
+            name,
+            prototype: Prototype::NodePrototype(
+                NodePrototype {regex, node_type: NodeType::Dir}
+            )
+        }
+    }
+}
+
+FilePrototype: PrototypeDeclaration = {
+    "FileSet" <name:Ident> <d:LabelledList> => {
+        let names = d.get_value("Names");
+        let regex = force_expr_to_regex(names);
+        PrototypeDeclaration {
+            name,
+            prototype: Prototype::NodePrototype(
+                NodePrototype {regex, node_type: NodeType::File}
+            )
+        }
+    }
+}
+
+TreePrototype: PrototypeDeclaration = {
+    "TreeDirectorySet" <name:Ident> <d:LabelledList> => {
+        let [names, structure] = d.get_values([to_ident("Names"), to_ident("Structure")]);
+        let regex = force_expr_to_regex(names);
+        let (layers, edges) = {
+            if let Some(structure) = as_labelled_list(structure) {
+                let [layers, edges] = structure.get_values([to_ident("layers"), to_ident("edges")]);
+                    (force_expr_to_structure_list(layers),  force_expr_to_structure_list(edges))
+            }
+            else {
+                (vec![], vec![])
+            }
+        };
+        PrototypeDeclaration {
+            name,
+            prototype: Prototype::TreePrototype(
+                TreePrototype { regex, layers, edges }
+            )
+        }
+    }
+}
+
+
 
 Field: Field = {
     // "as" is temporary
@@ -54,6 +111,7 @@ Clause: Clause = {
     <l:(<Ident> ":")?> <d:TypeDestructured> <g:Guard+> => Clause { destructured_type: d, child: ClauseType::Guarded(g), label: l },
     <l:(<Ident> ":")?> <d:TypeDestructured> <o:Arrows<Function>> "=>" <p:Destination> => Clause {destructured_type: d, child: ClauseType::FileRead(o, p), label: l},
     <l:(<Ident> ":")?> <d:TypeDestructured> "=>" "{" <c:Clause+> "}" => Clause {destructured_type: d, child: ClauseType::SubClause(c), label: l},
+    <l:(<Ident> ":")?> <d:TypeDestructured> ";" <n:Clause> => Clause { destructured_type: d, child: ClauseType::SubClause(vec![n]), label: l },
 }
 
 Guard: Guard = {
