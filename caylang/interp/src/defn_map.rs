@@ -32,7 +32,7 @@ impl DefnMap {
     // add default values
     pub fn add_defaults(&mut self) {
         let defaults = vec![("Directory", NodePrototype {regex: r".*".to_string(), node_type: NodeType::Dir}),
-                            ("File", NodePrototype {regex: r".*".to_string(), node_type: NodeType::File})];
+                            ("File",      NodePrototype {regex: r".*".to_string(), node_type: NodeType::File})];
         for (name, prototype) in defaults {
             _ = self.add_object(Ident::Variable(name.to_string()), Prototype::NodePrototype(prototype));
             // should probably throw if there's an overwrite here, means user redefined a default
