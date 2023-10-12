@@ -2,4 +2,3 @@
 members = ["caylang/*"]
 resolver = "2"
 default-members = ["caylang/cay"]
-# default-run = "caylang/cay"

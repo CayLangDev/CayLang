@@ -111,6 +111,7 @@ Clause: Clause = {
     <l:(<Ident> ":")?> <d:TypeDestructured> <g:Guard+> => Clause { destructured_type: d, child: ClauseType::Guarded(g), label: l },
     <l:(<Ident> ":")?> <d:TypeDestructured> <o:Arrows<Function>> "=>" <p:Destination> => Clause {destructured_type: d, child: ClauseType::FileRead(o, p), label: l},
     <l:(<Ident> ":")?> <d:TypeDestructured> "=>" "{" <c:Clause+> "}" => Clause {destructured_type: d, child: ClauseType::SubClause(c), label: l},
+    <l:(<Ident> ":")?> <d:TypeDestructured> ";" <n:Clause> => Clause { destructured_type: d, child: ClauseType::SubClause(vec![n]), label: l },
 }
 
 Guard: Guard = {
@@ -187,12 +188,3 @@ CommaM<T>: Vec<T> = { // (1)
             v
         }
 };
-
-
-        // return PrototypeDeclaration {name, prototype: Prototype::TreePrototype(
-        //     TreePrototype {
-        //         regex: "".to_string(),
-        //         layers: vec![],
-        //         edges: vec![]
-        //     }
-        // )};
