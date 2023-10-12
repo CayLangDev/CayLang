@@ -9,6 +9,7 @@ build = "build.rs"
 
 [dependencies]
 caylang-parser = { path = "../parser", version="0.1.0" }
+caylang-interpreter = { path = "../interp", version="0.1.0" }
 clap = { version = "4.1.8", features = [
   "derive",
   "wrap_help",

@@ -238,12 +238,25 @@ impl Tree {
         };
     }
 
-    pub fn data_iter<'a>(
-        &'a self,
-        i: impl Iterator<Item = usize> + 'a,
-    ) -> impl Iterator<Item = &'a NodeData> + '_ {
-        return i.map(|j| &self.nodes[j].data);
-    }
+	pub fn data_iter<'a>(&'a self, i: impl Iterator<Item = usize> + 'a ) -> impl Iterator<Item = &'a NodeData> + '_  {
+		return i.map(|j| &self.nodes[j].data)
+	}
+
+	pub fn print(&self) {
+		let mut j = 0;
+		println!("Layer 0");
+		for p in self.layers() {
+			match p {
+				Point::NodeIdx(i) => {
+				  println!("{:?}",self.nodes[i]);
+				}
+				Point::NextLayer => {
+					j += 1;
+					println!("Layer {:?}", j);
+				}
+			}
+		}
+	}
 }
 
 // 'a is life-time shit
@@ -269,6 +282,11 @@ impl Tree {
 // 	}
 // }
 
+pub enum Point {
+	NodeIdx(NodeIdx),
+	NextLayer
+}
+
 // // 'a is life-time shit
 pub struct Layers<'a> {
     tree: &'a Tree,
@@ -277,21 +295,28 @@ pub struct Layers<'a> {
 }
 
 impl Iterator for Layers<'_> {
-    type Item = NodeIdx;
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.current_v.len() == 0 {
-            if self.next_v.len() == 0 {
-                return None;
-            } else {
-                std::mem::swap(&mut self.next_v, &mut self.current_v);
-            }
-        }
-
+	type Item = Point;
+	fn next(&mut self) -> Option<Self::Item> {
+		if self.current_v.len() == 0 {
+			if self.next_v.len() == 0 {
+				return None;
+			}
+			else {
+				std::mem::swap(&mut self.next_v, &mut self.current_v);
+				return Some(Point::NextLayer);
+			}
+		}
+		
         let c_idx = self.current_v.pop().unwrap();
         for c in &self.tree.nodes[c_idx].children {
             self.next_v.push(c.clone());
         }
 
-        return Some(c_idx);
-    }
+		let c_idx = self.current_v.pop().unwrap();
+		for c in &self.tree.nodes[c_idx].children {
+			self.next_v.push(c.clone());
+		}
+
+		return Some(Point::NodeIdx(c_idx));
+	}
 }
