@@ -22,8 +22,6 @@ mod tests {
 
     #[test]
     fn test_valid_folds_1() {
-        let parser = syntax::MainParser::new();
-
         let cay =
                 "fold \"~/dataset\": Dataset { name as school, .. } {
                     Year { name as year, .. } => {
@@ -35,10 +33,7 @@ mod tests {
                     }
                     _ => .
                   }";
-        match parser.parse(cay) {
-            Err(err) => panic!("Failed to parse fold expression: {:?}", err),
-            _ => (),
-        }
+        test_parsing(cay);
     }
 
     #[test]
