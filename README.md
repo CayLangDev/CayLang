@@ -38,4 +38,3 @@ and then
 cargo run build -r -v samples/simple_test_2.cay
 ```
 (this might not work)
->>>>>>> feat/interp
