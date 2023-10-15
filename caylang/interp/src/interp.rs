@@ -35,7 +35,7 @@ pub fn to_fold(d: &DefnMap, tree: &Tree, fold_desc: FoldOperation, root_len: usi
                 Ok(Prototype::NodePrototype(o)) => {
                     if o.matches(l) {
                         old_paths.push(l.path.clone());
-                        new_paths.push(new_name(&l.path, *t, root_len));
+                        new_paths.push(new_name(&l.path, t, root_len));
                     }
                 }
                 _ => {}
@@ -53,15 +53,15 @@ pub fn make_full_path<'a>(i: impl Iterator<Item = &'a Path> + 'a) -> PathBuf {
     return b;
 }
 
-pub fn new_name(path: &PathBuf, target: Rename, root_len: usize) -> PathBuf {
+pub fn new_name(path: &PathBuf, target: &Rename, root_len: usize) -> PathBuf {
     let comps: Vec<Component> = path.components().collect();
 
     let mut name_comps = vec![];
     for i in 0..root_len {
-        name_comps.push(comps[i]);
+        name_comps.push(comps[i].as_os_str().to_str().unwrap().to_string());
     }
 
-    for part in target.parts {
+    for part in &target.parts {
         let mut s = "".to_string();
         for subpart in part {
             match subpart {

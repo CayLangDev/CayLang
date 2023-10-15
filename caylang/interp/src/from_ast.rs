@@ -36,19 +36,25 @@ pub struct Rename {
     pub parts: Vec<Vec<RenamePart>>
 }
 
-fn to_rename(variable_depth_map: &HashMap<String, usize>, String path) -> Option<Rename> {
+fn to_rename(variable_depth_map: &HashMap<String, usize>, path: &String) -> Option<Rename> {
     let parser = syntax::MainParser::new();
-    let result = parser.parse(&path)?;
-    let parts = vec![];
+    let result = parser.parse(path).ok()?;
+    let mut parts = vec![];
     for part in result.parts {
-        match part {
-            TemplatePart::LayerPart(name) => {
-                let idx = variable_depth_map.get(name)?; // propogates None if an ident doesn't exist
+        let mut subpart = vec![];
+        for atom in part {
+            match atom {
+                TemplatePart::LayerPart(name) => {
+                    let idx = variable_depth_map.get(&name)?; // propogates None if an ident doesn't exist
                                                          // should use result really
-                parts.push(RenamePart::Idx(*idx));
+                    subpart.push(RenamePart::Idx(*idx));
+                }
+                TemplatePart::Text(text) => {
+                    subpart.push(RenamePart::Text(text))
+                }
             }
-            TemplatePart::Text(text) => parts.push(RenamePart::Text(text));
         }
+        parts.push(subpart);
     }
     return Some(Rename{relative: result.relative, parts})
 }
@@ -131,7 +137,7 @@ impl ToInterpObject for FoldExpr {
             depth: usize,
             variable_depth_map: &mut HashMap<String, usize>,
             rename_templates: &mut Vec<Rename>,
-        ) -> Option(()) {
+        ) -> Option<()> {
             if let Some(fields) = &clause.destructured_type.fields {
                 let name_var = fields
                     .iter()
