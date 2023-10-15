@@ -1,4 +1,4 @@
-use crate::from_ast::{FoldOperation, Rename, Matches};
+use crate::from_ast::{FoldOperation, Rename, RenamePart, Matches};
 use crate::defn_map::{new_defn_map, DefnMap};
 use caylang_parser::ast::{Expr, Prototype, NodePrototype};
 
@@ -11,8 +11,6 @@ use std::iter::zip;
 use std::path::Path;
 use std::path::PathBuf;
 use std::path::Component;
-
-// use caylang_io::tree::NodeData;
 
 
 // needs to access prototypes by identifiers from a defn_map
@@ -37,7 +35,7 @@ pub fn to_fold(d: &DefnMap, tree: &Tree, fold_desc: FoldOperation, root_len: usi
                 Ok(Prototype::NodePrototype(o)) => {
                     if o.matches(l) {
                         old_paths.push(l.path.clone());
-                        new_paths.push(new_name(&l.path, t.to_vec(), root_len));
+                        new_paths.push(new_name(&l.path, *t, root_len));
                     }
                 }
                 _ => {}
@@ -63,8 +61,15 @@ pub fn new_name(path: &PathBuf, target: Rename, root_len: usize) -> PathBuf {
         name_comps.push(comps[i]);
     }
 
-    for i in target {
-        name_comps.push(comps[root_len+i]);
+    for part in target.parts {
+        let mut s = "".to_string();
+        for subpart in part {
+            match subpart {
+                RenamePart::Text(t) => s += &t,
+                RenamePart::Idx(i) => s += comps[root_len+i].as_os_str().to_str().unwrap(),
+            }
+        }
+        name_comps.push(s);
     }
     return make_full_path(name_comps.iter().map(|c| c.as_ref()));
 }

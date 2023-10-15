@@ -1,6 +1,8 @@
 use caylang_io::tree::NodeData;
 use regex::Regex;
 use std::{collections::HashMap};
+use caylang_template_parser::{syntax};
+use caylang_template_parser::ast::{TemplatePart};
 use caylang_parser::ast::{
     Clause, ClauseType, Destination, Expr, FoldExpr, Ident, Literal,
     Prototype, NodePrototype, PrototypeDeclaration, NodeType
@@ -22,7 +24,34 @@ impl Matches for NodePrototype {
     }
 }
 
-pub type Rename = Vec<usize>;
+#[derive(Debug)]
+pub enum RenamePart {
+    Idx(usize),
+    Text(String)
+}
+
+#[derive(Debug)]
+pub struct Rename {
+    pub relative: bool,
+    pub parts: Vec<Vec<RenamePart>>
+}
+
+fn to_rename(variable_depth_map: &HashMap<String, usize>, String path) -> Option<Rename> {
+    let parser = syntax::MainParser::new();
+    let result = parser.parse(&path)?;
+    let parts = vec![];
+    for part in result.parts {
+        match part {
+            TemplatePart::LayerPart(name) => {
+                let idx = variable_depth_map.get(name)?; // propogates None if an ident doesn't exist
+                                                         // should use result really
+                parts.push(RenamePart::Idx(*idx));
+            }
+            TemplatePart::Text(text) => parts.push(RenamePart::Text(text));
+        }
+    }
+    return Some(Rename{relative: result.relative, parts})
+}
 
 #[derive(Debug)]
 pub struct FoldOperation {
@@ -93,7 +122,7 @@ impl IntoInterpObject for PrototypeDeclaration {
 
 impl ToInterpObject for FoldExpr {
     fn to_interp_object(&self) -> Option<InterpObject> {
-        let mut rename_template: Vec<Vec<usize>> = vec![];
+        let mut rename_templates: Vec<Rename> = vec![];
         let mut variable_depth_map: HashMap<String, usize> = HashMap::new();
 
         // DFS function to process clauses.
@@ -101,8 +130,8 @@ impl ToInterpObject for FoldExpr {
             clause: &Clause,
             depth: usize,
             variable_depth_map: &mut HashMap<String, usize>,
-            rename_template: &mut Vec<Vec<usize>>,
-        ) {
+            rename_templates: &mut Vec<Rename>,
+        ) -> Option(()) {
             if let Some(fields) = &clause.destructured_type.fields {
                 let name_var = fields
                     .iter()
@@ -117,41 +146,31 @@ impl ToInterpObject for FoldExpr {
             match &clause.child {
                 ClauseType::SubClause(subclauses) => {
                     for subclause in subclauses {
-                        dfs(subclause, depth + 1, variable_depth_map, rename_template);
+                        dfs(subclause, depth + 1, variable_depth_map, rename_templates);
                     }
                 }
                 ClauseType::FileRead(_, dest) => {
                     if let Destination::Move(Literal::FString(path)) = dest {
-                        let elems = path
-                            .split('/')
-                            .map(|s| {
-                                // Remove the "{" and "}"
-                                let mut chars = s.chars();
-                                chars.next();
-                                chars.next_back();
-                                let t = chars.as_str();
-                                variable_depth_map.get(t).unwrap().clone()
-                            })
-                            .collect();
-                        rename_template.push(elems);
+                        rename_templates.push(to_rename(variable_depth_map, path)?); // should really use result
                     }
                 }
                 _ => {}
             }
+            return Some(());
         }
 
         for clause in &self.clauses {
-            dfs(clause, 0, &mut variable_depth_map, &mut rename_template);
+            dfs(clause, 0, &mut variable_depth_map, &mut rename_templates)?;
         }
 
         // TODO: Once NodePrototypes are properly parsed, can do proper options here.
-        let options: Vec<Ident> = vec![Ident::Variable("File".to_string()); rename_template.len()];
+        let options: Vec<Ident> = vec![Ident::Variable("File".to_string()); rename_templates.len()];
 
         Some(InterpObject::Application(OperationApplication {
             from: self.directory.clone(),
             operation: FoldOperation {
                 options,
-                targets: rename_template,
+                targets: rename_templates,
             },
         }))
     }

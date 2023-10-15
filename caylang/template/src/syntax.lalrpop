@@ -1,0 +1,24 @@
+use crate::ast::{TemplateLiteral};
+use std::str::FromStr;
+
+grammar;
+
+pub Main: TemplateLiteral = TemplateLiteral;
+
+// do spaces fuck us here?
+TemplateLiteral: TemplateLiteral = "`" <root: "/" ?> <p:SlashM<TemplatePart+>> "`" => TemplateLiteral {relative: root.is_some(), p};
+
+#[inline]
+TemplatePart: TemplatePart = {
+    "{" Variable "}" => TemplatePart::LayerPart(<>),
+     r#"(?:[^\\`]|(?:\\`))*"# => TemplatePart::Text(<>)
+}
+
+// Slash Seperated Capture Rule of T, must have atleast one T, modified from Comma template in LARLPOP Documentation.
+
+SlashM<T>: Vec<T> = { // (1)
+    <mut v:(<T> "/")*> <e:T> => { // (2)
+            v.push(e);
+            v
+        }
+};
