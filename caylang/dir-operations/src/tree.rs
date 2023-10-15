@@ -312,11 +312,6 @@ impl Iterator for Layers<'_> {
             self.next_v.push(c.clone());
         }
 
-		let c_idx = self.current_v.pop().unwrap();
-		for c in &self.tree.nodes[c_idx].children {
-			self.next_v.push(c.clone());
-		}
-
 		return Some(Point::NodeIdx(c_idx));
 	}
 }
