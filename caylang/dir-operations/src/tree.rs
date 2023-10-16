@@ -9,14 +9,14 @@ use std::path::PathBuf;
 pub type NodeIdx = usize;
 
 /// Whether the node is a file or directory is represented with NodeType
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum NodeType {
     File,
     Directory,
 }
 
 /// The metadata of a node is represented with NodeData
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct NodeData {
     /// The metadata contains the original path,
     pub original_path: PathBuf,
@@ -43,7 +43,7 @@ impl NodeData {
 }
 
 /// A node in the tree is represented here
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Node {
     /// A node has a pointer to the parent
     pub(crate) parent: NodeIdx,
@@ -75,11 +75,11 @@ pub struct Tree {
 }
 
 pub fn root_path() -> PathBuf {
-    return PathBuf::from("");
+    PathBuf::from("")
 }
 
 pub fn root_idx() -> NodeIdx {
-    return 0;
+    0
 }
 
 impl Tree {
@@ -94,7 +94,7 @@ impl Tree {
         new_tree.nodes.push(root);
         new_tree.path_map.insert(root_path(), 0);
 
-        return new_tree;
+        new_tree
     }
 
     pub fn from_fold_function(from_tree: &Tree, f: fn(&Node) -> PathBuf) -> Self {
@@ -116,7 +116,7 @@ impl Tree {
             .map(f)
             .collect();
 
-        return Tree::from_fold(&from_tree, from_paths, to_paths);
+        Tree::from_fold(&from_tree, from_paths, to_paths)
     }
 
     pub fn from_fold(from_tree: &Tree, from_paths: Vec<PathBuf>, to_paths: Vec<PathBuf>) -> Self {
@@ -130,7 +130,7 @@ impl Tree {
             new_tree.add_node(new_data);
         }
 
-        return new_tree;
+        new_tree
     }
 
     /// Returns a vector of file names. Used for testing atm.
@@ -148,10 +148,10 @@ impl Tree {
             }
         }
 
-        return file_names;
+        file_names
     }
 
-    pub fn add_node(&mut self, child_data: NodeData) {
+    pub fn add_node(&mut self, child_data: NodeData) -> NodeIdx {
         let ancestors: Vec<&Path> = child_data.path.ancestors().collect();
 
         for ancestor in ancestors.iter().rev() {
@@ -180,6 +180,8 @@ impl Tree {
                 Some(_parent_idx) => (),
             }
         }
+
+        self.nodes.len() - 1
     }
 
     pub fn add_child(&mut self, parent_idx: NodeIdx, child_data: NodeData) -> NodeIdx {
@@ -195,7 +197,7 @@ impl Tree {
         self.path_map
             .insert(self.nodes[child_idx].data.path.clone(), child_idx);
 
-        return child_idx;
+        child_idx
     }
 
     pub fn get_node_by_path(&self, path: &PathBuf) -> Option<&Node> {
@@ -210,7 +212,7 @@ impl Tree {
     // }
 
     pub fn get_children(&self, parent_idx: NodeIdx) -> impl Iterator<Item = usize> + '_ {
-        return self.nodes[parent_idx].children.iter().map(|i| i.clone());
+        self.nodes[parent_idx].children.iter().map(|i| i.clone())
     }
 
     pub fn get_child(&self, parent_idx: NodeIdx, file_name: String) -> Option<&NodeIdx> {
@@ -218,45 +220,47 @@ impl Tree {
         let mut child_path = parent.data.path.clone();
         child_path.push(file_name);
 
-        return self.path_map.get(&child_path);
+        self.path_map.get(&child_path)
     }
 
     pub fn leaves(&self) -> impl Iterator<Item = usize> + '_ {
-        return self
-            .nodes
+        self.nodes
             .iter()
             .enumerate()
             .filter(|(_i, x)| x.children.len() == 0)
-            .map(|(i, _x)| i);
+            .map(|(i, _x)| i)
     }
 
     pub fn layers(&self) -> Layers {
-        return Layers {
+        Layers {
             tree: self,
             current_v: vec![root_idx()],
             next_v: vec![],
-        };
+        }
     }
 
-	pub fn data_iter<'a>(&'a self, i: impl Iterator<Item = usize> + 'a ) -> impl Iterator<Item = &'a NodeData> + '_  {
-		return i.map(|j| &self.nodes[j].data)
-	}
+    pub fn data_iter<'a>(
+        &'a self,
+        i: impl Iterator<Item = usize> + 'a,
+    ) -> impl Iterator<Item = &'a NodeData> + '_ {
+        return i.map(|j| &self.nodes[j].data);
+    }
 
-	pub fn print(&self) {
-		let mut j = 0;
-		println!("Layer 0");
-		for p in self.layers() {
-			match p {
-				Point::NodeIdx(i) => {
-				  println!("{:?}",self.nodes[i]);
-				}
-				Point::NextLayer => {
-					j += 1;
-					println!("Layer {:?}", j);
-				}
-			}
-		}
-	}
+    pub fn print(&self) {
+        let mut j = 0;
+        println!("Layer 0");
+        for p in self.layers() {
+            match p {
+                Point::NodeIdx(i) => {
+                    println!("{:?}", self.nodes[i]);
+                }
+                Point::NextLayer => {
+                    j += 1;
+                    println!("Layer {:?}", j);
+                }
+            }
+        }
+    }
 }
 
 // 'a is life-time shit
@@ -283,8 +287,8 @@ impl Tree {
 // }
 
 pub enum Point {
-	NodeIdx(NodeIdx),
-	NextLayer
+    NodeIdx(NodeIdx),
+    NextLayer,
 }
 
 // // 'a is life-time shit
@@ -295,23 +299,22 @@ pub struct Layers<'a> {
 }
 
 impl Iterator for Layers<'_> {
-	type Item = Point;
-	fn next(&mut self) -> Option<Self::Item> {
-		if self.current_v.len() == 0 {
-			if self.next_v.len() == 0 {
-				return None;
-			}
-			else {
-				std::mem::swap(&mut self.next_v, &mut self.current_v);
-				return Some(Point::NextLayer);
-			}
-		}
-		
+    type Item = Point;
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current_v.len() == 0 {
+            if self.next_v.len() == 0 {
+                return None;
+            } else {
+                std::mem::swap(&mut self.next_v, &mut self.current_v);
+                return Some(Point::NextLayer);
+            }
+        }
+
         let c_idx = self.current_v.pop().unwrap();
         for c in &self.tree.nodes[c_idx].children {
             self.next_v.push(c.clone());
         }
 
-		return Some(Point::NodeIdx(c_idx));
-	}
+        return Some(Point::NodeIdx(c_idx));
+    }
 }
