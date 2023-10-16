@@ -49,31 +49,35 @@ pub fn run_test(path: &str, f: fn(&Tree) -> Tree) {
 pub fn load_full_tree(root: &PathBuf) -> Tree {
     let mut tree: Tree = Tree::new();
     // let mut root: NodeIdx = root_idx();
-
+    println!("{}", root.display());
     for entry in WalkDir::new(&root).sort(true) {
-        let entry = entry.unwrap();
+        match entry {
+            Ok(entry) => {
+                let mut parent_path = entry.path().clone();
+                parent_path.pop();
+                // Path sorting means we can expect the parent to exist
+                let parent_idx = tree.path_map.get(&parent_path);
 
-        let mut parent_path = entry.path().clone();
-        parent_path.pop();
-        // Path sorting means we can expect the parent to exist
-        let parent_idx = tree.path_map.get(&parent_path);
+                let node_type = match entry.file_type().is_file() {
+                    true => NodeType::File,
+                    false => NodeType::Directory,
+                };
 
-        let node_type = match entry.file_type().is_file() {
-            true => NodeType::File,
-            false => NodeType::Directory,
-        };
+                let relative_path =
+                    PathBuf::from(PathBuf::from(entry.path()).strip_prefix(&root).unwrap());
 
-        let relative_path = PathBuf::from(PathBuf::from(entry.path()).strip_prefix(&root).unwrap());
+                println!("root: {} path: {}", root.display(), relative_path.display());
 
-        println!("root: {} path: {}", root.display(), relative_path.display());
-
-        match parent_idx {
-            Some(idx) => {
-                tree.add_child(*idx, NodeData::new(relative_path, node_type));
+                match parent_idx {
+                    Some(idx) => {
+                        tree.add_child(*idx, NodeData::new(relative_path, node_type));
+                    }
+                    None => {
+                        tree.add_child(0, NodeData::new(relative_path, node_type));
+                    }
+                }
             }
-            None => {
-                tree.add_child(0, NodeData::new(relative_path, node_type));
-            }
+            _ => (println!("File doesn't exist")),
         }
     }
 
