@@ -9,6 +9,7 @@ pub enum Expr {
     LabelledList(LabelledList),
     UnlabelledList(UnlabelledList),
     Ident(Ident),
+    ParamIdent(ParamIdent), // temporary addition to test parsing
     Literal(Literal),
 }
 
@@ -64,6 +65,12 @@ pub enum Ident {
     Ignored,
 }
 
+// temporary parameter type to test parsing
+#[derive(Debug)]
+pub struct ParamIdent {
+    pub name: Ident,
+    pub param: Literal,
+}
 
 pub fn to_ident(s: &str) -> Ident {
     if s == "_" {
