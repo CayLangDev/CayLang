@@ -167,10 +167,6 @@ dependencies = [
 [[package]]
 name = "caylang-template-parser"
 version = "0.1.0"
-dependencies = [
- "lalrpop",
- "lalrpop-util",
-]
 
 [[package]]
 name = "cc"

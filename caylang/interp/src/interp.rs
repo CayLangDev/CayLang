@@ -29,6 +29,7 @@ pub fn to_fold(d: &DefnMap, tree: &Tree, fold_desc: FoldOperation, root_len: usi
     let mut old_paths = vec![];
     let mut new_paths = vec![];
     for l in tree.data_iter(tree.leaves()) {
+        // println!("leaf: {:?}", l);
         for (i, t) in zip(&fold_desc.options, &fold_desc.targets) {
             let o = d.get_object(i);
             match o {
@@ -38,7 +39,9 @@ pub fn to_fold(d: &DefnMap, tree: &Tree, fold_desc: FoldOperation, root_len: usi
                         new_paths.push(new_name(&l.path, t, root_len));
                     }
                 }
-                _ => {}
+                _ => {
+                    panic!("Prototype didn't match");
+                }
             }
         }
     }
@@ -85,12 +88,12 @@ pub fn interpret(ast: Expr) {
         let root: PathBuf = op.from.into();
         let root_len = root.components().count();
         let tree = load_full_tree(root);
-        tree.print();
+        // tree.print();
         let (old_paths, new_paths) = to_fold(&defn_map, &tree, op.operation, root_len);
         println!("old paths: {:?}", old_paths);
         println!("new paths: {:?}", new_paths);
         let new_tree = Tree::from_fold(&tree, old_paths, new_paths);
-        new_tree.print();
+        // new_tree.print();
         write_full_tree(&tree, &new_tree);
     }
     return;

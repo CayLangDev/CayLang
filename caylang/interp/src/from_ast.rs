@@ -1,7 +1,7 @@
 use caylang_io::tree::NodeData;
 use regex::Regex;
 use std::{collections::HashMap};
-use caylang_template_parser::{syntax};
+use caylang_template_parser::parse::{parse};
 use caylang_template_parser::ast::{TemplatePart};
 use caylang_parser::ast::{
     Clause, ClauseType, Destination, Expr, FoldExpr, Ident, Literal,
@@ -37,15 +37,18 @@ pub struct Rename {
 }
 
 fn to_rename(variable_depth_map: &HashMap<String, usize>, path: &String) -> Option<Rename> {
-    let parser = syntax::MainParser::new();
-    let result = parser.parse(path).ok()?;
+    // let parser = syntax::MainParser::new();
+    println!("input: {:?}", path);
+    let result = parse(path.clone());
+    println!("result: {:?}",result);
     let mut parts = vec![];
     for part in result.parts {
         let mut subpart = vec![];
         for atom in part {
             match atom {
                 TemplatePart::LayerPart(name) => {
-                    let idx = variable_depth_map.get(&name)?; // propogates None if an ident doesn't exist
+                    println!("name: {:?}", name);
+                    let idx = variable_depth_map.get(&name).unwrap(); // propogates None if an ident doesn't exist
                                                          // should use result really
                     subpart.push(RenamePart::Idx(*idx));
                 }
@@ -157,6 +160,7 @@ impl ToInterpObject for FoldExpr {
                 }
                 ClauseType::FileRead(_, dest) => {
                     if let Destination::Move(Literal::FString(path)) = dest {
+                        // let mut path = path;
                         rename_templates.push(to_rename(variable_depth_map, path)?); // should really use result
                     }
                 }
