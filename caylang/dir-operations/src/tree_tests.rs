@@ -1,193 +1,133 @@
 #[cfg(test)]
 mod tests {
 
-    use crate::tree::{root_idx, NodeData, NodeType, Tree};
+    use crate::tree::{NodeData, NodeType, Tree};
     use std::path::PathBuf;
 
     #[test]
-    fn check_same_files() {
-        let mut dataset_1 = Tree::new();
-
-        dataset_1.add_child(
-            root_idx(),
-            NodeData::new(PathBuf::from("1"), NodeType::Directory),
-        );
-        dataset_1.add_child(
-            root_idx(),
-            NodeData::new(PathBuf::from("2"), NodeType::Directory),
-        );
-        dataset_1.add_child(
-            root_idx(),
-            NodeData::new(PathBuf::from("3"), NodeType::Directory),
-        );
-
-        dataset_1.add_child(
-            1,
-            NodeData::new(PathBuf::from("file_a.txt"), NodeType::File),
-        );
-        dataset_1.add_child(
-            1,
-            NodeData::new(PathBuf::from("file_b.txt"), NodeType::File),
-        );
-        dataset_1.add_child(
-            1,
-            NodeData::new(PathBuf::from("file_c.txt"), NodeType::File),
-        );
-        dataset_1.add_child(
-            2,
-            NodeData::new(PathBuf::from("file_d.txt"), NodeType::File),
-        );
-        dataset_1.add_child(
-            2,
-            NodeData::new(PathBuf::from("file_e.txt"), NodeType::File),
-        );
-        dataset_1.add_child(
-            2,
-            NodeData::new(PathBuf::from("file_f.txt"), NodeType::File),
-        );
-        dataset_1.add_child(
-            3,
-            NodeData::new(PathBuf::from("file_g.txt"), NodeType::File),
-        );
-        dataset_1.add_child(
-            3,
-            NodeData::new(PathBuf::from("file_h.txt"), NodeType::File),
-        );
-        dataset_1.add_child(
-            3,
-            NodeData::new(PathBuf::from("file_i.txt"), NodeType::File),
-        );
-
-        let mut dataset_2 = Tree::new();
-
-        dataset_2.add_child(
-            root_idx(),
-            NodeData::new(PathBuf::from("1"), NodeType::Directory),
-        );
-        dataset_2.add_child(
-            root_idx(),
-            NodeData::new(PathBuf::from("1"), NodeType::Directory),
-        ); // 2
-        dataset_2.add_child(
-            root_idx(),
-            NodeData::new(PathBuf::from("2"), NodeType::Directory),
-        ); // 3
-        dataset_2.add_child(
-            root_idx(),
-            NodeData::new(PathBuf::from("3"), NodeType::Directory),
-        ); // 4
-        dataset_2.add_child(
-            root_idx(),
-            NodeData::new(PathBuf::from("3"), NodeType::Directory),
-        ); // 5
-
-        dataset_2.add_child(
-            1,
-            NodeData::new(PathBuf::from("file_a.txt"), NodeType::File),
-        );
-        dataset_2.add_child(
-            1,
-            NodeData::new(PathBuf::from("file_b.txt"), NodeType::File),
-        );
-        dataset_2.add_child(
-            2,
-            NodeData::new(PathBuf::from("file_c.txt"), NodeType::File),
-        );
-        dataset_2.add_child(
-            2,
-            NodeData::new(PathBuf::from("file_d.txt"), NodeType::File),
-        );
-        dataset_2.add_child(
-            3,
-            NodeData::new(PathBuf::from("file_e.txt"), NodeType::File),
-        );
-        dataset_2.add_child(
-            3,
-            NodeData::new(PathBuf::from("file_f.txt"), NodeType::File),
-        );
-        dataset_2.add_child(
-            3,
-            NodeData::new(PathBuf::from("file_g.txt"), NodeType::File),
-        );
-        dataset_2.add_child(
-            4,
-            NodeData::new(PathBuf::from("file_h.txt"), NodeType::File),
-        );
-        dataset_2.add_child(
-            5,
-            NodeData::new(PathBuf::from("file_i.txt"), NodeType::File),
-        );
-
-        assert_eq!(dataset_1.get_file_names(), dataset_2.get_file_names());
+    fn test_tree_creation() {
+        let tree = Tree::new();
+        assert_eq!(tree.nodes.len(), 1);
+        assert_eq!(tree.path_map.len(), 1);
+        assert_eq!(tree.nodes[0].data.node_type, NodeType::Directory);
     }
 
-    // #[test]
-    // fn test_get_children() {
-    //     let mut dataset = Tree::new();
+    #[test]
+    fn test_add_child() {
+        let mut tree = Tree::new();
+        let parent_data = NodeData::new(PathBuf::from("parent"), NodeType::Directory);
+        let parent_idx = tree.add_child(0, parent_data.clone());
 
-    //     dataset.add_child(
-    //         root_idx(),
-    //         NodeData::new(PathBuf::from("1"), NodeType::Directory),
-    //     );
-    //     dataset.add_child(
-    //         root_idx(),
-    //         NodeData::new(PathBuf::from("2"), NodeType::Directory),
-    //     );
-    //     dataset.add_child(
-    //         root_idx(),
-    //         NodeData::new(PathBuf::from("3"), NodeType::Directory),
-    //     );
+        let child_data = NodeData::new(PathBuf::from("parent/child1"), NodeType::File);
+        let child_idx = tree.add_child(parent_idx, child_data.clone());
 
-    //     dataset.add_child(
-    //         1,
-    //         NodeData::new(PathBuf::from("file_a.txt"), NodeType::File),
-    //     );
-    //     dataset.add_child(
-    //         1,
-    //         NodeData::new(PathBuf::from("file_b.txt"), NodeType::File),
-    //     );
-    //     dataset.add_child(
-    //         1,
-    //         NodeData::new(PathBuf::from("file_c.txt"), NodeType::File),
-    //     );
-    //     dataset.add_child(
-    //         2,
-    //         NodeData::new(PathBuf::from("file_d.txt"), NodeType::File),
-    //     );
-    //     dataset.add_child(
-    //         2,
-    //         NodeData::new(PathBuf::from("file_e.txt"), NodeType::File),
-    //     );
-    //     dataset.add_child(
-    //         2,
-    //         NodeData::new(PathBuf::from("file_f.txt"), NodeType::File),
-    //     );
-    //     dataset.add_child(
-    //         3,
-    //         NodeData::new(PathBuf::from("file_g.txt"), NodeType::File),
-    //     );
-    //     dataset.add_child(
-    //         3,
-    //         NodeData::new(PathBuf::from("file_h.txt"), NodeType::File),
-    //     );
-    //     dataset.add_child(
-    //         3,
-    //         NodeData::new(PathBuf::from("file_i.txt"), NodeType::File),
-    //     );
+        assert_eq!(tree.nodes.len(), 3);
+        assert_eq!(tree.path_map.len(), 3);
+        assert_eq!(tree.nodes[child_idx].data, child_data);
+        assert_eq!(tree.nodes[parent_idx].children, vec![child_idx]);
+    }
 
-    //     let children = dataset.get_children(2);
-    //     let mut i = 7;
-    //     for child in children {
-    //         assert_eq!(child, i);
-    //         i += 1;
-    //     }
+    #[test]
+    fn test_add_node() {
+        let mut tree = Tree::new();
+        let node_data = NodeData::new(PathBuf::from("child1"), NodeType::Directory);
+        tree.add_node(node_data.clone());
 
-    //     match dataset.get_child(1, "file_b.txt".to_string()) {
-    //         Some(&value) => println!("Child index: {}", value),
-    //         None => println!("Child not found"),
-    //     }
+        assert_eq!(tree.nodes.len(), 2);
+        assert_eq!(tree.path_map.len(), 2);
+        assert_eq!(tree.nodes[1].data, node_data);
+    }
+    #[test]
+    fn test_add_node_with_implicit_parents() {
+        let mut tree = Tree::new();
 
-    //     assert_eq!(dataset.get_child(1, "file_b.txt".to_string()).unwrap(), &5);
-    //     assert_eq!(dataset.get_child(3, "file_h.txt".to_string()).unwrap(), &11);
-    // }
+        let child_data1 = NodeData::new(PathBuf::from("parent/child1"), NodeType::File);
+        let child_idx1 = tree.add_node(child_data1.clone());
+
+        let child_data2 = NodeData::new(PathBuf::from("parent/child2"), NodeType::File);
+        let child_idx2 = tree.add_node(child_data2.clone());
+
+        assert_eq!(tree.nodes.len(), 4);
+        assert_eq!(tree.path_map.len(), 4);
+
+        let parent_idx = tree.path_map.get(&PathBuf::from("parent")).unwrap();
+        let root_idx = tree.path_map.get(&PathBuf::from("")).unwrap();
+
+        assert_eq!(
+            tree.nodes[*parent_idx].children,
+            vec![child_idx1, child_idx2]
+        );
+        assert_eq!(tree.nodes[child_idx1].data, child_data1);
+        assert_eq!(tree.nodes[child_idx2].data, child_data2);
+        assert_eq!(tree.nodes[*root_idx].children, vec![*parent_idx]);
+    }
+
+    #[test]
+    fn test_get_node_by_path() {
+        let mut tree = Tree::new();
+        let node_data = NodeData::new(PathBuf::from("parent"), NodeType::Directory);
+        let node_idx = tree.add_node(node_data.clone());
+
+        let path = PathBuf::from("parent");
+        let result = tree.get_node_by_path(&path);
+
+        assert_eq!(result, Some(&tree.nodes[node_idx]));
+    }
+
+    #[test]
+    fn test_get_children() {
+        let mut tree = Tree::new();
+        let parent_data = NodeData::new(PathBuf::from("parent"), NodeType::Directory);
+        let parent_idx = tree.add_node(parent_data.clone());
+
+        let child1_data = NodeData::new(PathBuf::from("parent/child1"), NodeType::File);
+        let child1_idx = tree.add_child(parent_idx, child1_data.clone());
+
+        let child2_data = NodeData::new(PathBuf::from("parent/child2"), NodeType::File);
+        let child2_idx = tree.add_child(parent_idx, child2_data.clone());
+
+        let children = tree.get_children(parent_idx).collect::<Vec<_>>();
+
+        assert_eq!(children, vec![child1_idx, child2_idx]);
+    }
+
+    #[test]
+    fn test_get_child() {
+        let mut tree = Tree::new();
+        let parent_data = NodeData::new(PathBuf::from("parent"), NodeType::Directory);
+        let parent_idx = tree.add_node(parent_data.clone());
+
+        let child1_data = NodeData::new(PathBuf::from("parent/child1"), NodeType::File);
+        let _child1_idx = tree.add_child(parent_idx, child1_data.clone());
+
+        let child2_data = NodeData::new(PathBuf::from("parent/child2"), NodeType::File);
+        let child2_idx = tree.add_child(parent_idx, child2_data.clone());
+
+        let result = tree.get_child(parent_idx, "child2".to_string());
+
+        assert_eq!(result, Some(&child2_idx));
+    }
+
+    #[test]
+    fn test_from_fold_flatten() {
+        let mut tree = Tree::new();
+
+        let node_data1 = NodeData::new(PathBuf::from("parent/child1"), NodeType::File);
+        let node_data2 = NodeData::new(PathBuf::from("parent/child2"), NodeType::File);
+
+        tree.add_node(node_data1.clone());
+        tree.add_node(node_data2.clone());
+
+        let new_tree = Tree::from_fold_function(&tree, |node| {
+            let string = node.data.path.to_str().unwrap();
+            PathBuf::from(str::replace(string, "/", "_"))
+        });
+
+        assert_eq!(new_tree.nodes.len(), 3);
+        assert_eq!(new_tree.path_map.len(), 3);
+
+        assert_eq!(new_tree.nodes[0].data.path, PathBuf::from(""));
+        assert_eq!(new_tree.nodes[1].data.path, PathBuf::from("parent_child1"));
+        assert_eq!(new_tree.nodes[2].data.path, PathBuf::from("parent_child2"));
+    }
 }

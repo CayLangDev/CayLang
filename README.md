@@ -14,6 +14,14 @@ This will create a `target/release` directory containing the binaries. To run th
 ```
 Calling `./target/release/cay help` will display a list of commands.
 
+## Unit Tests
+
+To run all unit tests you must specify all caylang packages in this workspace with a glob specifier.
+```bash
+cargo test -p caylang-*
+```
+
+
 ## Samples
 
 Samples are available to run in the `samples` folder, to run one execute:
