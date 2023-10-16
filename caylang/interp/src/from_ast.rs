@@ -24,19 +24,19 @@ impl Matches for NodePrototype {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum RenamePart {
     Idx(usize),
     Text(String)
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Rename {
     pub relative: bool,
     pub parts: Vec<Vec<RenamePart>>
 }
 
-fn to_rename(variable_depth_map: &HashMap<String, usize>, path: &String) -> Option<Rename> {
+pub(crate) fn to_rename(variable_depth_map: &HashMap<String, usize>, path: &String) -> Option<Rename> {
     // let parser = syntax::MainParser::new();
     println!("input: {:?}", path);
     let result = parse(path.clone());
