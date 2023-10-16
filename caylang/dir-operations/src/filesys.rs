@@ -53,11 +53,6 @@ pub fn load_full_tree(root: &PathBuf) -> Tree {
     for entry in WalkDir::new(&root).sort(true) {
         match entry {
             Ok(entry) => {
-                let mut parent_path = entry.path().clone();
-                parent_path.pop();
-                // Path sorting means we can expect the parent to exist
-                let parent_idx = tree.path_map.get(&parent_path);
-
                 let node_type = match entry.file_type().is_file() {
                     true => NodeType::File,
                     false => NodeType::Directory,
@@ -65,6 +60,13 @@ pub fn load_full_tree(root: &PathBuf) -> Tree {
 
                 let relative_path =
                     PathBuf::from(PathBuf::from(entry.path()).strip_prefix(&root).unwrap());
+
+                let mut parent_path = relative_path.clone();
+                parent_path.pop();
+
+                print!("{} {}\n", entry.path().display(), parent_path.display());
+                // Path sorting means we can expect the parent to exist
+                let parent_idx = tree.path_map.get(&parent_path);
 
                 println!("root: {} path: {}", root.display(), relative_path.display());
 
@@ -77,7 +79,7 @@ pub fn load_full_tree(root: &PathBuf) -> Tree {
                     }
                 }
             }
-            _ => (println!("File doesn't exist")),
+            _ => println!("File doesn't exist"),
         }
     }
 
