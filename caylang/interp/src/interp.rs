@@ -1,5 +1,5 @@
 use crate::defn_map::{new_defn_map, DefnMap};
-use crate::from_ast::{FoldOperation, Matches, Rename};
+use crate::from_ast::{FoldOperation, Rename, RenamePart, Matches};
 use caylang_parser::ast::{Expr, NodePrototype, Prototype};
 
 use caylang_io::filesys::{load_full_tree, write_full_tree};
@@ -12,7 +12,7 @@ use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
 
-// use caylang_io::tree::NodeData;
+
 
 // needs to access prototypes by identifiers from a defn_map
 // fn validate(tree: &Tree, prototype: TreePrototype) -> bool {
@@ -35,16 +35,19 @@ pub fn to_fold(
     let mut old_paths = vec![];
     let mut new_paths = vec![];
     for l in tree.data_iter(tree.leaves()) {
+        // println!("leaf: {:?}", l);
         for (i, t) in zip(&fold_desc.options, &fold_desc.targets) {
             let o = d.get_object(i);
             match o {
                 Ok(Prototype::NodePrototype(o)) => {
                     if o.matches(l) {
                         old_paths.push(l.path.clone());
-                        new_paths.push(new_name(&l.path, t.to_vec(), root_len));
+                        new_paths.push(new_name(&l.path, t, root_len));
                     }
                 }
-                _ => {}
+                _ => {
+                    panic!("Prototype didn't match");
+                }
             }
         }
     }
@@ -59,7 +62,7 @@ pub fn make_full_path<'a>(i: impl Iterator<Item = &'a Path> + 'a) -> PathBuf {
     return b;
 }
 
-pub fn new_name(path: &PathBuf, target: Rename, root_len: usize) -> PathBuf {
+pub fn new_name(path: &PathBuf, target: &Rename, root_len: usize) -> PathBuf {
     let comps: Vec<Component> = path.components().collect();
 
     // TODO this fixes it temporarily
@@ -68,15 +71,23 @@ pub fn new_name(path: &PathBuf, target: Rename, root_len: usize) -> PathBuf {
     // }
 
     let mut name_comps = vec![];
-    println!("path: {}", path.display());
-    println!("target: {}", target.len());
-    // for i in 0..root_len {
-    //     name_comps.push(comps[i]);
-    // }
+// <<<<<<< HEAD
+//     for i in 0..root_len {
+//         name_comps.push(comps[i].as_os_str().to_str().unwrap().to_string());
+//     }
 
-    for i in target {
-        name_comps.push(comps[i]);
+    for part in &target.parts {
+        let mut s = "".to_string();
+        for subpart in part {
+            match subpart {
+                RenamePart::Text(t) => s += &t,
+                RenamePart::Idx(i) => s += comps[*i].as_os_str().to_str().unwrap(),
+            }
+        }
+        name_comps.push(s);
     }
+    // println!("path: {}", path.display());
+    // println!("target: {}", target.len());
     return make_full_path(name_comps.iter().map(|c| c.as_ref()));
 }
 
@@ -91,13 +102,18 @@ pub fn interpret(ast: Expr) {
         let root: PathBuf = op.from.into();
         let root_len = root.components().count();
         let tree = load_full_tree(&root);
-        tree.print();
+        // tree.print();
         let (old_paths, new_paths) = to_fold(&defn_map, &tree, op.operation, root_len);
         println!("old paths: {:?}", old_paths);
         println!("new paths: {:?}", new_paths);
         let new_tree = Tree::from_fold(&tree, old_paths, new_paths);
-        new_tree.print();
+// <<<<<<< HEAD
+//         // new_tree.print();
+//         write_full_tree(&tree, &new_tree);
+// =======
+        // new_tree.print();
         write_full_tree(&root, &root, &tree, &new_tree);
+// >>>>>>> feat/interp
     }
     return;
 }
