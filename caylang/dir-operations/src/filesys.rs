@@ -2,6 +2,7 @@ use crate::tree::{NodeData, NodeIdx, NodeType, Tree};
 use jwalk::WalkDir;
 use std::fs;
 use std::path::PathBuf;
+use std::process::{exit, Command};
 extern crate fs_extra;
 use fs_extra::dir;
 use fs_extra::dir::copy;
@@ -15,6 +16,59 @@ fn dfs(tree: &Tree, current_idx: NodeIdx) {
     for child in tree.get_children(current_idx) {
         dfs(&tree, child);
     }
+}
+
+pub fn run_system_test(path: &str) {
+    let test_path = PathBuf::from(path);
+    let mut in_path = test_path.clone();
+    in_path.push("in");
+    let mut out_path = test_path.clone();
+    out_path.push("out");
+    let mut cay_path = test_path.clone();
+    cay_path.push("test.cay");
+
+    let tmp_dir = TempDir::new("test").unwrap();
+    let root_path = PathBuf::from(tmp_dir.path());
+
+    let options = dir::CopyOptions::new();
+    // options.mirror_copy = true; // To mirror copy the whole structure of the source directory
+    let _ = copy(&in_path, &root_path, &options);
+    let mut tmp_in = root_path.clone();
+    tmp_in.push("in");
+    let mut tmp_out = root_path.clone();
+    tmp_out.push("out");
+    let _ = fs::rename(&tmp_in, &tmp_out);
+
+    let mut tmp_cay = root_path.clone();
+    tmp_cay.push("test.cay");
+    let _ = fs::copy(&cay_path, &tmp_cay);
+
+    dfs(&load_full_tree(&root_path), 0);
+
+    let file_content = fs::read_to_string(&tmp_cay).unwrap();
+    let modified_content = file_content.replace("<PATH>", tmp_out.to_str().unwrap());
+    let _ = fs::write(&tmp_cay, &modified_content).unwrap();
+
+    // Call main cay exec on the file
+    let mut cmd = Command::new("cargo");
+    let _ = cmd
+        .arg("run")
+        .arg("build")
+        .arg("-r")
+        // .arg("-v")
+        .arg(tmp_cay.to_str().unwrap());
+
+    // Run cmd
+    match cmd.status() {
+        Ok(status) => status,
+        Err(e) => {
+            eprintln!("Failed to execute command: {}", e);
+            exit(1);
+        }
+    };
+
+    dfs(&load_full_tree(&root_path), 0);
+    assert!(!is_different(out_path.to_str().unwrap(), tmp_out.to_str().unwrap()).unwrap());
 }
 
 pub fn run_test(path: &str, f: fn(&Tree) -> Tree) {
@@ -49,7 +103,6 @@ pub fn run_test(path: &str, f: fn(&Tree) -> Tree) {
 pub fn load_full_tree(root: &PathBuf) -> Tree {
     let mut tree: Tree = Tree::new();
     // let mut root: NodeIdx = root_idx();
-    println!("{}", root.display());
     for entry in WalkDir::new(&root).sort(true) {
         match entry {
             Ok(entry) => {
