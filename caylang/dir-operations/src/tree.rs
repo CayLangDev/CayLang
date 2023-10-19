@@ -235,7 +235,6 @@ impl Tree {
         Layers {
             tree: self,
             current_v: vec![root_idx()],
-            next_v: vec![],
         }
     }
 
@@ -247,18 +246,10 @@ impl Tree {
     }
 
     pub fn print(&self) {
-        let mut j = 0;
-        println!("Layer 0");
-        for p in self.layers() {
-            match p {
-                Point::NodeIdx(i) => {
-                    println!("{:?}", self.nodes[i]);
-                }
-                Point::NextLayer => {
-                    j += 1;
-                    println!("Layer {:?}", j);
-                }
-            }
+        for (j, p) in self.layers().enumerate() {
+            println!("Layer {}", j);
+            let layer: Vec<&Node> = p.iter().map(|i| &self.nodes[*i]).collect();
+            println!("{:?}", layer);
         }
     }
 }
@@ -286,35 +277,62 @@ impl Tree {
 // 	}
 // }
 
-pub enum Point {
-    NodeIdx(NodeIdx),
-    NextLayer,
-}
+// pub enum Point {
+//     NodeIdx(NodeIdx),
+//     NextLayer,
+// }
 
-// // 'a is life-time shit
+type Layer = Vec<NodeIdx>;
+
 pub struct Layers<'a> {
     tree: &'a Tree,
-    current_v: Vec<usize>,
-    next_v: Vec<usize>,
+    current_v: Layer
 }
 
 impl Iterator for Layers<'_> {
-    type Item = Point;
+    type Item = Layer;
     fn next(&mut self) -> Option<Self::Item> {
         if self.current_v.len() == 0 {
-            if self.next_v.len() == 0 {
-                return None;
-            } else {
-                std::mem::swap(&mut self.next_v, &mut self.current_v);
-                return Some(Point::NextLayer);
+            return None;
+        }
+
+        let mut next_v = vec![];
+        for curr_idx in &self.current_v { // fill next_v with next layer
+            for c in &self.tree.nodes[*curr_idx].children {
+                next_v.push(c.clone());
             }
         }
-
-        let c_idx = self.current_v.pop().unwrap();
-        for c in &self.tree.nodes[c_idx].children {
-            self.next_v.push(c.clone());
-        }
-
-        return Some(Point::NodeIdx(c_idx));
+        // next_v holds the next layer and current_v holds the current
+        // swap them and return next_v, as it's a temp.
+        std::mem::swap(&mut next_v, &mut self.current_v);
+        return Some(next_v);
     }
 }
+
+// // 'a is life-time shit
+// pub struct Layers<'a> {
+//     tree: &'a Tree,
+//     current_v: Vec<usize>,
+//     next_v: Vec<usize>,
+// }
+//
+// impl Iterator for Layers<'_> {
+//     type Item = Point;
+//     fn next(&mut self) -> Option<Self::Item> {
+//         if self.current_v.len() == 0 {
+//             if self.next_v.len() == 0 {
+//                 return None;
+//             } else {
+//                 std::mem::swap(&mut self.next_v, &mut self.current_v);
+//                 return Some(Point::NextLayer);
+//             }
+//         }
+//
+//         let c_idx = self.current_v.pop().unwrap();
+//         for c in &self.tree.nodes[c_idx].children {
+//             self.next_v.push(c.clone());
+//         }
+//
+//         return Some(Point::NodeIdx(c_idx));
+//     }
+// }
