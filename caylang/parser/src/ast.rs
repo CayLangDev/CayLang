@@ -8,16 +8,23 @@ pub enum Expr {
     PrototypeDeclaration(PrototypeDeclaration),
     LabelledList(LabelledList),
     UnlabelledList(UnlabelledList),
-    Ident(Ident),
-    ParamIdent(ParamIdent), // temporary addition to test parsing
+    SuperIdent(SuperIdent),
     Literal(Literal),
 }
 
+// Fold structures
 #[derive(Debug)]
 pub struct FoldExpr {
     pub directory: String,
     pub dir_type: TypeDestructured,
     pub clauses: Vec<Clause>,
+}
+
+#[derive(Debug)]
+pub struct Clause {
+    pub label: Option<SuperIdent>,
+    pub destructured_type: TypeDestructured,
+    pub child: ClauseType,
 }
 
 #[derive(Debug)]
@@ -29,34 +36,33 @@ pub enum ClauseType {
 }
 
 #[derive(Debug)]
-pub struct Clause {
-    pub label: Option<Ident>,
-    pub destructured_type: TypeDestructured,
-    pub child: ClauseType,
-}
-
-#[derive(Debug)]
 pub struct Guard {
     pub conditions: Vec<Function>,
     pub child: ClauseType,
 }
 
+
 #[derive(Debug)]
 pub struct Function {
-    pub name: Ident,
+    pub name: SuperIdent,
     pub args: Vec<Expr>,
 }
 
 #[derive(Debug)]
 pub struct Field {
-    pub name: Ident,
-    pub alias: Option<Ident>,
+    pub name: SuperIdent,
+    pub alias: Option<SuperIdent>,
 }
 
 #[derive(Debug)]
 pub struct TypeDestructured {
-    pub name: Ident,
+    pub name: SuperIdent,
     pub fields: Option<Vec<Field>>,
+}
+
+pub enum SuperIdent {
+    Ident(Ident),
+    ParamIdent(ParamIdent),
 }
 
 #[derive(Debug, Eq, Hash, PartialEq, Clone)]
@@ -72,16 +78,17 @@ pub struct ParamIdent {
     pub param: Literal,
 }
 
-pub fn to_ident(s: &str) -> Ident {
+pub fn to_ident(s: &str) -> SuperIdent {
     if s == "_" {
-        return Ident::Ignored;
+        return SuperIdent::Ident::Ignored;
     } else {
-        return Ident::Variable(s.to_string());
+        return SuperIdent::Variable(s.to_string());
     }
 }
 
-impl Ident {
+impl SuperIdent { /// TODODODO
     pub fn to_string(&self) -> String {
+        match self {}///
         match self {
             Ident::Variable(s) => s.to_string(),
             Ident::Ignored => "_".to_string(),
@@ -187,6 +194,7 @@ pub fn as_labelled_list(e: Option<Expr>) -> Option<LabelledList> {
     return None;
 }
 
+/////////TdoOdodod
 pub fn as_ident(e: Option<Expr>) -> Option<Ident> {
     if let Some(e) = e {
         if let Some(Expr::Ident(i)) = singular_expr(e) {

@@ -18,6 +18,7 @@ ClosedExpr: Expr = {
 }
 
 BasicExpr: Expr = {
+    SuperIdent => Expr::SuperIdent(<>)
     Ident => Expr::Ident(<>),
     ParamIdent => Expr::ParamIdent(<>), // temporary addition to test parsing
     Literal => Expr::Literal(<>),
