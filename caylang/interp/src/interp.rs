@@ -1,7 +1,7 @@
 use crate::defn_map::{new_defn_map, DefnMap};
 use crate::from_ast::{top_level_ident, FoldOperation, Matches, Rename, RenamePart};
 use caylang_parser::ast::{
-    Expr, Ident, NodePrototype, Prototype, StructureList, StructurePair, TreePrototype,
+    Expr, Ident, ParamIdent, SuperIdent, NodePrototype, Prototype, StructureList, StructurePair, TreePrototype,
 };
 
 use caylang_io::filesys::{load_full_tree, write_full_tree};
@@ -17,13 +17,13 @@ use std::path::PathBuf;
 #[derive(Debug)]
 pub enum ValidationError {
     BadTreeDepth(usize, usize),             // expected a, found b
-    IdentifiedPrototypeNotFound(Ident),     // failed on a
-    IdentifiedPrototypeNotSupported(Ident), // failed on a
-    LayerMatchFailed(Ident, NodeIdx),       // failed to match a to b
+    IdentifiedPrototypeNotFound(SuperIdent),     // failed on a
+    IdentifiedPrototypeNotSupported(SuperIdent), // failed on a
+    LayerMatchFailed(SuperIdent, NodeIdx),       // failed to match a to b
     EdgeMatchFailed(NodeIdx),               // failed to match any edge prototype to a
 }
 
-fn get_tree_prototype<'a>(d: &'a DefnMap, i: &Ident) -> Result<&'a TreePrototype, ValidationError> {
+fn get_tree_prototype<'a>(d: &'a DefnMap, i: &SuperIdent) -> Result<&'a TreePrototype, ValidationError> {
     let Ok(prototype) = d.get_object(&i) else {
             return
                 Err(
@@ -44,7 +44,7 @@ fn get_tree_prototype<'a>(d: &'a DefnMap, i: &Ident) -> Result<&'a TreePrototype
     return Ok(prototype);
 }
 
-fn get_node_prototype<'a>(d: &'a DefnMap, i: &Ident) -> Result<&'a NodePrototype, ValidationError> {
+fn get_node_prototype<'a>(d: &'a DefnMap, i: &SuperIdent) -> Result<&'a NodePrototype, ValidationError> {
     let Ok(prototype) = d.get_object(&i) else {
             return
                 Err(
@@ -68,7 +68,7 @@ fn get_node_prototype<'a>(d: &'a DefnMap, i: &Ident) -> Result<&'a NodePrototype
 fn load_validation_prototypes<'a>(
     d: &'a DefnMap,
     l: &StructureList,
-) -> Result<Vec<(Ident, &'a NodePrototype)>, ValidationError> {
+) -> Result<Vec<(SuperIdent, &'a NodePrototype)>, ValidationError> {
     let mut prototypes = vec![];
     for StructurePair(_, prototype_idn) in l {
         let prototype = get_node_prototype(d, &prototype_idn)?;
@@ -78,7 +78,7 @@ fn load_validation_prototypes<'a>(
 }
 
 // needs to access prototypes by identifiers from a defn_map
-fn validate_tree(d: &DefnMap, tree: &Tree, ident: &Ident) -> Result<(), ValidationError> {
+fn validate_tree(d: &DefnMap, tree: &Tree, ident: &SuperIdent) -> Result<(), ValidationError> {
     let tree_layers: Vec<Vec<NodeIdx>> = tree.proper_layers().collect();
     let prototype = get_tree_prototype(d, ident)?;
     let offset = if prototype.edges.len() > 0 { 1 } else { 0 };

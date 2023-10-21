@@ -22,7 +22,7 @@ pub struct FoldExpr {
 
 #[derive(Debug)]
 pub struct Clause {
-    pub label: Option<SuperIdent>,
+    pub label: Option<Ident>,
     pub destructured_type: TypeDestructured,
     pub child: ClauseType,
 }
@@ -60,7 +60,7 @@ pub struct TypeDestructured {
     pub fields: Option<Vec<Field>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum SuperIdent {
     Ident(Ident),
     ParamIdent(ParamIdent),
@@ -72,8 +72,7 @@ pub enum Ident {
     Ignored,
 }
 
-// temporary parameter type to test parsing
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ParamIdent {
     pub name: String,
     pub param: Literal,
@@ -114,7 +113,7 @@ pub enum Destination {
     Move(Literal),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Literal {
     String(String),
     FString(String),

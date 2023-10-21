@@ -1,5 +1,5 @@
 use crate::from_ast::{IntoInterpObject};
-use caylang_parser::ast::{Expr, Ident, NodePrototype, NodeType, Prototype};
+use caylang_parser::ast::{Expr, Literal, Ident, ParamIdent, SuperIdent, NodePrototype, NodeType, Prototype};
 use crate::from_ast::{InterpObject, OperationApplication};
 use std::collections::HashMap;
 
@@ -51,7 +51,7 @@ impl DefnMap {
                         Some(obj) => {
                             match obj {
                                 InterpObject::Declaration(dec) => {
-                                    _ = self.add_object(SuperIdent::Ident(Ident::Variable(dec.name), dec.prototype));
+                                    _ = self.add_object(Ident::Variable(dec.name), dec.prototype);
                                 }
                                 InterpObject::Application(op) => {
                                     operations.push(op);
@@ -76,8 +76,22 @@ impl DefnMap {
                 }
                 Ident::Ignored => Err(LookupError::IgnoreLookup)
             }
-            SuperIdent::ParamIdent(param) => { ////Tdodododod
-                Err(LookupError::InvalidParameter)
+            SuperIdent::ParamIdent(param) => {
+                match param.name.as_str() {
+                    "dir" => {
+                        if let Literal::Regex(r) = param.param {
+                            let prototype = Prototype::NodePrototype(NodePrototype {regex: r.to_string(),
+                                node_type: NodeType::Dir});
+                            Ok(&prototype)
+                        } else {
+                            Err(LookupError::InvalidParameter)
+                        }
+                    }
+                    // "tree" => {
+                        
+                    // }
+                    _ => Err(LookupError::InvalidParameter)
+                }
             }
         }
     }

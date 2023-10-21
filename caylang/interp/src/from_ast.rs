@@ -70,7 +70,7 @@ pub struct FoldOperation {
 
 #[derive(Debug)]
 pub struct FoldStructure {
-    pub top_level: Ident,
+    pub top_level: SuperIdent,
     // pub layers: Vec<Ident>,
     // pub edges: Vec<Ident>
 }
@@ -93,7 +93,7 @@ pub enum TopLevelFoldPrototypeError {
     NodeGiven
 }
 
-pub fn top_level_ident(f: &FoldExpr) -> Ident {
+pub fn top_level_ident(f: &FoldExpr) -> SuperIdent {
     return f.dir_type.name.clone();
 }
 
@@ -195,7 +195,7 @@ impl ToInterpObject for FoldExpr {
         }
 
         // TODO: Once NodePrototypes are properly parsed, can do proper options here.
-        let options: Vec<Ident> = vec![Ident::Variable("File".to_string()); rename_templates.len()];
+        let options: Vec<SuperIdent> = vec![SuperIdent::Ident(Ident::Variable("File".to_string())); rename_templates.len()];
 
         Some(InterpObject::Application(OperationApplication {
             from: self.directory.clone(),

@@ -108,10 +108,10 @@ Destination: Destination = {
 
 // Each clause in a Fold expression
 Clause: Clause = {
-    <l:(<SuperIdent> ":")?> <d:TypeDestructured> <g:Guard+> => Clause { destructured_type: d, child: ClauseType::Guarded(g), label: l },
-    <l:(<SuperIdent> ":")?> <d:TypeDestructured> <o:Arrows<Function>> "=>" <p:Destination> => Clause {destructured_type: d, child: ClauseType::FileRead(o, p), label: l},
-    <l:(<SuperIdent> ":")?> <d:TypeDestructured> "=>" "{" <c:Clause+> "}" => Clause {destructured_type: d, child: ClauseType::SubClause(c), label: l},
-    <l:(<SuperIdent> ":")?> <d:TypeDestructured> ";" <n:Clause> => Clause { destructured_type: d, child: ClauseType::SubClause(vec![n]), label: l },
+    <l:(<Ident> ":")?> <d:TypeDestructured> <g:Guard+> => Clause { destructured_type: d, child: ClauseType::Guarded(g), label: l },
+    <l:(<Ident> ":")?> <d:TypeDestructured> <o:Arrows<Function>> "=>" <p:Destination> => Clause {destructured_type: d, child: ClauseType::FileRead(o, p), label: l},
+    <l:(<Ident> ":")?> <d:TypeDestructured> "=>" "{" <c:Clause+> "}" => Clause {destructured_type: d, child: ClauseType::SubClause(c), label: l},
+    <l:(<Ident> ":")?> <d:TypeDestructured> ";" <n:Clause> => Clause { destructured_type: d, child: ClauseType::SubClause(vec![n]), label: l },
 }
 
 Guard: Guard = {
