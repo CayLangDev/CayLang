@@ -253,7 +253,7 @@ pub struct TreePrototype {
 #[derive(Debug)]
 pub struct StructurePair(pub Ident, pub Ident);
 
-type StructureList = Vec<StructurePair>;
+pub type StructureList = Vec<StructurePair>;
 
 #[derive(Debug, Clone)]
 pub enum NodeType {

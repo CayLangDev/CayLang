@@ -69,6 +69,13 @@ pub struct FoldOperation {
 }
 
 #[derive(Debug)]
+pub struct FoldStructure {
+    pub top_level: Ident,
+    // pub layers: Vec<Ident>,
+    // pub edges: Vec<Ident>
+}
+
+#[derive(Debug)]
 pub struct Declaration {
     pub name: String,
     pub prototype: Prototype,
@@ -78,6 +85,16 @@ pub struct Declaration {
 pub struct OperationApplication {
     pub from: String,
     pub operation: FoldOperation,
+    pub structure: FoldStructure
+}
+
+pub enum TopLevelFoldPrototypeError {
+    NotFound,
+    NodeGiven
+}
+
+pub fn top_level_ident(f: &FoldExpr) -> Ident {
+    return f.dir_type.name.clone();
 }
 
 pub enum InterpObject {
@@ -182,6 +199,9 @@ impl ToInterpObject for FoldExpr {
                 options,
                 targets: rename_templates,
             },
+            structure: FoldStructure {
+                top_level: self.dir_type.name.clone()
+            }
         }))
     }
 }
