@@ -2,8 +2,8 @@ use caylang_io::tree::NodeData;
 use regex::Regex;
 use std::{collections::HashMap};
 use caylang_parser::ast::{
-    Clause, ClauseType, Destination, Expr, FoldExpr, Ident, Literal,
-    Prototype, NodePrototype, PrototypeDeclaration, NodeType
+    Clause, ClauseType, Destination, Expr, FoldExpr, SuperIdent, Ident, ParamIdent,
+    Literal, Prototype, NodePrototype, PrototypeDeclaration, NodeType
 };
 
 pub trait Matches {
@@ -83,9 +83,11 @@ impl IntoInterpObject for Expr {
 impl IntoInterpObject for PrototypeDeclaration {
     fn to_interp_object(self) -> Option<InterpObject> {
         match self.name {
-            SuperIdent::Ident::Variable(s) => Some(InterpObject::Declaration(Declaration {name: s, prototype: self.prototype})),
-            SuperIdent::Ident::Ignored => None,
-            SuperIdent::ParamIdent => None
+            SuperIdent::Ident(ident) => match ident {
+                Ident::Variable(s) => Some(InterpObject::Declaration(Declaration {name: s, prototype: self.prototype})),
+                Ident::Ignored => None,
+            }
+            _ => None
         }
     }
 }

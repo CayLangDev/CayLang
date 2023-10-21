@@ -44,14 +44,14 @@ pub struct Guard {
 
 #[derive(Debug)]
 pub struct Function {
-    pub name: SuperIdent,
+    pub name: Ident,
     pub args: Vec<Expr>,
 }
 
 #[derive(Debug)]
 pub struct Field {
-    pub name: SuperIdent,
-    pub alias: Option<SuperIdent>,
+    pub name: Ident,
+    pub alias: Option<Ident>,
 }
 
 #[derive(Debug)]
@@ -79,15 +79,24 @@ pub struct ParamIdent {
     pub param: Literal,
 }
 
-pub fn to_ident(s: &str) -> SuperIdent {
+pub fn to_ident(s: &str) -> Ident {
     if s == "_" {
-        return SuperIdent::Ident(Ident::Ignored);
+        return Ident::Ignored;
     } else {
-        return SuperIdent::Ident(Ident::Variable(s.to_string()));
+        return Ident::Variable(s.to_string());
     }
 }
 
-impl SuperIdent { /// TODODODO
+impl Ident {
+    pub fn to_string(&self) -> String {
+        match self {
+            Ident::Variable(s) => s.to_string(),
+            Ident::Ignored => "_".to_string()
+        }
+    }
+}
+
+impl SuperIdent {
     pub fn to_string(&self) -> String {
         match self {
             SuperIdent::Ident(ident) => match ident {

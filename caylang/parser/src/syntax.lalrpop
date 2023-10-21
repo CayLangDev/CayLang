@@ -92,7 +92,7 @@ TreePrototype: PrototypeDeclaration = {
 
 Field: Field = {
     // "as" is temporary
-    <name:SuperIdent> <alias:("as" <SuperIdent>)?> => Field {<>}
+    <name:Ident> <alias:("as" <Ident>)?> => Field {<>}
 }
 
 #[inline]
@@ -146,16 +146,16 @@ SuperIdent: SuperIdent = {
 
 // secret sauce
 Ident: Ident = {
-    r"[a-zA-Z_]+[a-zA-Z0-9_]*" => Ident::Variable(String::from(<>)),
+    IdentString => Ident::Variable(<>),
     "_" => Ident::Ignored
 } 
 
 // temprorary addition to test parsing
 ParamIdent: ParamIdent = {
-    <name:String> "<" <param:Literal> ">" => ParamIdent {<>}
+    <name:IdentString> "<" <param:Literal> ">" => ParamIdent {<>}
 }
 
-String: String = {
+IdentString: String = {
     r"[a-zA-Z_]+[a-zA-Z0-9_]*" => String::from(<>)
 }
 

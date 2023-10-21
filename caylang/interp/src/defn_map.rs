@@ -9,7 +9,8 @@ use std::collections::HashMap;
 
 pub enum LookupError {
     IgnoreLookup,
-    VariableNotFound
+    VariableNotFound,
+    InvalidParameter
 }
 
 pub enum AddStatus {
@@ -50,7 +51,7 @@ impl DefnMap {
                         Some(obj) => {
                             match obj {
                                 InterpObject::Declaration(dec) => {
-                                    _ = self.add_object(Ident::Variable(dec.name), dec.prototype);
+                                    _ = self.add_object(SuperIdent::Ident(Ident::Variable(dec.name), dec.prototype));
                                 }
                                 InterpObject::Application(op) => {
                                     operations.push(op);
@@ -66,25 +67,26 @@ impl DefnMap {
         return operations;
     }
 
-    pub fn get_object(&self, name: &Ident) -> Result<&Object, LookupError> {
+    pub fn get_object(&self, name: &SuperIdent) -> Result<&Object, LookupError> {
         match name {
-            Ident::Variable(s) => {
-                match self.data.get(s) {
+            SuperIdent::Ident(ident) => match ident {
+                Ident::Variable(s) => match self.data.get(s) {
                     Some(val) => Ok(val),
                     None => Err(LookupError::VariableNotFound)
                 }
+                Ident::Ignored => Err(LookupError::IgnoreLookup)
             }
-            Ident::Ignored => Err(LookupError::IgnoreLookup)
+            SuperIdent::ParamIdent(param) => { ////Tdodododod
+                Err(LookupError::InvalidParameter)
+            }
         }
     }
 
     pub fn add_object(&mut self, name: Ident, obj: Object) -> Result<(), AddStatus> {
         match name {
-            Ident::Variable(s) => {
-                match self.data.insert(s, obj) {
-                    Some(_val) => Err(AddStatus::OldReplaced),
-                    None => Ok(()) // added a new object with a new name
-                }
+            Ident::Variable(s) => match self.data.insert(s, obj) {
+                Some(_val) => Err(AddStatus::OldReplaced),
+                None => Ok(()) // added a new object with a new name
             }
             Ident::Ignored => Err(AddStatus::Ignored)
         }
