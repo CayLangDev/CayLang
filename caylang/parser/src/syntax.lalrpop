@@ -158,7 +158,8 @@ ParamIdent: ParamIdent = {
 }
 
 Literal: Literal = {
-    r"[0-9]+(?:\.[0-9]*)?" => Literal::Numeric(f64::from_str(<>).unwrap()), // should add distinct integer and floating point type, currently all floats.
+    r"[0-9]*" => Literal::Integer(i32::from_str(<>).unwrap()),
+    r"[0-9]+(?:\.[0-9]*)" => Literal::Numeric(f64::from_str(<>).unwrap()),
     r#""(?:[^\\"]|(?:\\"))*""# => Literal::String(stripstr(<>, 1)), // arbitrary characters between "", except " which must be preceded by \.
     r#"`(?:[^\\`]|(?:\\`))*`"# => Literal::FString(stripstr(<>, 1)),
     

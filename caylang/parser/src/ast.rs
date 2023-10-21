@@ -119,6 +119,7 @@ pub enum Literal {
     FString(String),
     Regex(String),
     Path(String),
+    Integer(i32),
     Numeric(f64),
 }
 
@@ -254,19 +255,19 @@ pub type UnlabelledList = Vec<Expr>;
 #[derive(Debug)]
 pub struct Pair(pub Ident, pub Expr);
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PrototypeDeclaration {
     pub name: SuperIdent,
     pub prototype: Prototype,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Prototype {
     NodePrototype(NodePrototype),
     TreePrototype(TreePrototype),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TreePrototype {
     pub regex: String,
     pub layers: StructureList,
@@ -275,7 +276,7 @@ pub struct TreePrototype {
 
 // .0 refers to prototype label, .1 refers to prototype identifier
 // no expression prototypes rn
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StructurePair(pub Ident, pub SuperIdent);
 
 pub type StructureList = Vec<StructurePair>;

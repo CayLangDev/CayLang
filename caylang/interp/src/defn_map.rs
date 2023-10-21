@@ -1,5 +1,6 @@
 use crate::from_ast::{IntoInterpObject};
-use caylang_parser::ast::{Expr, Literal, Ident, ParamIdent, SuperIdent, NodePrototype, NodeType, Prototype};
+use caylang_parser::ast::{Expr, Literal, Ident, ParamIdent, SuperIdent,
+    StructurePair, StructureList, TreePrototype, NodePrototype, NodeType, Prototype};
 use crate::from_ast::{InterpObject, OperationApplication};
 use std::collections::HashMap;
 
@@ -67,29 +68,52 @@ impl DefnMap {
         return operations;
     }
 
-    pub fn get_object(&self, name: &SuperIdent) -> Result<&Object, LookupError> {
+    pub fn get_object(&self, name: &SuperIdent) -> Result<Object, LookupError> {
         match name {
             SuperIdent::Ident(ident) => match ident {
                 Ident::Variable(s) => match self.data.get(s) {
-                    Some(val) => Ok(val),
+                    Some(val) => Ok(val.clone()),
                     None => Err(LookupError::VariableNotFound)
                 }
                 Ident::Ignored => Err(LookupError::IgnoreLookup)
             }
+
             SuperIdent::ParamIdent(param) => {
                 match param.name.as_str() {
-                    "dir" => {
-                        if let Literal::Regex(r) = param.param {
-                            let prototype = Prototype::NodePrototype(NodePrototype {regex: r.to_string(),
-                                node_type: NodeType::Dir});
-                            Ok(&prototype)
+                    "Directory" => {
+                        if let Literal::Regex(r) = &param.param {
+
+                            Ok( Prototype::NodePrototype(
+                                NodePrototype {regex: r.to_string(), node_type: NodeType::Dir}
+                            ))
                         } else {
                             Err(LookupError::InvalidParameter)
                         }
                     }
-                    // "tree" => {
-                        
-                    // }
+
+                    "Star" => {
+                        if let Literal::Integer(i) = &param.param {
+                            if i > &0 {
+                                let layers: StructureList = vec![ StructurePair(
+                                        Ident::Variable("".to_string()),
+                                        SuperIdent::Ident(Ident::Variable("Directory".to_string()))
+                                    ); (i - 1).try_into().unwrap()];
+                                let edges: StructureList = vec![ StructurePair(
+                                        Ident::Variable("".to_string()),
+                                        SuperIdent::Ident(Ident::Variable("File".to_string()))
+                                    )];
+                                    
+                                Ok( Prototype::TreePrototype(
+                                    TreePrototype {regex: r".*".to_string(), layers, edges}
+                                ))
+                            }
+                            else {
+                                Err(LookupError::InvalidParameter)
+                            }
+                        } else {
+                            Err(LookupError::InvalidParameter)
+                        }
+                    }
                     _ => Err(LookupError::InvalidParameter)
                 }
             }

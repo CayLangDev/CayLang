@@ -23,7 +23,7 @@ pub enum ValidationError {
     EdgeMatchFailed(NodeIdx),               // failed to match any edge prototype to a
 }
 
-fn get_tree_prototype<'a>(d: &'a DefnMap, i: &SuperIdent) -> Result<&'a TreePrototype, ValidationError> {
+fn get_tree_prototype<'a>(d: &'a DefnMap, i: &SuperIdent) -> Result<TreePrototype, ValidationError> {
     let Ok(prototype) = d.get_object(&i) else {
             return
                 Err(
@@ -44,7 +44,7 @@ fn get_tree_prototype<'a>(d: &'a DefnMap, i: &SuperIdent) -> Result<&'a TreeProt
     return Ok(prototype);
 }
 
-fn get_node_prototype<'a>(d: &'a DefnMap, i: &SuperIdent) -> Result<&'a NodePrototype, ValidationError> {
+fn get_node_prototype<'a>(d: &'a DefnMap, i: &SuperIdent) -> Result<NodePrototype, ValidationError> {
     let Ok(prototype) = d.get_object(&i) else {
             return
                 Err(
@@ -68,7 +68,7 @@ fn get_node_prototype<'a>(d: &'a DefnMap, i: &SuperIdent) -> Result<&'a NodeProt
 fn load_validation_prototypes<'a>(
     d: &'a DefnMap,
     l: &StructureList,
-) -> Result<Vec<(SuperIdent, &'a NodePrototype)>, ValidationError> {
+) -> Result<Vec<(SuperIdent, NodePrototype)>, ValidationError> {
     let mut prototypes = vec![];
     for StructurePair(_, prototype_idn) in l {
         let prototype = get_node_prototype(d, &prototype_idn)?;
