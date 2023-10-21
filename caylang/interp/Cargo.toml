@@ -7,6 +7,5 @@ edition = "2021"
 
 [dependencies]
 caylang-parser = { path = "../parser", version="0.1.0" }
-caylang-template-parser = { path = "../template", version="0.1.0" }
 caylang-io = { path = "../dir-operations", version="0.1.0" }
 regex = "1.9.5"

@@ -1,8 +1,8 @@
 use caylang_io::tree::NodeData;
 use regex::Regex;
 use std::{collections::HashMap};
-use caylang_template_parser::parse::{parse};
-use caylang_template_parser::ast::{TemplatePart};
+use crate::template::parse::{parse};
+use crate::template::ast::{TemplatePart};
 use caylang_parser::ast::{
     Clause, ClauseType, Destination, Expr, FoldExpr, Ident, Literal,
     Prototype, NodePrototype, PrototypeDeclaration, NodeType

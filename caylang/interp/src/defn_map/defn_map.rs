@@ -1,7 +1,8 @@
 use crate::from_ast::{IntoInterpObject};
-use caylang_parser::ast::{Expr, Ident, NodePrototype, NodeType, Prototype};
+use caylang_parser::ast::{Expr, Ident, NodePrototype, NodeType, Prototype, TreePrototype, NodePrototype};
 use crate::from_ast::{InterpObject, OperationApplication};
 use std::collections::HashMap;
+use std::mem::{discriminant, Discriminant};
 
 // map from variable names to values, that handles the ignore identifier cleanly
 // pub type DefnMap = ;
@@ -10,6 +11,12 @@ use std::collections::HashMap;
 pub enum LookupError {
     IgnoreLookup,
     VariableNotFound
+}
+
+pub enum TargetedLookupError {
+    IgnoreLookup,
+    VariableNotFound,
+    IncorrectTypeObjectFound
 }
 
 pub enum AddStatus {
@@ -21,7 +28,7 @@ pub type Object = Prototype;
 
 #[derive(Debug)]
 pub struct DefnMap {
-    data: HashMap<String, Object>
+    pub(super) data: HashMap<String, Object>
 }
 
 pub fn new_defn_map() -> DefnMap {
@@ -77,6 +84,34 @@ impl DefnMap {
             Ident::Ignored => Err(LookupError::IgnoreLookup)
         }
     }
+
+    pub fn get_tree_object(&self, name: &Ident) ->  Result<&TreePrototype, TargetedLookupError> {
+        match self.get_object(name) {
+            Ok(r) => match r {
+                 Prototype::TreePrototype(p) => Ok(p),
+                 _ => Err(TargetedLookupError::IncorrectTypeObjectFound)
+            }
+            Err(e) => Err(match e {
+                LookupError::IgnoreLookup => TargetedLookupError::IgnoreLookup,
+                LookupError::VariableNotFound => TargetedLookupError::VariableNotFound
+            })
+        }
+    }
+
+    pub fn get_node_object(&self, name: &Ident) ->  Result<&NodePrototype, TargetedLookupError> {
+        match self.get_object(name) {
+            Ok(r) => match r {
+                 Prototype::TreePrototype(p) => Ok(p),
+                 _ => Err(TargetedLookupError::IncorrectTypeObjectFound)
+            }
+            Err(e) => Err(match e {
+                LookupError::IgnoreLookup => TargetedLookupError::IgnoreLookup,
+                LookupError::VariableNotFound => TargetedLookupError::VariableNotFound
+            })
+        }
+    }
+
+
 
     pub fn add_object(&mut self, name: Ident, obj: Object) -> Result<(), AddStatus> {
         match name {
