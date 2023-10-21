@@ -1,5 +1,5 @@
 use crate::defn_map::{new_defn_map, DefnMap};
-use crate::from_ast::{FoldOperation, Rename, RenamePart, Matches};
+use crate::from_ast::{FoldOperation, Matches, Rename, RenamePart};
 use caylang_parser::ast::{Expr, NodePrototype, Prototype};
 
 use caylang_io::filesys::{load_full_tree, write_full_tree};
@@ -11,8 +11,6 @@ use std::iter::zip;
 use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
-
-
 
 // needs to access prototypes by identifiers from a defn_map
 // fn validate(tree: &Tree, prototype: TreePrototype) -> bool {
@@ -71,10 +69,10 @@ pub fn new_name(path: &PathBuf, target: &Rename, root_len: usize) -> PathBuf {
     // }
 
     let mut name_comps = vec![];
-// <<<<<<< HEAD
-//     for i in 0..root_len {
-//         name_comps.push(comps[i].as_os_str().to_str().unwrap().to_string());
-//     }
+    // <<<<<<< HEAD
+    //     for i in 0..root_len {
+    //         name_comps.push(comps[i].as_os_str().to_str().unwrap().to_string());
+    //     }
 
     for part in &target.parts {
         let mut s = "".to_string();
@@ -95,25 +93,26 @@ pub fn interpret(ast: Expr) {
     let mut defn_map = new_defn_map();
     let operations = defn_map.load_objects(ast);
     defn_map.add_defaults();
-    println!("defns {:?}", defn_map);
-    println!("operations {:?}", operations);
+    // println!("defns {:?}", defn_map);
+    // println!("operations {:?}", operations);
     // now run to_fold
     for op in operations {
         let root: PathBuf = op.from.into();
         let root_len = root.components().count();
         let tree = load_full_tree(&root);
+
         // tree.print();
         let (old_paths, new_paths) = to_fold(&defn_map, &tree, op.operation, root_len);
-        println!("old paths: {:?}", old_paths);
-        println!("new paths: {:?}", new_paths);
+        // println!("old paths: {:?}", old_paths);
+        // println!("new paths: {:?}", new_paths);
         let new_tree = Tree::from_fold(&tree, old_paths, new_paths);
-// <<<<<<< HEAD
-//         // new_tree.print();
-//         write_full_tree(&tree, &new_tree);
-// =======
+        // <<<<<<< HEAD
+        //         // new_tree.print();
+        //         write_full_tree(&tree, &new_tree);
+        // =======
         // new_tree.print();
         write_full_tree(&root, &root, &tree, &new_tree);
-// >>>>>>> feat/interp
+        // >>>>>>> feat/interp
     }
     return;
 }
