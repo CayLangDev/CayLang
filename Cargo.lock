@@ -129,6 +129,7 @@ version = "0.1.0"
 dependencies = [
  "built",
  "caylang-interpreter",
+ "caylang-io",
  "caylang-parser",
  "clap",
  "lalrpop-util",

@@ -2,6 +2,7 @@ use crate::defn_map::{new_defn_map, DefnMap};
 use crate::from_ast::{FoldOperation, Rename, RenamePart, Matches, top_level_ident};
 use caylang_parser::ast::{Expr, NodePrototype, TreePrototype, Prototype, StructureList, Ident, StructurePair};
 
+
 use caylang_io::filesys::{load_full_tree, write_full_tree};
 use caylang_io::tree::{Tree, NodeIdx};
 
@@ -188,8 +189,8 @@ pub fn interpret(ast: Expr) {
     let mut defn_map = new_defn_map();
     let operations = defn_map.load_objects(ast);
     defn_map.add_defaults();
-    println!("defns {:?}", defn_map);
-    println!("operations {:?}", operations);
+    // println!("defns {:?}", defn_map);
+    // println!("operations {:?}", operations);
     // now run to_fold
     for op in operations {
         let root: PathBuf = op.from.into();
