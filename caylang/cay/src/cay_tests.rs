@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use caylang_io::filesys::run_system_test;
+    use caylang_io::filesys::system_test;
     use caylang_io::filesys_builder::FileNode;
     use caylang_io::tree::{NodeData, NodeType, Tree};
     use std::fs::File;
@@ -8,8 +8,34 @@ mod tests {
 
     #[test]
     fn basic_system_shuffle() {
-        let in_structure = FileNode::dir("a", vec![FileNode::dir("b", [FileNode::file("f")])]);
+        let cay_code = r#"
+            TreeDirectorySet SmallTreeDir {
+                Names: r"test_1",
+                Structure: {
+                    layers: {
+                        A: Directory,
+                        B: Directory
+                    },
+                    edges: {
+                        F: File
+                    }
+                }
+            }
 
-        run_system_test("test/cases/simple_test_1");
+            fold "<PATH>": SmallTreeDir {
+                A { name as a } => {
+                    B { name as b } => {
+                        F {name as f} => `{b}/{a}/{f}`
+                    }
+                }
+            }
+        "#;
+
+        let in_structure =
+            FileNode::dir("a", vec![FileNode::dir("b", vec![FileNode::file("f.txt")])]);
+        let out_structure =
+            FileNode::dir("b", vec![FileNode::dir("a", vec![FileNode::file("f.txt")])]);
+
+        system_test(cay_code, &in_structure, &out_structure);
     }
 }

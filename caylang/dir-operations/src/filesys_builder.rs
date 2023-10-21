@@ -27,7 +27,7 @@ impl FileNode {
         if !self.children.is_empty() {
             create_dir(&node_path)?;
         } else {
-            write(node_path, format!("{}", &self.name))?;
+            write(&node_path, format!("{}", &self.name))?;
         }
 
         for child in &self.children {

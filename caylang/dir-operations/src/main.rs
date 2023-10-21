@@ -5,7 +5,7 @@ use std::process::Child;
 pub mod filesys;
 use crate::filesys::{load_full_tree, write_full_tree};
 use crate::tree::{root_idx, NodeIdx, Tree};
-mod filesys_builder;
+pub mod filesys_builder;
 mod filesys_tests;
 mod tree_tests;
 

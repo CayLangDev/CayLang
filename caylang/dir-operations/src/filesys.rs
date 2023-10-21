@@ -1,3 +1,4 @@
+use crate::filesys_builder::FileNode;
 use crate::tree::{NodeData, NodeIdx, NodeType, Tree};
 use jwalk::WalkDir;
 use std::fs;
@@ -18,36 +19,35 @@ fn dfs(tree: &Tree, current_idx: NodeIdx) {
     }
 }
 
-pub fn run_system_test(path: &str) {
-    let test_path = PathBuf::from(path);
-    let mut in_path = test_path.clone();
-    in_path.push("in");
-    let mut out_path = test_path.clone();
-    out_path.push("out");
-    let mut cay_path = test_path.clone();
-    cay_path.push("test.cay");
-
+pub fn system_test(
+    cay_code: &str,
+    in_structure: &FileNode,
+    out_structure: &FileNode,
+) -> Result<(), std::io::Error> {
     let tmp_dir = TempDir::new("test").unwrap();
     let root_path = PathBuf::from(tmp_dir.path());
 
-    let options = dir::CopyOptions::new();
-    // options.mirror_copy = true; // To mirror copy the whole structure of the source directory
-    let _ = copy(&in_path, &root_path, &options);
     let mut tmp_in = root_path.clone();
-    tmp_in.push("in");
+    tmp_in.push("testbed");
+    tmp_in.push("test_root");
+
     let mut tmp_out = root_path.clone();
-    tmp_out.push("out");
-    let _ = fs::rename(&tmp_in, &tmp_out);
+    tmp_out.push("expected");
+    tmp_out.push("test_root");
 
     let mut tmp_cay = root_path.clone();
     tmp_cay.push("test.cay");
-    let _ = fs::copy(&cay_path, &tmp_cay);
 
-    dfs(&load_full_tree(&root_path), 0);
+    fs::create_dir_all(&tmp_in)?;
+    fs::create_dir_all(&tmp_out)?;
 
-    let file_content = fs::read_to_string(&tmp_cay).unwrap();
-    let modified_content = file_content.replace("<PATH>", tmp_out.to_str().unwrap());
-    let _ = fs::write(&tmp_cay, &modified_content).unwrap();
+    in_structure.apply(&tmp_in)?;
+    out_structure.apply(&tmp_out)?;
+
+    fs::write(
+        &tmp_cay,
+        &cay_code.replace("<PATH>", tmp_in.to_str().unwrap()),
+    )?;
 
     // Call main cay exec on the file
     let mut cmd = Command::new("cargo");
@@ -55,7 +55,6 @@ pub fn run_system_test(path: &str) {
         .arg("run")
         .arg("build")
         .arg("-r")
-        // .arg("-v")
         .arg(tmp_cay.to_str().unwrap());
 
     // Run cmd
@@ -68,7 +67,8 @@ pub fn run_system_test(path: &str) {
     };
 
     dfs(&load_full_tree(&root_path), 0);
-    assert!(!is_different(out_path.to_str().unwrap(), tmp_out.to_str().unwrap()).unwrap());
+    assert!(!is_different(tmp_in.to_str().unwrap(), tmp_out.to_str().unwrap()).unwrap());
+    return Ok(());
 }
 
 pub fn run_test(path: &str, f: fn(&Tree) -> Tree) {
