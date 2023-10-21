@@ -27,24 +27,22 @@ fn main() -> std::io::Result<()> {
     }
 
     let path = PathBuf::from(&args[1]);
-    // let to_path = PathBuf::from(&args[2]);
-    // let tree: Tree = load_full_tree(&path);
+    let to_path = PathBuf::from(&args[2]);
+    let tree: Tree = load_full_tree(&path);
 
-    // let flattened_tree = Tree::from_fold_function(&tree, |x| {
-    //     let string = x.data.path.to_str().unwrap();
-    //     PathBuf::from(str::replace(string, "/", "_"))
-    // });
+    let flattened_tree = Tree::from_fold_function(&tree, |x| {
+        let string = x.data.path.to_str().unwrap();
+        PathBuf::from(str::replace(string, "/", "_"))
+    });
 
-    // println!("DFS");
+    println!("DFS");
 
-    // dfs(&tree, root_idx());
+    dfs(&tree, root_idx());
 
-    // println!("DFS Flatten Fold");
-    // dfs(&flattened_tree, root_idx());
+    println!("DFS Flatten Fold");
+    dfs(&flattened_tree, root_idx());
 
-    // write_full_tree(&path, &to_path, &tree, &flattened_tree);
-
-    // FileNode::dir("a", vec![FileNode::file("b")]).apply(&path)?;
+    write_full_tree(&path, &to_path, &tree, &flattened_tree);
 
     return Ok(());
 }
