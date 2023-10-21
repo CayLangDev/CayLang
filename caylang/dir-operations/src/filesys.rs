@@ -66,6 +66,22 @@ pub fn system_test(
         }
     };
 
+    for entry in WalkDir::new(&root_path)
+        .into_iter()
+        .filter_map(|entry| entry.ok())
+    {
+        if entry.file_type().is_file() {
+            let file_path = entry.path();
+
+            if let Ok(contents) = fs::read_to_string(&file_path) {
+                println!("File: {:?}", file_path);
+                println!("Content: \n{}\n", contents);
+            } else {
+                eprintln!("Failed to read file: {:?}", file_path);
+            }
+        }
+    }
+
     dfs(&load_full_tree(&root_path), 0);
     assert!(!is_different(tmp_in.to_str().unwrap(), tmp_out.to_str().unwrap()).unwrap());
     return Ok(());
