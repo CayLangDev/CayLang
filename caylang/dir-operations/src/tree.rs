@@ -83,6 +83,14 @@ pub fn root_idx() -> NodeIdx {
 }
 
 impl Tree {
+    // pub root_path(&self) -> PathBuf {
+    //     self.nodes[0].data.path
+    // }
+    //
+    // pub root_idx() -> NodeIdx {
+    //     0
+    // }
+
     pub fn new() -> Self {
         let mut new_tree = Self {
             nodes: Vec::new(),
@@ -238,6 +246,11 @@ impl Tree {
         }
     }
 
+    // bandaid layers fix
+    pub fn proper_layers(&self) -> impl Iterator<Item = Vec<usize>> + '_ {
+        self.layers().filter(|v| !self.data_iter(v.iter().map(|i| *i)).any(|d| d.path == PathBuf::new()))
+    }
+
     pub fn data_iter<'a>(
         &'a self,
         i: impl Iterator<Item = usize> + 'a,
@@ -246,7 +259,7 @@ impl Tree {
     }
 
     pub fn print(&self) {
-        for (j, p) in self.layers().enumerate() {
+        for (j, p) in self.proper_layers().enumerate() {
             println!("Layer {}", j);
             let layer: Vec<&Node> = p.iter().map(|i| &self.nodes[*i]).collect();
             println!("{:?}", layer);

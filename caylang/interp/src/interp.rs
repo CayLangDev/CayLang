@@ -1,5 +1,5 @@
 use crate::defn_map::{new_defn_map, DefnMap};
-use crate::from_ast::{FoldOperation, Rename, RenamePart, Matches};
+use crate::from_ast::{FoldOperation, Rename, RenamePart, Matches, top_level_ident};
 use caylang_parser::ast::{Expr, NodePrototype, TreePrototype, Prototype, StructureList, Ident, StructurePair};
 
 use caylang_io::filesys::{load_full_tree, write_full_tree};
@@ -12,25 +12,7 @@ use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
 
-/*
-fn validate_layers(
-    d: &DefnMap,
-    tree: &Tree,
-    tree_layers: &[Vec<NodeIdx>],
-    prototype_layers: StructureList
-) -> bool {
-    for (tree_layer, (layer_label_idn, layer_prototype_idn)) in
-        zip(tree_layers, prototype_layers) {
-        let layer_prototype = d.get_object(layer_prototype_idn);
-        for node in tree.data_iter(tree_layer) {
-            if !layer_prototype.matches(node) {
-                return false;
-            }
-        }
-    }
-    return true;
-}*/
-
+#[derive(Debug)]
 pub enum ValidationError {
     BadTreeDepth(usize, usize), // expected a, found b
     IdentifiedPrototypeNotFound(Ident), // failed on a
@@ -39,28 +21,61 @@ pub enum ValidationError {
     EdgeMatchFailed(NodeIdx) // failed to match any edge prototype to a
 }
 
-fn load_validation_prototypes(d: &DefnMap, l: StructureList)
--> Result<Vec<(Ident, &NodePrototype)>, ValidationError> {
-    let mut prototypes = vec![];
-    for StructurePair(_, prototype_idn) in l {
-        let Ok(prototype) = d.get_object(&prototype_idn) else {
+fn get_tree_prototype<'a>(
+    d: &'a DefnMap,
+    i: &Ident
+) -> Result<&'a TreePrototype, ValidationError> {
+    let Ok(prototype) = d.get_object(&i) else {
             return
                 Err(
                     ValidationError::IdentifiedPrototypeNotFound(
-                        prototype_idn.clone()
+                        i.clone()
                     )
                 );
         };
 
-        let Prototype::NodePrototype(prototype) = prototype else {
+    let Prototype::TreePrototype(prototype) = prototype else {
+        return
+            Err(
+                ValidationError::IdentifiedPrototypeNotSupported(
+                    i.clone()
+                )
+            );
+    };
+    return Ok(prototype);
+}
+
+fn get_node_prototype<'a>(
+    d: &'a DefnMap,
+    i: &Ident
+) -> Result<&'a NodePrototype, ValidationError> {
+    let Ok(prototype) = d.get_object(&i) else {
             return
                 Err(
-                    ValidationError::IdentifiedPrototypeNotSupported(
-                        prototype_idn.clone()
+                    ValidationError::IdentifiedPrototypeNotFound(
+                        i.clone()
                     )
                 );
         };
 
+    let Prototype::NodePrototype(prototype) = prototype else {
+        return
+            Err(
+                ValidationError::IdentifiedPrototypeNotSupported(
+                    i.clone()
+                )
+            );
+    };
+    return Ok(prototype);
+}
+
+fn load_validation_prototypes<'a>(
+d: &'a DefnMap,
+l: &StructureList
+) -> Result<Vec<(Ident, &'a NodePrototype)>, ValidationError> {
+    let mut prototypes = vec![];
+    for StructurePair(_, prototype_idn) in l {
+        let prototype = get_node_prototype(d, &prototype_idn)?;
         prototypes.push((prototype_idn.clone(), prototype));
     }
     return Ok(prototypes);
@@ -70,28 +85,28 @@ fn load_validation_prototypes(d: &DefnMap, l: StructureList)
 fn validate_tree(
     d: &DefnMap,
     tree: &Tree,
-    prototype: TreePrototype
+    ident: &Ident
 ) -> Result<(), ValidationError> {
-    let tree_layers: Vec<Vec<NodeIdx>> = tree.layers().collect();
-
+    let tree_layers: Vec<Vec<NodeIdx>> = tree.proper_layers().collect();
+    let prototype = get_tree_prototype(d, ident)?;
     let offset = if prototype.edges.len() > 0 { 1 } else { 0 };
 
     // There should be as many tree layers as there are prototype layers
-    // unless the prototype has an edge, in which case there ought to be one less
+    // unless the prototype has an edge, in which case there ought to be one more
     // tree layer.
-    if tree_layers.len() != prototype.layers.len() - offset {
-        return Err(ValidationError::BadTreeDepth(prototype.layers.len() - offset,
+    if tree_layers.len() != prototype.layers.len() + offset {
+        return Err(ValidationError::BadTreeDepth(prototype.layers.len() + offset,
                                                  tree_layers.len()));
     }
 
     let inner_layers = &tree_layers[0..tree_layers.len()-offset];
-    let layer_prototypes = load_validation_prototypes(d, prototype.layers)?;
+    let layer_prototypes = load_validation_prototypes(&d, &prototype.layers)?;
 
-    for (layer, (p_ident, prototype)) in zip(inner_layers, layer_prototypes) {
+    for (layer, (l_ident, l_prototype)) in zip(inner_layers, layer_prototypes) {
         for node_idx in layer {
             let node = &tree.nodes[*node_idx];
-            if !prototype.matches(&node.data) {
-                return Err(ValidationError::LayerMatchFailed(p_ident, *node_idx));
+            if !l_prototype.matches(&node.data) {
+                return Err(ValidationError::LayerMatchFailed(l_ident, *node_idx));
             }
         }
     }
@@ -100,7 +115,7 @@ fn validate_tree(
         return Ok(());
     }
 
-    let edge_prototypes = load_validation_prototypes(d, prototype.edges)?;
+    let edge_prototypes = load_validation_prototypes(&d, &prototype.edges)?;
     // return false if there's any leaf node that doesn't match some
     // edge prototype.
     for leaf_idx in &tree_layers[tree_layers.len()-1] {
@@ -116,25 +131,27 @@ fn validate_tree(
 pub fn to_fold(
     d: &DefnMap,
     tree: &Tree,
-    fold_desc: FoldOperation,
-    root_len: usize,
+    fold_desc: FoldOperation
 ) -> (Vec<PathBuf>, Vec<PathBuf>) {
     let mut old_paths = vec![];
     let mut new_paths = vec![];
     for l in tree.data_iter(tree.leaves()) {
-        // println!("leaf: {:?}", l);
-        for (i, t) in zip(&fold_desc.options, &fold_desc.targets) {
-            let o = d.get_object(i);
-            match o {
-                Ok(Prototype::NodePrototype(o)) => {
-                    if o.matches(l) {
-                        old_paths.push(l.path.clone());
-                        new_paths.push(new_name(&l.path, t, root_len));
-                    }
-                }
-                _ => {
-                    panic!("Prototype didn't match");
-                }
+
+        let prototypes = fold_desc.options.iter().map(|i| {
+            let Ok(Prototype::NodePrototype(o)) = d.get_object(i)
+            else {panic!("Edge Prototype doesn't exist")};
+            o
+        });
+
+        let out = zip(prototypes,fold_desc.targets.iter()).find(|(p, t)| p.matches(l));
+
+        match out {
+            Some((_, t)) => {
+                old_paths.push(l.path.clone());
+                new_paths.push(new_name(&l.path, t));
+            },
+            _ => {
+                panic!("Edge Prototypes didn't match!");
             }
         }
     }
@@ -149,19 +166,10 @@ pub fn make_full_path<'a>(i: impl Iterator<Item = &'a Path> + 'a) -> PathBuf {
     return b;
 }
 
-pub fn new_name(path: &PathBuf, target: &Rename, root_len: usize) -> PathBuf {
+pub fn new_name(path: &PathBuf, target: &Rename) -> PathBuf {
     let comps: Vec<Component> = path.components().collect();
 
-    // TODO this fixes it temporarily
-    // if comps.len() < 3 {
-    //     return PathBuf::from("");
-    // }
-
     let mut name_comps = vec![];
-// <<<<<<< HEAD
-//     for i in 0..root_len {
-//         name_comps.push(comps[i].as_os_str().to_str().unwrap().to_string());
-//     }
 
     for part in &target.parts {
         let mut s = "".to_string();
@@ -173,8 +181,6 @@ pub fn new_name(path: &PathBuf, target: &Rename, root_len: usize) -> PathBuf {
         }
         name_comps.push(s);
     }
-    // println!("path: {}", path.display());
-    // println!("target: {}", target.len());
     return make_full_path(name_comps.iter().map(|c| c.as_ref()));
 }
 
@@ -187,20 +193,16 @@ pub fn interpret(ast: Expr) {
     // now run to_fold
     for op in operations {
         let root: PathBuf = op.from.into();
-        let root_len = root.components().count();
         let tree = load_full_tree(&root);
+        let tlp_ident = op.structure.top_level;
+        validate_tree(&defn_map, &tree, &tlp_ident).unwrap();
+
         // tree.print();
-        let (old_paths, new_paths) = to_fold(&defn_map, &tree, op.operation, root_len);
+        let (old_paths, new_paths) = to_fold(&defn_map, &tree, op.operation);
         println!("old paths: {:?}", old_paths);
         println!("new paths: {:?}", new_paths);
         let new_tree = Tree::from_fold(&tree, old_paths, new_paths);
-// <<<<<<< HEAD
-//         // new_tree.print();
-//         write_full_tree(&tree, &new_tree);
-// =======
-        // new_tree.print();
         write_full_tree(&root, &root, &tree, &new_tree);
-// >>>>>>> feat/interp
     }
     return;
 }
