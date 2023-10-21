@@ -26,7 +26,7 @@ pub type Rename = Vec<usize>;
 
 #[derive(Debug)]
 pub struct FoldOperation {
-    pub options: Vec<Ident>,
+    pub options: Vec<SuperIdent>,
     pub targets: Vec<Rename>,
 }
 
@@ -79,11 +79,13 @@ impl IntoInterpObject for Expr {
     }
 }
 
+// tree stuff
 impl IntoInterpObject for PrototypeDeclaration {
     fn to_interp_object(self) -> Option<InterpObject> {
         match self.name {
-            Ident::Variable(s) => Some(InterpObject::Declaration(Declaration {name: s, prototype: self.prototype})),
-            Ident::Ignored => None
+            SuperIdent::Ident::Variable(s) => Some(InterpObject::Declaration(Declaration {name: s, prototype: self.prototype})),
+            SuperIdent::Ident::Ignored => None,
+            SuperIdent::ParamIdent => None
         }
     }
 }

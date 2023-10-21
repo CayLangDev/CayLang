@@ -60,6 +60,7 @@ pub struct TypeDestructured {
     pub fields: Option<Vec<Field>>,
 }
 
+#[derive(Debug)]
 pub enum SuperIdent {
     Ident(Ident),
     ParamIdent(ParamIdent),
@@ -74,24 +75,26 @@ pub enum Ident {
 // temporary parameter type to test parsing
 #[derive(Debug)]
 pub struct ParamIdent {
-    pub name: Ident,
+    pub name: String,
     pub param: Literal,
 }
 
 pub fn to_ident(s: &str) -> SuperIdent {
     if s == "_" {
-        return SuperIdent::Ident::Ignored;
+        return SuperIdent::Ident(Ident::Ignored);
     } else {
-        return SuperIdent::Variable(s.to_string());
+        return SuperIdent::Ident(Ident::Variable(s.to_string()));
     }
 }
 
 impl SuperIdent { /// TODODODO
     pub fn to_string(&self) -> String {
-        match self {}///
         match self {
-            Ident::Variable(s) => s.to_string(),
-            Ident::Ignored => "_".to_string(),
+            SuperIdent::Ident(ident) => match ident {
+                Ident::Variable(s) => s.to_string(),
+                Ident::Ignored => "_".to_string(),
+            }
+            SuperIdent::ParamIdent(param) => param.name.to_string()
         }
     }
 }
@@ -194,10 +197,9 @@ pub fn as_labelled_list(e: Option<Expr>) -> Option<LabelledList> {
     return None;
 }
 
-/////////TdoOdodod
-pub fn as_ident(e: Option<Expr>) -> Option<Ident> {
+pub fn as_ident(e: Option<Expr>) -> Option<SuperIdent> {
     if let Some(e) = e {
-        if let Some(Expr::Ident(i)) = singular_expr(e) {
+        if let Some(Expr::SuperIdent(i)) = singular_expr(e) {
             return Some(i);
         }
     }
@@ -246,7 +248,7 @@ pub struct Pair(pub Ident, pub Expr);
 
 #[derive(Debug)]
 pub struct PrototypeDeclaration {
-    pub name: Ident,
+    pub name: SuperIdent,
     pub prototype: Prototype,
 }
 
@@ -266,7 +268,7 @@ pub struct TreePrototype {
 // .0 refers to prototype label, .1 refers to prototype identifier
 // no expression prototypes rn
 #[derive(Debug)]
-pub struct StructurePair(pub Ident, pub Ident);
+pub struct StructurePair(pub Ident, pub SuperIdent);
 
 type StructureList = Vec<StructurePair>;
 
