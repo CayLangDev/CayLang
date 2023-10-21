@@ -129,6 +129,7 @@ version = "0.1.0"
 dependencies = [
  "built",
  "caylang-interpreter",
+ "caylang-io",
  "caylang-parser",
  "clap",
  "lalrpop-util",
@@ -140,6 +141,7 @@ version = "0.1.0"
 dependencies = [
  "caylang-io",
  "caylang-parser",
+ "caylang-template-parser",
  "regex",
 ]
 
@@ -162,6 +164,10 @@ dependencies = [
  "lalrpop",
  "lalrpop-util",
 ]
+
+[[package]]
+name = "caylang-template-parser"
+version = "0.1.0"
 
 [[package]]
 name = "cc"

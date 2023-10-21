@@ -1,11 +1,15 @@
 use std::env;
 pub mod tree;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::process::Child;
 pub mod filesys;
 use crate::filesys::{load_full_tree, write_full_tree};
 use crate::tree::{root_idx, NodeIdx, Tree};
-mod tree_tests;
+pub mod filesys_builder;
 mod filesys_tests;
+mod tree_tests;
+
+use crate::filesys_builder::FileNode;
 
 fn dfs(tree: &Tree, current_idx: NodeIdx) {
     let root = &tree.nodes[current_idx];
@@ -17,7 +21,7 @@ fn dfs(tree: &Tree, current_idx: NodeIdx) {
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
-    if args.len() != 3 {
+    if args.len() != 2 {
         println!("Flatten operation failed!\nExpected:\ncargo run <path>");
         return Ok(());
     }
