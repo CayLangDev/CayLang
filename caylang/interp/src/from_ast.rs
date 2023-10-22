@@ -1,8 +1,8 @@
 use caylang_io::tree::NodeData;
 use regex::Regex;
 use std::{collections::HashMap};
-use caylang_template_parser::parse::{parse};
-use caylang_template_parser::ast::{TemplatePart};
+use crate::template::parse::{parse};
+use crate::template::ast::{TemplatePart};
 use caylang_parser::ast::{
     Clause, ClauseType, Destination, Expr, FoldExpr, Ident, Literal,
     Prototype, NodePrototype, PrototypeDeclaration, NodeType
@@ -14,7 +14,7 @@ pub trait Matches {
 
 impl Matches for NodePrototype {
     fn matches(&self, node: &NodeData) -> bool {
-        let p = node.path.as_os_str().to_str();
+        let p = node.path.file_name().unwrap().to_str();
         if let Some(s) = p {
             let r = Regex::new(format!(r"^{}$", self.regex).as_str()).unwrap();
             return r.is_match(s);

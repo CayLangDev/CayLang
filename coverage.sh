@@ -1,1 +1,1 @@
-cargo tarpaulin --target-dir target/tarpaulin-target/ --skip-clean
+cargo tarpaulin -p caylang-* -o html

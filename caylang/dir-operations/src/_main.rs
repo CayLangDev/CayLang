@@ -1,15 +1,13 @@
 use std::env;
-pub mod tree;
+// pub mod tree;
 use std::path::{Path, PathBuf};
 use std::process::Child;
-pub mod filesys;
+// pub mod filesys;
 use crate::filesys::{load_full_tree, write_full_tree};
 use crate::tree::{root_idx, NodeIdx, Tree};
-pub mod filesys_builder;
-mod filesys_tests;
-mod tree_tests;
-
-use crate::filesys_builder::FileNode;
+// pub mod filesys_builder;
+// mod filesys_tests;
+// mod tree_tests;
 
 fn dfs(tree: &Tree, current_idx: NodeIdx) {
     let root = &tree.nodes[current_idx];

@@ -4,7 +4,7 @@ extern crate tempdir;
 
 #[cfg(test)]
 mod tests {
-    use crate::filesys::run_test;
+    use crate::test_helpers::system_testing::run_test;
     use crate::tree::Tree;
     use std::path::PathBuf;
 

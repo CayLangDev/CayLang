@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use caylang_io::filesys::system_test;
-    use caylang_io::filesys_builder::FileNode;
+    use caylang_io::test_helpers::system_testing::system_test;
+    use caylang_io::test_helpers::tree_builder::FileNode;
     use caylang_io::tree::{NodeData, NodeType, Tree};
     use std::fs::File;
     use std::path::PathBuf;

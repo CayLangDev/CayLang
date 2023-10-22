@@ -1,4 +1,6 @@
 use cay::cmd::{build, Cmd};
+
+#[cfg(test)]
 pub mod cay_tests;
 
 fn main() {

@@ -1,4 +1,4 @@
-use crate::ast::{TemplateLiteral, TemplatePart};
+use crate::template::ast::{TemplateLiteral, TemplatePart};
 use std::collections::VecDeque;
 // custom implementation of a LR(2) parser because LALRPOP doesn't allow whitespace without writing our own lexer.
 
@@ -20,28 +20,7 @@ pub fn parse(path: String) -> TemplateLiteral {
         panic!("Empty template path!");
     }
     let relative = path.starts_with("/");
-//     if path.starts_with("/") {
-//
-//     }
-//     = {
-//         let Some(c) = path.get(0..1) else {
-//
-//         };
-//
-//         match c {
-//             "/" => {
-//                 input.pop_front();
-//                 false
-//             }
-//             _ => {
-//                 true
-//             }
-//         }
-//     };
-
     let mut input = path.chars().peekable();
-
-
     let mut output = TemplateLiteral { relative, parts: vec![]};
     let mut last_state = State::NewState;
     let mut state = State::NewState;
@@ -157,14 +136,13 @@ pub fn parse(path: String) -> TemplateLiteral {
         match state {
             State::NewState => {
                 match last_state {
-                    State::NewState => {}
                     State::Text => {
                         full_buffer.push(TemplatePart::Text(buffer));
                     }
                     State::LayerPart => {
                         full_buffer.push(TemplatePart::LayerPart(buffer));
                     }
-                    _ => {panic!("Error in parsing, full part ended in wrong state");}
+                    _ => {panic!("Error in parsing, subpart ended in wrong state");}
                 }
                 buffer = "".to_string();
             }
@@ -173,10 +151,8 @@ pub fn parse(path: String) -> TemplateLiteral {
                     State::NewState => {}
                     State::Text => {
                         full_buffer.push(TemplatePart::Text(buffer));
-                    }
-                    State::LayerPart => {
-                        full_buffer.push(TemplatePart::LayerPart(buffer));
-                    }
+                    },
+                    // layer part ought to conclude before /
                     _ => {panic!("Error in parsing, full part ended in wrong state");}
                 }
 
