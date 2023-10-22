@@ -8,15 +8,23 @@ pub enum Expr {
     PrototypeDeclaration(PrototypeDeclaration),
     LabelledList(LabelledList),
     UnlabelledList(UnlabelledList),
-    Ident(Ident),
+    SuperIdent(SuperIdent),
     Literal(Literal),
 }
 
+// Fold structures
 #[derive(Debug)]
 pub struct FoldExpr {
     pub directory: String,
     pub dir_type: TypeDestructured,
     pub clauses: Vec<Clause>,
+}
+
+#[derive(Debug)]
+pub struct Clause {
+    pub label: Option<Ident>,
+    pub destructured_type: TypeDestructured,
+    pub child: ClauseType,
 }
 
 #[derive(Debug)]
@@ -28,17 +36,11 @@ pub enum ClauseType {
 }
 
 #[derive(Debug)]
-pub struct Clause {
-    pub label: Option<Ident>,
-    pub destructured_type: TypeDestructured,
-    pub child: ClauseType,
-}
-
-#[derive(Debug)]
 pub struct Guard {
     pub conditions: Vec<Function>,
     pub child: ClauseType,
 }
+
 
 #[derive(Debug)]
 pub struct Function {
@@ -54,8 +56,14 @@ pub struct Field {
 
 #[derive(Debug)]
 pub struct TypeDestructured {
-    pub name: Ident,
+    pub name: SuperIdent,
     pub fields: Option<Vec<Field>>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum SuperIdent {
+    Ident(Ident),
+    ParamIdent(ParamIdent),
 }
 
 #[derive(Debug, Eq, Hash, PartialEq, Clone)]
@@ -64,6 +72,11 @@ pub enum Ident {
     Ignored,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct ParamIdent {
+    pub name: String,
+    pub param: Literal,
+}
 
 pub fn to_ident(s: &str) -> Ident {
     if s == "_" {
@@ -77,7 +90,16 @@ impl Ident {
     pub fn to_string(&self) -> String {
         match self {
             Ident::Variable(s) => s.to_string(),
-            Ident::Ignored => "_".to_string(),
+            Ident::Ignored => "_".to_string()
+        }
+    }
+}
+
+impl SuperIdent {
+    pub fn to_string(&self) -> String {
+        match self {
+            SuperIdent::Ident(ident) => ident.to_string(),
+            SuperIdent::ParamIdent(param) => param.name.to_string()
         }
     }
 }
@@ -88,12 +110,13 @@ pub enum Destination {
     Move(Literal),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Literal {
     String(String),
     FString(String),
     Regex(String),
     Path(String),
+    Integer(i32),
     Numeric(f64),
 }
 
@@ -180,9 +203,9 @@ pub fn as_labelled_list(e: Option<Expr>) -> Option<LabelledList> {
     return None;
 }
 
-pub fn as_ident(e: Option<Expr>) -> Option<Ident> {
+pub fn as_ident(e: Option<Expr>) -> Option<SuperIdent> {
     if let Some(e) = e {
-        if let Some(Expr::Ident(i)) = singular_expr(e) {
+        if let Some(Expr::SuperIdent(i)) = singular_expr(e) {
             return Some(i);
         }
     }
@@ -229,19 +252,19 @@ pub type UnlabelledList = Vec<Expr>;
 #[derive(Debug)]
 pub struct Pair(pub Ident, pub Expr);
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PrototypeDeclaration {
-    pub name: Ident,
+    pub name: SuperIdent,
     pub prototype: Prototype,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Prototype {
     NodePrototype(NodePrototype),
     TreePrototype(TreePrototype),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TreePrototype {
     pub regex: String,
     pub layers: StructureList,
@@ -250,8 +273,8 @@ pub struct TreePrototype {
 
 // .0 refers to prototype label, .1 refers to prototype identifier
 // no expression prototypes rn
-#[derive(Debug, PartialEq)]
-pub struct StructurePair(pub Ident, pub Ident);
+#[derive(Debug, Clone, PartialEq)]
+pub struct StructurePair(pub Ident, pub SuperIdent);
 
 pub type StructureList = Vec<StructurePair>;
 

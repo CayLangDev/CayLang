@@ -12,7 +12,7 @@ fn test_new() {
 fn test_default_dir() {
     let mut d = new_defn_map();
     d.add_defaults();
-    let dir = d.get_object(&to_ident("Directory"));
+    let dir = d.get_object(&SuperIdent::Ident(to_ident("Directory")));
     assert!(matches!(dir, Ok(Prototype::NodePrototype(p))));
     match dir {
         Ok(Prototype::NodePrototype(p)) => {

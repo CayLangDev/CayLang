@@ -1,4 +1,4 @@
-use crate::ast::{Expr, Literal, Ident, Pair, Guard, Clause, Function,
+use crate::ast::{Expr, Literal, SuperIdent, Ident, ParamIdent, Pair, Guard, Clause, Function,
                  TypeDestructured, FoldExpr, Field, ClauseType, Destination,
                  LabelledList, UnlabelledList, stripstr, PrototypeDeclaration, TreePrototype,
                  Prototype, NodePrototype, NodeType, GetValue,
@@ -18,7 +18,7 @@ ClosedExpr: Expr = {
 }
 
 BasicExpr: Expr = {
-    Ident => Expr::Ident(<>),
+    SuperIdent => Expr::SuperIdent(<>),
     Literal => Expr::Literal(<>),
     LabelledList => Expr::LabelledList(<>),
     UnlabelledList => Expr::UnlabelledList(<>),
@@ -41,7 +41,7 @@ Fold: FoldExpr = {
 }
 
 DirPrototype: PrototypeDeclaration = {
-    "DirectorySet" <name:Ident> <d:LabelledList> => {
+    "DirectorySet" <name:SuperIdent> <d:LabelledList> => {
         let names = d.get_value("Names");
         let regex = force_expr_to_regex(names);
         PrototypeDeclaration {
@@ -54,7 +54,7 @@ DirPrototype: PrototypeDeclaration = {
 }
 
 FilePrototype: PrototypeDeclaration = {
-    "FileSet" <name:Ident> <d:LabelledList> => {
+    "FileSet" <name:SuperIdent> <d:LabelledList> => {
         let names = d.get_value("Names");
         let regex = force_expr_to_regex(names);
         PrototypeDeclaration {
@@ -67,7 +67,7 @@ FilePrototype: PrototypeDeclaration = {
 }
 
 TreePrototype: PrototypeDeclaration = {
-    "TreeDirectorySet" <name:Ident> <d:LabelledList> => {
+    "TreeDirectorySet" <name:SuperIdent> <d:LabelledList> => {
         let [names, structure] = d.get_values([to_ident("Names"), to_ident("Structure")]);
         let regex = force_expr_to_regex(names);
         let (layers, edges) = {
@@ -97,7 +97,7 @@ Field: Field = {
 
 #[inline]
 TypeDestructured: TypeDestructured = {
-    <name:Ident> <fields:("{" <Comma<Field>> ".."? "}")?> => TypeDestructured {<>}
+    <name:SuperIdent> <fields:("{" <Comma<Field>> ".."? "}")?> => TypeDestructured {<>}
     // You can add more specific DirElement types here
 }
 
@@ -139,6 +139,11 @@ Pair: Pair = <i:Ident> ":" <e:Expr> => Pair(<>);
 // these should probably be considered literals
 // or part of a new CompoundLiteral enum
 
+SuperIdent: SuperIdent = {
+    ParamIdent => SuperIdent::ParamIdent(<>),
+    Ident => SuperIdent::Ident(<>)
+}
+
 // secret sauce
 Ident: Ident = {
     Variable => Ident::Variable(String::from(<>)),
@@ -148,8 +153,13 @@ Ident: Ident = {
 #[inline]
 Variable: String = r"[a-zA-Z_]+[a-zA-Z0-9_]*" => String::from(<>);
 
+ParamIdent: ParamIdent = {
+    <name:Variable> "<" <param:Literal> ">" => ParamIdent {<>}
+}
+
 Literal: Literal = {
-    r"[0-9]+(?:\.[0-9]*)?" => Literal::Numeric(f64::from_str(<>).unwrap()), // should add distinct integer and floating point type, currently all floats.
+    r"[0-9]*" => Literal::Integer(i32::from_str(<>).unwrap()),
+    r"[0-9]+(?:\.[0-9]*)" => Literal::Numeric(f64::from_str(<>).unwrap()),
     r#""(?:[^\\"]|(?:\\"))*""# => Literal::String(stripstr(<>, 1)), // arbitrary characters between "", except " which must be preceded by \.
     r#"`(?:[^\\`]|(?:\\`))*`"# => Literal::FString(stripstr(<>, 1)),
     

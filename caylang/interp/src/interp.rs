@@ -2,7 +2,7 @@ use crate::defn_map::{new_defn_map, DefnMap};
 use crate::from_ast::{top_level_ident, FoldOperation, Matches, Rename, RenamePart};
 use crate::validate::{validate_tree, ValidationError};
 use caylang_parser::ast::{
-    Expr, Ident, NodePrototype, Prototype, StructureList, StructurePair, TreePrototype,
+    Expr, Ident, ParamIdent, SuperIdent, NodePrototype, Prototype, StructureList, StructurePair, TreePrototype,
 };
 
 use caylang_io::filesys::{load_full_tree, write_full_tree};
