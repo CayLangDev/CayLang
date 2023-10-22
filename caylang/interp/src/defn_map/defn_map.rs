@@ -7,7 +7,7 @@ use std::mem::{discriminant, Discriminant};
 // map from variable names to values, that handles the ignore identifier cleanly
 // pub type DefnMap = ;
 
-
+#[derive(Debug, PartialEq)]
 pub enum LookupError {
     IgnoreLookup,
     VariableNotFound

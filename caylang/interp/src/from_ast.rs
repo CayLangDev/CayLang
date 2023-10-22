@@ -14,7 +14,7 @@ pub trait Matches {
 
 impl Matches for NodePrototype {
     fn matches(&self, node: &NodeData) -> bool {
-        let p = node.path.as_os_str().to_str();
+        let p = node.path.file_name().unwrap().to_str();
         if let Some(s) = p {
             let r = Regex::new(format!(r"^{}$", self.regex).as_str()).unwrap();
             return r.is_match(s);

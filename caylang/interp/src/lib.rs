@@ -2,7 +2,7 @@ mod from_ast;
 mod defn_map;
 mod template;
 mod validate;
-mod test_helpers;
+// mod test_helpers;
 pub mod interp;
 
 #[cfg(test)]

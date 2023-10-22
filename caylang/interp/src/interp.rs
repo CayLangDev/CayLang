@@ -77,6 +77,7 @@ pub fn interpret(ast: Expr) {
         let root: PathBuf = op.from.into();
         let tree = load_full_tree(&root);
         let tlp_ident = op.structure.top_level;
+        tree.print();
         validate_tree(&defn_map, &tree, &tlp_ident).unwrap();
 
         // tree.print();

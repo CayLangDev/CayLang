@@ -235,7 +235,7 @@ pub struct PrototypeDeclaration {
     pub prototype: Prototype,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Prototype {
     NodePrototype(NodePrototype),
     TreePrototype(TreePrototype),
