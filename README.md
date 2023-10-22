@@ -21,6 +21,18 @@ To run all unit tests you must specify all caylang packages in this workspace wi
 cargo test -p caylang-*
 ```
 
+To check the coverage of the unit tests install `taurplin` and run.
+```bash
+cargo tarpaulin -p 'caylang-*' -o html
+```
+Then check the `taurplin-report.html` file generated in the root directory.
+
+## System Tests
+To run all the system tests you must specify the cay package for testing.
+```bash
+cargo test -p cay
+```
+
 
 ## Samples
 

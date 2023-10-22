@@ -136,15 +136,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "caylang-int-tests"
-version = "0.1.0"
-dependencies = [
- "caylang-interpreter",
- "caylang-io",
- "caylang-parser",
-]
-
-[[package]]
 name = "caylang-interpreter"
 version = "0.1.0"
 dependencies = [

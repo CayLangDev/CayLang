@@ -1,6 +1,7 @@
 use crate::tree::{Tree, NodeIdx, NodeData, NodeType, root_path, root_idx};
 use std::fs::{create_dir, write};
 use std::{fs::File, path::PathBuf};
+use tempdir::TempDir;
 
 #[derive(Clone)]
 pub struct FileNode {
@@ -41,6 +42,13 @@ impl FileNode {
             content: Some(content.to_string()),
         };
     }
+
+    // pub fn temp_make(&self, prefix: &str) -> Result<TempDir, std::io::Error> {
+    //     let t = TempDir::new(prefix)?;
+    //     let path = PathBuf::from(t.path());
+    //     self.apply(&path)?;
+    //     return Ok(t);
+    // }
 
     pub fn apply(&self, base_dir: &PathBuf) -> Result<(), std::io::Error> {
         let node_path = base_dir.join(&self.name);

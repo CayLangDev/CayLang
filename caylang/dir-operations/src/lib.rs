@@ -5,5 +5,9 @@ extern crate tempdir;
 pub mod filesys;
 pub mod test_helpers;
 pub mod tree;
+
+#[cfg(test)]
 mod tree_tests;
-// mod main;
+
+#[cfg(test)]
+mod filesys_tests;

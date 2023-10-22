@@ -28,15 +28,15 @@ pub fn system_test(
 
 
     // std::env::set_current_dir();
-    let cd = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    println!("cd: {:?}", cd);
-    let p = cd.parent().unwrap();
-    println!("par: {:?}", p);
-    let p = p.parent().unwrap();
-    println!("parpar: {:?}", p);
-    std::env::set_current_dir(p);
+    // let cd = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    // println!("cd: {:?}", cd);
+    // let p = cd.parent().unwrap();
+    // println!("par: {:?}", p);
+    // let p = p.parent().unwrap();
+    // println!("parpar: {:?}", p);
+    // std::env::set_current_dir(p);
     // std::env::set_current_dir(std::env::current_dir().unwrap().parent().unwrap());
-    println!("cd1: {:?}", std::env::current_dir());
+    // println!("cd1: {:?}", std::env::current_dir());
 
     let tmp_dir = TempDir::new("test").unwrap();
     let root_path = PathBuf::from(tmp_dir.path());
