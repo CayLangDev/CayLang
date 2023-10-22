@@ -1,9 +1,0 @@
-[package]
-name = "caylang-int-tests"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-caylang-io = { path = "../dir-operations", version="0.1.0" }
-caylang-parser = { path = "../parser", version="0.1.0" }
-caylang-interpreter = { path = "../interp", version="0.1.0" }

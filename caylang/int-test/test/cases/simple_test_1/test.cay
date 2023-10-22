@@ -1,7 +1,0 @@
-fold "<PATH>": SmallTreeDir {
-    A { name as a } => {
-        B { name as b } => {
-            F {name as f} => `{b}/{a}/{f}`
-        }
-    }
-}
