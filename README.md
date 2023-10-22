@@ -21,7 +21,7 @@ To run all unit tests you must specify all caylang packages in this workspace wi
 cargo test -p caylang-*
 ```
 
-To check the coverage of the unit tests install `taurplin` and run.
+To check the coverage of the unit tests install [tarpaulin](https://github.com/xd009642/tarpaulin) and run.
 ```bash
 cargo tarpaulin -p 'caylang-*' -o html
 ```
