@@ -46,9 +46,9 @@ fn test_make_tree_prototype() {
     let b = dir_p("b");
     let f = file_p("f");
 
-    assert_eq!(d.get_object(&to_super_ident("a")), res(&a));
-    assert_eq!(d.get_object(&to_super_ident("b")), res(&b));
-    assert_eq!(d.get_object(&to_super_ident("f")), res(&f));
+    assert_eq!(d.get_object(&to_super_ident("a")), res(&a).cloned());
+    assert_eq!(d.get_object(&to_super_ident("b")), res(&b).cloned());
+    assert_eq!(d.get_object(&to_super_ident("f")), res(&f).cloned());
 }
 
 #[test]
@@ -67,7 +67,7 @@ fn test_make_tree_prototype_structure() {
         return Ok(p);
     }
 
-    assert_eq!(d.get_object(&to_super_ident("t")), res(&p));
+    assert_eq!(d.get_object(&to_super_ident("t")), res(&p).cloned());
 }
 
 #[test]
@@ -80,7 +80,7 @@ fn test_get_tree_prototype() {
     );
 
     let p = simple_tree_prototype("a");
-    assert_eq!(get_tree_prototype(&d, &to_super_ident("a")), Ok(&p) as Result<&TreePrototype, ValidationError>);
+    assert_eq!(get_tree_prototype(&d, &to_super_ident("a")), (Ok(&p) as Result<&TreePrototype, ValidationError>).cloned());
 
     let b = to_super_ident("b");
     let res = get_tree_prototype(&d, &b);
@@ -102,7 +102,7 @@ fn test_get_node_prototype() {
 
     let p = simple_node_prototype("a", NodeType::File);
     assert_eq!(get_node_prototype(&d, &to_super_ident("a")),
-               Ok(&p) as Result<&NodePrototype, ValidationError>);
+               (Ok(&p) as Result<&NodePrototype, ValidationError>).cloned());
 
     let b = to_super_ident("b");
     let res = get_node_prototype(&d, &b);
