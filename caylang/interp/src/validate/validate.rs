@@ -15,53 +15,25 @@ pub enum ValidationError {
 }
 
 pub(super) fn get_tree_prototype<'a>(d: &'a DefnMap, i: &Ident) -> Result<&'a TreePrototype, ValidationError> {
-    match d.get_node_prototype(i) {
+    match d.get_tree_object(i) {
         Ok(p) => Ok(p),
         Err(e) => Err(match e {
-            TargetedLookupError::IncorrectTypeObjectFound =>
+            TargetedLookupError::IncorrectTypeObjectFound => ValidationError::IdentifiedPrototypeNotSupported(i.clone()),
+            TargetedLookupError::VariableNotFound |
+                TargetedLookupError::IgnoreLookup =>
+                    ValidationError::IdentifiedPrototypeNotFound(i.clone()),
         })
-        TargetedLookupError::
     }
-
-    let Ok(prototype) = d.get_object(&i) else {
-            return
-                Err(
-                    ValidationError::IdentifiedPrototypeNotFound(
-                        i.clone()
-                    )
-                );
-        };
-
-    let Prototype::TreePrototype(prototype) = prototype else {
-        return
-            Err(
-                ValidationError::IdentifiedPrototypeNotSupported(
-                    i.clone()
-                )
-            );
-    };
-    return Ok(prototype);
 }
 
 pub(super) fn get_node_prototype<'a>(d: &'a DefnMap, i: &Ident) -> Result<&'a NodePrototype, ValidationError> {
-    let Ok(prototype) = d.get_object(&i) else {
-            return
-                Err(
-                    ValidationError::IdentifiedPrototypeNotFound(
-                        i.clone()
-                    )
-                );
-        };
-
-    let Prototype::NodePrototype(prototype) = prototype else {
-        return
-            Err(
-                ValidationError::IdentifiedPrototypeNotSupported(
-                    i.clone()
-                )
-            );
-    };
-    return Ok(prototype);
+    match d.get_node_object(i) {
+        Ok(p) => Ok(p),
+        Err(e) => Err(match e {
+            TargetedLookupError::IncorrectTypeObjectFound => ValidationError::IdentifiedPrototypeNotSupported(i.clone()),
+            TargetedLookupError::VariableNotFound | TargetedLookupError::IgnoreLookup => ValidationError::IdentifiedPrototypeNotFound(i.clone()),
+        })
+    }
 }
 
 pub(super) fn load_validation_prototypes<'a>(

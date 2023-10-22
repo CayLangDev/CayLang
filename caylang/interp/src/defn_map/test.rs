@@ -1,6 +1,6 @@
 use caylang_parser::ast::{Ident, NodePrototype, Prototype, NodeType};
 use crate::defn_map::*;
-use crate::test_helpers::as_ident;
+use crate::test_helpers::{to_ident};
 
 #[test]
 fn test_new() {

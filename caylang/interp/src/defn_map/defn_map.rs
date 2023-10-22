@@ -1,5 +1,5 @@
 use crate::from_ast::{IntoInterpObject};
-use caylang_parser::ast::{Expr, Ident, NodePrototype, NodeType, Prototype, TreePrototype, NodePrototype};
+use caylang_parser::ast::{Expr, Ident, NodeType, Prototype, TreePrototype, NodePrototype};
 use crate::from_ast::{InterpObject, OperationApplication};
 use std::collections::HashMap;
 use std::mem::{discriminant, Discriminant};
@@ -101,7 +101,7 @@ impl DefnMap {
     pub fn get_node_object(&self, name: &Ident) ->  Result<&NodePrototype, TargetedLookupError> {
         match self.get_object(name) {
             Ok(r) => match r {
-                 Prototype::TreePrototype(p) => Ok(p),
+                 Prototype::NodePrototype(p) => Ok(p),
                  _ => Err(TargetedLookupError::IncorrectTypeObjectFound)
             }
             Err(e) => Err(match e {
