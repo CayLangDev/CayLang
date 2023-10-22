@@ -5,7 +5,7 @@ use caylang_io::tree::{NodeIdx, Tree};
 use std::iter::zip;
 use std::mem::{Discriminant};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ValidationError {
     BadTreeDepth(usize, usize),             // expected a, found b
     IdentifiedPrototypeNotFound(Ident),     // failed on a

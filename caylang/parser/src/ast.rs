@@ -241,7 +241,7 @@ pub enum Prototype {
     TreePrototype(TreePrototype),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct TreePrototype {
     pub regex: String,
     pub layers: StructureList,
@@ -250,18 +250,18 @@ pub struct TreePrototype {
 
 // .0 refers to prototype label, .1 refers to prototype identifier
 // no expression prototypes rn
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct StructurePair(pub Ident, pub Ident);
 
 pub type StructureList = Vec<StructurePair>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum NodeType {
     File,
     Dir,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct NodePrototype {
     pub regex: String,
     pub node_type: NodeType,
