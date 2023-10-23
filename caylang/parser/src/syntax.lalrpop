@@ -41,11 +41,11 @@ Fold: FoldExpr = {
 }
 
 DirPrototype: PrototypeDeclaration = {
-    "DirectorySet" <name:SuperIdent> <d:LabelledList> => {
+    "DirectorySet" <name:Ident> <d:LabelledList> => {
         let names = d.get_value("Names");
         let regex = force_expr_to_regex(names);
         PrototypeDeclaration {
-            name,
+            name: SuperIdent::Ident(name),
             prototype: Prototype::NodePrototype(
                 NodePrototype {regex, node_type: NodeType::Dir}
             )
@@ -54,11 +54,11 @@ DirPrototype: PrototypeDeclaration = {
 }
 
 FilePrototype: PrototypeDeclaration = {
-    "FileSet" <name:SuperIdent> <d:LabelledList> => {
+    "FileSet" <name:Ident> <d:LabelledList> => {
         let names = d.get_value("Names");
         let regex = force_expr_to_regex(names);
         PrototypeDeclaration {
-            name,
+            name: SuperIdent::Ident(name),
             prototype: Prototype::NodePrototype(
                 NodePrototype {regex, node_type: NodeType::File}
             )
@@ -67,7 +67,7 @@ FilePrototype: PrototypeDeclaration = {
 }
 
 TreePrototype: PrototypeDeclaration = {
-    "TreeDirectorySet" <name:SuperIdent> <d:LabelledList> => {
+    "TreeDirectorySet" <name:Ident> <d:LabelledList> => {
         let [names, structure] = d.get_values([to_ident("Names"), to_ident("Structure")]);
         let regex = force_expr_to_regex(names);
         let (layers, edges) = {
@@ -80,7 +80,7 @@ TreePrototype: PrototypeDeclaration = {
             }
         };
         PrototypeDeclaration {
-            name,
+            name: SuperIdent::Ident(name),
             prototype: Prototype::TreePrototype(
                 TreePrototype { regex, layers, edges }
             )

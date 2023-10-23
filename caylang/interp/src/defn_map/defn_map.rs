@@ -12,12 +12,15 @@ use std::mem::{discriminant, Discriminant};
 pub enum LookupError {
     IgnoreLookup,
     VariableNotFound,
-    IncorrectTypeObjectFound
+    InvalidParamIdent,
+    BadParameter
 }
 
 pub enum TargetedLookupError {
     IgnoreLookup,
     VariableNotFound,
+    InvalidParamIdent,
+    BadParameter,
     IncorrectTypeObjectFound
 }
 
@@ -94,17 +97,17 @@ impl DefnMap {
                                 NodePrototype {regex: r.to_string(), node_type: NodeType::Dir}
                             ))
                         } else {
-                            Err(LookupError::IncorrectTypeObjectFound)
+                            Err(LookupError::BadParameter)
                         }
                     }
 
                     "Star" => {
                         if let Literal::Integer(i) = &param.param {
-                            if i > &0 {
+                            if i > &0 && i <= &(usize::MAX as i32) {
                                 let layers: StructureList = vec![ StructurePair(
                                         Ident::Variable("".to_string()),
                                         SuperIdent::Ident(Ident::Variable("Directory".to_string()))
-                                    ); (i - 1).try_into().unwrap()];
+                                    ); (i - 1) as usize];
                                 let edges: StructureList = vec![ StructurePair(
                                         Ident::Variable("".to_string()),
                                         SuperIdent::Ident(Ident::Variable("File".to_string()))
@@ -115,13 +118,13 @@ impl DefnMap {
                                 ))
                             }
                             else {
-                                Err(LookupError::IncorrectTypeObjectFound)
+                                Err(LookupError::BadParameter)
                             }
                         } else {
-                            Err(LookupError::IncorrectTypeObjectFound)
+                            Err(LookupError::BadParameter)
                         }
                     }
-                    _ => Err(LookupError::IncorrectTypeObjectFound)
+                    _ => Err(LookupError::InvalidParamIdent)
                 }
             }
         }
@@ -136,7 +139,8 @@ impl DefnMap {
             Err(e) => Err(match e {
                 LookupError::IgnoreLookup => TargetedLookupError::IgnoreLookup,
                 LookupError::VariableNotFound => TargetedLookupError::VariableNotFound,
-                LookupError::IncorrectTypeObjectFound => TargetedLookupError::IncorrectTypeObjectFound
+                LookupError::InvalidParamIdent => TargetedLookupError::InvalidParamIdent,
+                LookupError::BadParameter => TargetedLookupError::BadParameter,
             })
         }
     }
@@ -150,7 +154,8 @@ impl DefnMap {
             Err(e) => Err(match e {
                 LookupError::IgnoreLookup => TargetedLookupError::IgnoreLookup,
                 LookupError::VariableNotFound => TargetedLookupError::VariableNotFound,
-                LookupError::IncorrectTypeObjectFound => TargetedLookupError::IncorrectTypeObjectFound
+                LookupError::InvalidParamIdent => TargetedLookupError::InvalidParamIdent,
+                LookupError::BadParameter => TargetedLookupError::BadParameter,
             })
         }
     }

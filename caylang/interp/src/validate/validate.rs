@@ -10,6 +10,7 @@ pub enum ValidationError {
     BadTreeDepth(usize, usize),             // expected a, found b
     IdentifiedPrototypeNotFound(SuperIdent),     // failed on a
     IdentifiedPrototypeNotSupported(SuperIdent), // failed on a
+    IdentifiedParamPrototypeInvalid(SuperIdent), // failed on a
     LayerMatchFailed(SuperIdent, NodeIdx),       // failed to match a to b
     EdgeMatchFailed(NodeIdx),               // failed to match any edge prototype to a
 }
@@ -22,6 +23,8 @@ pub(super) fn get_tree_prototype<'a>(d: &'a DefnMap, i: &SuperIdent) -> Result<T
             TargetedLookupError::VariableNotFound |
                 TargetedLookupError::IgnoreLookup =>
                     ValidationError::IdentifiedPrototypeNotFound(i.clone()),
+            TargetedLookupError::InvalidParamIdent | TargetedLookupError::BadParameter =>
+                ValidationError::IdentifiedParamPrototypeInvalid(i.clone())
         })
     }
 }
@@ -32,6 +35,8 @@ pub(super) fn get_node_prototype<'a>(d: &'a DefnMap, i: &SuperIdent) -> Result<N
         Err(e) => Err(match e {
             TargetedLookupError::IncorrectTypeObjectFound => ValidationError::IdentifiedPrototypeNotSupported(i.clone()),
             TargetedLookupError::VariableNotFound | TargetedLookupError::IgnoreLookup => ValidationError::IdentifiedPrototypeNotFound(i.clone()),
+            TargetedLookupError::InvalidParamIdent | TargetedLookupError::BadParameter =>
+                ValidationError::IdentifiedParamPrototypeInvalid(i.clone())
         })
     }
 }
