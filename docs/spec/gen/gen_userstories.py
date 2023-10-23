@@ -155,7 +155,7 @@ def user():
 
 @specfunc("shuffle")
 def shuffle():
-    tree = by_layer("root", [("B",3), ("A", 3), ("C", 3)])
+    tree = by_layer("root", [("B",9), ("A", 1), ("C", 9)])
     return tree_to_str(tree)
 
 
