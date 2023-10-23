@@ -11,7 +11,7 @@ A user is able to write a cay script that can permute the order of layers in a f
 Suppose the user's tree looks like the following
 
 ```
-{{{user}}}
+{{user}}
 ```
 
 Then they should be able to write cay code to shuffle the first to layers.
@@ -28,7 +28,7 @@ Suppose the user's tree looks like the following
 
 
 ```
-{{{user}}}
+{{user}}
 ```
 
 
@@ -42,7 +42,7 @@ A user is able to write a cay script that can shuffle and flatten various layers
 
 A user is able to write a cay script with a confidently correct prototype description to apply an arbitrary manipulation on a dataset. Running the file with ‘cay’ will apply the changes in exactly the way the user expects as they have ensured that the dataset matches their prototype.
 
-# User Story N-1: Complex Dataset Manipulation
+# User Story 6: Complex Dataset Manipulation
 
 Take for example the structure used by the librispeech dataset. A root Librispeech folder, with a layer of subset folders, with a layer of reader folders, with numbered flac files and a transcription of the reading at the edges.
 

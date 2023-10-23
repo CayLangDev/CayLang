@@ -5,25 +5,25 @@ The structure used by the openspeech* dataset is a root OpenSpeech folder, follo
 
 Example generated below.
 ```
-                                      ┌ RD129-CH275.flac 
-                              ┌ CH275 ┤
-                              │       └ RD129-CH275.trans.txt 
-                      ┌ RD129 ┤
-                      │       │       ┌ RD129-CH276.flac 
-                      │       └ CH276 ┤
-                      │               └ RD129-CH276.trans.txt 
-                      │
-                      │               ┌ RD130-CH276.flac 
-- OpenSpeech ─ subset ┤       ┌ CH276 ┤
-                      │       │       └ RD130-CH276.trans.txt 
-                      ├ RD130 ┤
-                      │       │       ┌ RD130-CH277.flac 
-                      │       └ CH277 ┤
-                      │               └ RD130-CH277.trans.txt 
-                      │
-                      │               ┌ RD131-CH275.flac 
-                      └ RD131 ─ CH275 ┤
-                                      └ RD131-CH275.trans.txt 
+                             ┌RD129-CH275.flac
+                       ┌CH275┤                
+                       │     └RD129-CH275.trans.txt
+                 ┌RD129┤                           
+                 │     │     ┌RD129-CH276.flac
+                 │     └CH276┤                
+                 │           └RD129-CH276.trans.txt
+                 │                                 
+                 │           ┌RD130-CH276.flac
+                 │     ┌CH276┤                
+OpenSpeech─subset┤     │     └RD130-CH276.trans.txt
+                 ├RD130┤                           
+                 │     │     ┌RD130-CH277.flac
+                 │     └CH277┤                
+                 │           └RD130-CH277.trans.txt
+                 │                                 
+                 │           ┌RD131-CH275.flac
+                 └RD131─CH275┤                
+                             └RD131-CH275.trans.txt
 ```
 
 We set up a simple tree directory set for matching our structure.
@@ -71,25 +71,25 @@ fold "~": OSDataSet {
 Now our tree is as follows
 
 ```
-                              ┌ RD129-CH275.flac 
-                              │
-                              ├ RD129-CH275.trans.txt 
-                      ┌ RD129 ┤
-                      │       ├ RD129-CH276.flac 
-                      │       │
-                      │       └ RD129-CH276.trans.txt 
-                      │
-                      │       ┌ RD130-CH276.flac 
-- OpenSpeech ─ subset ┤       │
-                      │       ├ RD130-CH276.trans.txt 
-                      ├ RD130 ┤
-                      │       ├ RD130-CH277.flac 
-                      │       │
-                      │       └ RD130-CH277.trans.txt 
-                      │
-                      │       ┌ RD131-CH275.flac 
-                      └ RD131 ┤
-                              └ RD131-CH275.trans.txt 
+                       ┌RD129-CH275.flac
+                       │                
+                       ├RD129-CH275.trans.txt
+                 ┌RD129┤                     
+                 │     ├RD129-CH276.flac
+                 │     │                
+                 │     └RD129-CH276.trans.txt
+                 │                           
+                 │     ┌RD130-CH276.flac
+                 │     │                
+OpenSpeech─subset┤     ├RD130-CH276.trans.txt
+                 ├RD130┤                     
+                 │     ├RD130-CH277.flac
+                 │     │                
+                 │     └RD130-CH277.trans.txt
+                 │                           
+                 │     ┌RD131-CH275.flac
+                 └RD131┤                
+                       └RD131-CH275.trans.txt
 ```
 
 Now suppose instead we want to change the structure so that the subset layer is followed by a chapter layer which is followed by a reader layer; each chapter folder contains a folder for each reader who has read it rather than vice versa.
@@ -112,25 +112,15 @@ The fold operation rebuilds our tree from the root, allowing this change in stru
 
 Now our tree is as follows
 ```
-                                      ┌ subset-RD129-CH275.flac 
-                              ┌ RD129 ┤
-                              │       └ subset-RD129-CH275.trans.txt 
-                      ┌ CH275 ┤
-                      │       │       ┌ subset-RD131-CH275.flac 
-                      │       └ RD131 ┤
-                      │               └ subset-RD131-CH275.trans.txt 
-                      │
-                      │               ┌ subset-RD129-CH276.flac 
-- OpenSpeech ─ subset ┤       ┌ RD129 ┤
-                      │       │       └ subset-RD129-CH276.trans.txt 
-                      ├ CH276 ┤
-                      │       │       ┌ subset-RD130-CH276.flac 
-                      │       └ RD130 ┤
-                      │               └ subset-RD130-CH276.trans.txt 
-                      │
-                      │               ┌ subset-RD130-CH277.flac 
-                      └ CH277 ─ RD130 ┤
-                                      └ subset-RD130-CH277.trans.txt 
+                                                                                                                                           OpenSpeech
+                                                                                                                                               |
+                                                                                                                                             subset
+                                                  ┌────────────────────────────────────────────────────────────────────────────────────────────┴────────────┬───────────────────────────────────────────────────────────────────────────────┐
+                                                CH275                                                                                                     CH276                                                                           CH277                         
+                        ┌─────────────────────────┴──────────────────────────┐                                                    ┌─────────────────────────┴──────────────────────────┐                                                    |                           
+                      RD129                                                RD131                                                RD129                                                RD130                                                RD130                         
+           ┌────────────┴────────────┐                          ┌────────────┴────────────┐                          ┌────────────┴────────────┐                          ┌────────────┴────────────┐                          ┌────────────┴────────────┐              
+subset-RD129-CH275.flac subset-RD129-CH275.trans.txt subset-RD131-CH275.flac subset-RD131-CH275.trans.txt subset-RD129-CH276.flac subset-RD129-CH276.trans.txt subset-RD130-CH276.flac subset-RD130-CH276.trans.txt subset-RD130-CH277.flac subset-RD130-CH277.trans.txt
 ```
 
 

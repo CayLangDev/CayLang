@@ -48,7 +48,7 @@ def openspeech_tree(maker=make_opentree):
 @specfunc("openspeech")
 def openspeech():
     tree = openspeech_tree()
-    return tree_to_str(tree, orientation = PrettyPrintTree.HORIZONTAL)
+    return tree_to_str(tree, orientation = PrettyPrintTree.Horizontal)
 
 # OpenSpeech - presentation version
 # Subset
@@ -75,7 +75,7 @@ def open_joined_spec(trace, leaves):
 @specfunc("openspeech_partflattened")
 def openspeech_partflattened():
     tree = openspeech_tree(maker=make_opentree_fl1_cat)
-    return tree_to_str(tree, orientation = PrettyPrintTree.HORIZONTAL)
+    return tree_to_str(tree, orientation = PrettyPrintTree.Horizontal)
 
 def openspeech_map(tree: Tree):
     readers = tree.children[0].children

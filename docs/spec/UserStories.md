@@ -4,57 +4,63 @@ A user is able to write a simple cay script that describes the structure of a si
 
 Suppose for example a developer is working on a Rust project.
 
-```
-                proj
-     ┌───────────┼───────────┐
- package-1   package-2   package-3 
-     |           |           |     
-   src-1       src-2       src-3   
-  ┌──┴──┐     ┌──┴──┐     ┌──┴──┐  
-mod-1 mod-2 mod-3 mod-4 mod-5 mod-6
-```
-
-The developer knows the name of their project, and that its structure is uniformly three deep with a relatively predictable format.
-
-They can verify the structure using the following cay code.
-
-```
-TreeDirectorySet RustProject {
-    Names: r"proj",
-    Structure: {
-        layers: {
-            Package: Directory,
-            Source: Directory,
-        }
-        edges: {
-            Module: File
-        }
-    }
-}
-
-fold "~/pathto/proj": RustProject {
-    Package { name as p };
-    Source { name as s };
-    Module {name as m } => `{p}/{s}/{m}`
-}
-```
-Note this last fold operation doesn't manipulate the structure in anyway, but it does run the validation code the ensures it's in an expected state; this is an "idempotent" operation.
-
-# User Story 3: Simple Dataset Shuffle
+# User Story 2: Simple Dataset Shuffle
 
 A user is able to write a cay script that can permute the order of layers in a file system. Running the cay file with ‘cay’ will change the relation of the file layers in the file system. A user may wish to use this to shuffle the student grades layer relation from the structure year/student-id/course-grade.txt to student-id/year/course-grade.txt, which would be difficult without such a tool.
 
 Suppose the user's tree looks like the following
 
 ```
-{{student}}
+                                                          root
+                 ┌───────────────────────────────────────┬─┴──────────────────────────────────────────┐
+                A-1                                     A-2                                          A-3                     
+     ┌───────────┼───────────┐            ┌──────────────┼──────────────┐              ┌──────────────┼──────────────┐       
+    B-1         B-2         B-3          B-4            B-5            B-6            B-7            B-8            B-9      
+ ┌───┼───┐   ┌───┼───┐   ┌───┼───┐   ┌────┼────┐    ┌────┼────┐    ┌────┼────┐    ┌────┼────┐    ┌────┼────┐    ┌────┼────┐  
+C-1 C-2 C-3 C-4 C-5 C-6 C-7 C-8 C-9 C-10 C-11 C-12 C-13 C-14 C-15 C-16 C-17 C-18 C-19 C-20 C-21 C-22 C-23 C-24 C-25 C-26 C-27
 ```
 
-And they want to shuffle the first two layers, then they'd write.
+Then they should be able to write cay code to shuffle the first to layers.
+
+```
+                                                          root
+                 ┌───────────────────────────────────────┬─┴──────────────────────────────────────────┐
+                B-1                                     B-2                                          B-3                     
+     ┌───────────┼───────────┐            ┌──────────────┼──────────────┐              ┌──────────────┼──────────────┐       
+    A-1         A-2         A-3          A-4            A-5            A-6            A-7            A-8            A-9      
+ ┌───┼───┐   ┌───┼───┐   ┌───┼───┐   ┌────┼────┐    ┌────┼────┐    ┌────┼────┐    ┌────┼────┐    ┌────┼────┐    ┌────┼────┐  
+C-1 C-2 C-3 C-4 C-5 C-6 C-7 C-8 C-9 C-10 C-11 C-12 C-13 C-14 C-15 C-16 C-17 C-18 C-19 C-20 C-21 C-22 C-23 C-24 C-25 C-26 C-27
+```
+
+# User Story 3: Simple Dataset Flatten
+
+A user is able to write a cay script that can flatten directories in the file system. Running the cay file with ‘cay’ will merge various directory and file paths to easily simplify the structure. A user may wish to use this to flatten a student grades dataset from the structure year/student-id/course-grade.txt to year_student-id_course-grade.txt.
+
+Suppose the user's tree looks like the following
 
 
+```
+                                                          root
+                 ┌───────────────────────────────────────┬─┴──────────────────────────────────────────┐
+                A-1                                     A-2                                          A-3                     
+     ┌───────────┼───────────┐            ┌──────────────┼──────────────┐              ┌──────────────┼──────────────┐       
+    B-1         B-2         B-3          B-4            B-5            B-6            B-7            B-8            B-9      
+ ┌───┼───┐   ┌───┼───┐   ┌───┼───┐   ┌────┼────┐    ┌────┼────┐    ┌────┼────┐    ┌────┼────┐    ┌────┼────┐    ┌────┼────┐  
+C-1 C-2 C-3 C-4 C-5 C-6 C-7 C-8 C-9 C-10 C-11 C-12 C-13 C-14 C-15 C-16 C-17 C-18 C-19 C-20 C-21 C-22 C-23 C-24 C-25 C-26 C-27
+```
 
-# User Story 2: Complex Dataset Manipulation
+
+Then they should be able to write cay code to flatten the layers.
+
+# User Story 4: Full Featured Dataset Manipulation
+
+A user is able to write a cay script that can shuffle and flatten various layers of a file system structure arbitrarily. Running the file with ‘cay’ will apply these changes, which would be otherwise very time consuming and complex. A user may wish to restructure a grades dataset from year/student-id/course-grade.txt to student-id_year_course-grade.txt.
+
+# User Story 5: Fearless Dataset Manipulation
+
+A user is able to write a cay script with a confidently correct prototype description to apply an arbitrary manipulation on a dataset. Running the file with ‘cay’ will apply the changes in exactly the way the user expects as they have ensured that the dataset matches their prototype.
+
+# User Story 6: Complex Dataset Manipulation
 
 Take for example the structure used by the librispeech dataset. A root Librispeech folder, with a layer of subset folders, with a layer of reader folders, with numbered flac files and a transcription of the reading at the edges.
 
@@ -272,7 +278,7 @@ Librispeech┤
            └RD131-CH275.trans.txt
 ```
 
-# User Story 2: Complex Dataset Understanding Validation
+# User Story N: Complex Dataset Understanding Validation
 
 Now suppose Librispeech has noticed the success of our first user with CayLang, and would like to add it to their project so other users can manipulate the dataset as easily.
 
@@ -392,5 +398,3 @@ def gapless(seq) -> range min seq ((max seq) + 1) == seq
 def complete(seq) -> range 0 ((max seq) + 1) == seq
 ```
 Function definition sequence WIP.
-
-

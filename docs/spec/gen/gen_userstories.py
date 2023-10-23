@@ -148,27 +148,8 @@ def rust_proj():
     tree = by_layer("proj", [("package",3), ("src", 1), ("mod", 2)])
     return tree_to_str(tree)
 
-@specfunc("simple")
-def shuffle():
-    tree = by_layer("root", [("year",3), ("student-id", 3), ("course-grade", 3)])
-    return tree_to_str(tree)
-
-def flatten_bottom(root):
-    def _flatten_bottom(p, c):
-        n = []
-        nn = []
-        for l in c: n.extend(l.children)
-        for l in n: nn.extend(l.children)
-        if nn:
-            _flatten_bottom(c, n)
-        else:
-            p.children = []
-            for l in c:
-
-    _flatten_bottom([root],root.children)
-
-@specfunc("student")
-def shuffle():
+@specfunc("user")
+def user():
     tree = by_layer("root", [("A",3), ("B", 3), ("C", 3)])
     return tree_to_str(tree)
 
@@ -179,7 +160,7 @@ def shuffle():
 
 
 def get_all():
-    return [librispeech, librispeech_partflattened, librispeech_flattened, librispeech_folded_r_c, librispeech_folded_c_r, rust_proj]
+    return [librispeech, librispeech_partflattened, librispeech_flattened, librispeech_folded_r_c, librispeech_folded_c_r, rust_proj, user, shuffle]
 
 def gen_all(source, pub):
     gen(source, pub, get_all())
