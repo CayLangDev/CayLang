@@ -1,0 +1,5 @@
+fold "test/testbed/test_1": Star<3> {
+    A { name as a };
+    B { name as b };
+    F {name as f} => `_{a}_hello_{b}/{f}`
+}

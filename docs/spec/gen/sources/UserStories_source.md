@@ -1,4 +1,48 @@
-# User Story 1: Developer
+# User Story 1: Simple Dataset Sanity Check
+
+A user is able to write a simple cay script that describes the structure of a simple dataset they’re working with/have created. They can then run that cay file with `cay` throughout development as a sanity check, ensuring it hasn’t been changed from its expected structure.
+
+Suppose for example a developer is working on a Rust project.
+
+# User Story 2: Simple Dataset Shuffle
+
+A user is able to write a cay script that can permute the order of layers in a file system. Running the cay file with ‘cay’ will change the relation of the file layers in the file system. A user may wish to use this to shuffle the student grades layer relation from the structure year/student-id/course-grade.txt to student-id/year/course-grade.txt, which would be difficult without such a tool.
+
+Suppose the user's tree looks like the following
+
+```
+{{{user}}}
+```
+
+Then they should be able to write cay code to shuffle the first to layers.
+
+```
+{{shuffle}}
+```
+
+# User Story 3: Simple Dataset Flatten
+
+A user is able to write a cay script that can flatten directories in the file system. Running the cay file with ‘cay’ will merge various directory and file paths to easily simplify the structure. A user may wish to use this to flatten a student grades dataset from the structure year/student-id/course-grade.txt to year_student-id_course-grade.txt.
+
+Suppose the user's tree looks like the following
+
+
+```
+{{{user}}}
+```
+
+
+Then they should be able to write cay code to flatten the layers.
+
+# User Story 4: Full Featured Dataset Manipulation
+
+A user is able to write a cay script that can shuffle and flatten various layers of a file system structure arbitrarily. Running the file with ‘cay’ will apply these changes, which would be otherwise very time consuming and complex. A user may wish to restructure a grades dataset from year/student-id/course-grade.txt to student-id_year_course-grade.txt.
+
+# User Story 5: Fearless Dataset Manipulation
+
+A user is able to write a cay script with a confidently correct prototype description to apply an arbitrary manipulation on a dataset. Running the file with ‘cay’ will apply the changes in exactly the way the user expects as they have ensured that the dataset matches their prototype.
+
+# User Story N-1: Complex Dataset Manipulation
 
 Take for example the structure used by the librispeech dataset. A root Librispeech folder, with a layer of subset folders, with a layer of reader folders, with numbered flac files and a transcription of the reading at the edges.
 
@@ -120,7 +164,7 @@ Now our tree is fully flattened.
 {{librispeech_flattened}}
 ```
 
-# User Story 2: Distributor
+# User Story N: Complex Dataset Understanding Validation
 
 Now suppose Librispeech has noticed the success of our first user with CayLang, and would like to add it to their project so other users can manipulate the dataset as easily.
 

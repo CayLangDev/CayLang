@@ -1,58 +1,114 @@
-# User Story 1: Developer
+# User Story 1: Simple Dataset Sanity Check
+
+A user is able to write a simple cay script that describes the structure of a simple dataset they’re working with/have created. They can then run that cay file with `cay` throughout development as a sanity check, ensuring it hasn’t been changed from its expected structure.
+
+Suppose for example a developer is working on a Rust project.
+
+```
+                proj
+     ┌───────────┼───────────┐
+ package-1   package-2   package-3 
+     |           |           |     
+   src-1       src-2       src-3   
+  ┌──┴──┐     ┌──┴──┐     ┌──┴──┐  
+mod-1 mod-2 mod-3 mod-4 mod-5 mod-6
+```
+
+The developer knows the name of their project, and that its structure is uniformly three deep with a relatively predictable format.
+
+They can verify the structure using the following cay code.
+
+```
+TreeDirectorySet RustProject {
+    Names: r"proj",
+    Structure: {
+        layers: {
+            Package: Directory,
+            Source: Directory,
+        }
+        edges: {
+            Module: File
+        }
+    }
+}
+
+fold "~/pathto/proj": RustProject {
+    Package { name as p };
+    Source { name as s };
+    Module {name as m } => `{p}/{s}/{m}`
+}
+```
+Note this last fold operation doesn't manipulate the structure in anyway, but it does run the validation code the ensures it's in an expected state; this is an "idempotent" operation.
+
+# User Story 3: Simple Dataset Shuffle
+
+A user is able to write a cay script that can permute the order of layers in a file system. Running the cay file with ‘cay’ will change the relation of the file layers in the file system. A user may wish to use this to shuffle the student grades layer relation from the structure year/student-id/course-grade.txt to student-id/year/course-grade.txt, which would be difficult without such a tool.
+
+Suppose the user's tree looks like the following
+
+```
+{{student}}
+```
+
+And they want to shuffle the first two layers, then they'd write.
+
+
+
+# User Story 2: Complex Dataset Manipulation
 
 Take for example the structure used by the librispeech dataset. A root Librispeech folder, with a layer of subset folders, with a layer of reader folders, with numbered flac files and a transcription of the reading at the edges.
 
 Example generated below.
 ```
-                                       ┌ RD129-CH275-0.flac 
-                                       │
-                                       ├ RD129-CH275-1.flac 
-                                       │
-                               ┌ CH275 ┼ RD129-CH275-2.flac 
-                               │       │
-                               │       ├ RD129-CH275-3.flac 
-                               │       │
-                               │       └ RD129-CH275.trans.txt 
-                       ┌ RD129 ┤
-                       │       │       ┌ RD129-CH276-0.flac 
-                       │       │       │
-                       │       │       ├ RD129-CH276-1.flac 
-                       │       │       │
-                       │       └ CH276 ┼ RD129-CH276-2.flac 
-                       │               │
-                       │               ├ RD129-CH276-3.flac 
-                       │               │
-                       │               └ RD129-CH276.trans.txt 
-                       │
-                       │               ┌ RD130-CH276-0.flac 
-                       │               │
-                       │               ├ RD130-CH276-1.flac 
-                       │               │
-- Librispeech ─ subset ┤       ┌ CH276 ┼ RD130-CH276-2.flac 
-                       │       │       │
-                       │       │       ├ RD130-CH276-3.flac 
-                       │       │       │
-                       │       │       └ RD130-CH276.trans.txt 
-                       ├ RD130 ┤
-                       │       │       ┌ RD130-CH277-0.flac 
-                       │       │       │
-                       │       │       ├ RD130-CH277-1.flac 
-                       │       │       │
-                       │       └ CH277 ┼ RD130-CH277-2.flac 
-                       │               │
-                       │               ├ RD130-CH277-3.flac 
-                       │               │
-                       │               └ RD130-CH277.trans.txt 
-                       │
-                       │               ┌ RD131-CH275-0.flac 
-                       │               │
-                       │               ├ RD131-CH275-1.flac 
-                       │               │
-                       └ RD131 ─ CH275 ┼ RD131-CH275-2.flac 
-                                       │
-                                       ├ RD131-CH275-3.flac 
-                                       │
-                                       └ RD131-CH275.trans.txt 
+                              ┌RD129-CH275-0.flac
+                              │                  
+                              ├RD129-CH275-1.flac
+                              │                  
+                        ┌CH275┼RD129-CH275-2.flac
+                        │     │                  
+                        │     ├RD129-CH275-3.flac
+                        │     │                  
+                        │     └RD129-CH275.trans.txt
+                  ┌RD129┤                           
+                  │     │     ┌RD129-CH276-0.flac
+                  │     │     │                  
+                  │     │     ├RD129-CH276-1.flac
+                  │     │     │                  
+                  │     └CH276┼RD129-CH276-2.flac
+                  │           │                  
+                  │           ├RD129-CH276-3.flac
+                  │           │                  
+                  │           └RD129-CH276.trans.txt
+                  │                                 
+                  │           ┌RD130-CH276-0.flac
+                  │           │                  
+                  │           ├RD130-CH276-1.flac
+                  │           │                  
+                  │     ┌CH276┼RD130-CH276-2.flac
+                  │     │     │                  
+Librispeech─subset┤     │     ├RD130-CH276-3.flac
+                  │     │     │                  
+                  │     │     └RD130-CH276.trans.txt
+                  ├RD130┤                           
+                  │     │     ┌RD130-CH277-0.flac
+                  │     │     │                  
+                  │     │     ├RD130-CH277-1.flac
+                  │     │     │                  
+                  │     └CH277┼RD130-CH277-2.flac
+                  │           │                  
+                  │           ├RD130-CH277-3.flac
+                  │           │                  
+                  │           └RD130-CH277.trans.txt
+                  │                                 
+                  │           ┌RD131-CH275-0.flac
+                  │           │                  
+                  │           ├RD131-CH275-1.flac
+                  │           │                  
+                  └RD131─CH275┼RD131-CH275-2.flac
+                              │                  
+                              ├RD131-CH275-3.flac
+                              │                  
+                              └RD131-CH275.trans.txt
 ```
 
 We set up a simple tree directory set for matching our structure.
@@ -103,25 +159,13 @@ fold "~": LSDataSet {
 
 Now our tree is as follows
 ```
-                       ┌ RD129-CH275.flac 
-               ┌ CH275 ┤
-               │       └ RD129-CH275.trans.txt 
-       ┌ RD129 ┤
-       │       │       ┌ RD129-CH276.flac 
-       │       └ CH276 ┤
-       │               └ RD129-CH276.trans.txt 
-       │
-       │               ┌ RD130-CH276.flac 
-- root ┤       ┌ CH276 ┤
-       │       │       └ RD130-CH276.trans.txt 
-       ├ RD130 ┤
-       │       │       ┌ RD130-CH277.flac 
-       │       └ CH277 ┤
-       │               └ RD130-CH277.trans.txt 
-       │
-       │               ┌ RD131-CH275.flac 
-       └ RD131 ─ CH275 ┤
-                       └ RD131-CH275.trans.txt 
+                                                                                                       root
+                                    ┌───────────────────────────────────────────────────────────────────┴─────────┬──────────────────────────────────────────────────────────┐
+                                  RD129                                                                         RD130                                                      RD131                  
+                 ┌──────────────────┴───────────────────┐                                      ┌──────────────────┴───────────────────┐                                      |                    
+               CH275                                  CH276                                  CH276                                  CH277                                  CH275                  
+       ┌─────────┴─────────┐                  ┌─────────┴─────────┐                  ┌─────────┴─────────┐                  ┌─────────┴─────────┐                  ┌─────────┴─────────┐          
+RD129-CH275.flac RD129-CH275.trans.txt RD129-CH276.flac RD129-CH276.trans.txt RD130-CH276.flac RD130-CH276.trans.txt RD130-CH277.flac RD130-CH277.trans.txt RD131-CH275.flac RD131-CH275.trans.txt
 ```
 
 Now suppose we want to change our structure so that the subset layer is followed by a reader layer, which has the chapter layer folded into it.
@@ -142,25 +186,25 @@ fold "~": LSDataSet {
 Now our structure is as follows.
 
 ```
-                               ┌ RD129-CH275.flac 
-                               │
-                               ├ RD129-CH275.trans.txt 
-                       ┌ RD129 ┤
-                       │       ├ RD129-CH276.flac 
-                       │       │
-                       │       └ RD129-CH276.trans.txt 
-                       │
-                       │       ┌ RD130-CH276.flac 
-- Librispeech ─ subset ┤       │
-                       │       ├ RD130-CH276.trans.txt 
-                       ├ RD130 ┤
-                       │       ├ RD130-CH277.flac 
-                       │       │
-                       │       └ RD130-CH277.trans.txt 
-                       │
-                       │       ┌ RD131-CH275.flac 
-                       └ RD131 ┤
-                               └ RD131-CH275.trans.txt 
+                        ┌RD129-CH275.flac
+                        │                
+                        ├RD129-CH275.trans.txt
+                  ┌RD129┤                     
+                  │     ├RD129-CH276.flac
+                  │     │                
+                  │     └RD129-CH276.trans.txt
+                  │                           
+                  │     ┌RD130-CH276.flac
+                  │     │                
+Librispeech─subset┤     ├RD130-CH276.trans.txt
+                  ├RD130┤                     
+                  │     ├RD130-CH277.flac
+                  │     │                
+                  │     └RD130-CH277.trans.txt
+                  │                           
+                  │     ┌RD131-CH275.flac
+                  └RD131┤                
+                        └RD131-CH275.trans.txt
 ```
 
 Now suppose instead we want to change the structure so that the subset layer is followed by a chapter layer which is followed by a reader layer; each chapter folder contains a folder for each reader who has read it rather than vice versa.
@@ -182,25 +226,13 @@ The fold operation rebuilds our tree from the root, allowing this change in stru
 
 Now our tree is as follows
 ```
-                       ┌ RD129-CH275.flac 
-               ┌ RD129 ┤
-               │       └ RD129-CH275.trans.txt 
-       ┌ CH275 ┤
-       │       │       ┌ RD131-CH275.flac 
-       │       └ RD131 ┤
-       │               └ RD131-CH275.trans.txt 
-       │
-       │               ┌ RD129-CH276.flac 
-- root ┤       ┌ RD129 ┤
-       │       │       └ RD129-CH276.trans.txt 
-       ├ CH276 ┤
-       │       │       ┌ RD130-CH276.flac 
-       │       └ RD130 ┤
-       │               └ RD130-CH276.trans.txt 
-       │
-       │               ┌ RD130-CH277.flac 
-       └ CH277 ─ RD130 ┤
-                       └ RD130-CH277.trans.txt 
+                                                                                                       root
+                                    ┌───────────────────────────────────────────────────────────────────┴─────────┬──────────────────────────────────────────────────────────┐
+                                  CH275                                                                         CH276                                                      CH277                  
+                 ┌──────────────────┴───────────────────┐                                      ┌──────────────────┴───────────────────┐                                      |                    
+               RD129                                  RD131                                  RD129                                  RD130                                  RD130                  
+       ┌─────────┴─────────┐                  ┌─────────┴─────────┐                  ┌─────────┴─────────┐                  ┌─────────┴─────────┐                  ┌─────────┴─────────┐          
+RD129-CH275.flac RD129-CH275.trans.txt RD131-CH275.flac RD131-CH275.trans.txt RD129-CH276.flac RD129-CH276.trans.txt RD130-CH276.flac RD130-CH276.trans.txt RD130-CH277.flac RD130-CH277.trans.txt
 ```
 
 Finally suppose we want to fully flatten our dataset and concatenate all audio files from the same reading.
@@ -219,28 +251,28 @@ fold "~": LSDataSet {
 
 Now our tree is fully flattened.
 ```
-              ┌ RD129-CH275.flac 
-              │
-              ├ RD129-CH275.trans.txt 
-              │
-              ├ RD129-CH276.flac 
-              │
-              ├ RD129-CH276.trans.txt 
-              │
-              ├ RD130-CH276.flac 
-- Librispeech ┤
-              ├ RD130-CH276.trans.txt 
-              │
-              ├ RD130-CH277.flac 
-              │
-              ├ RD130-CH277.trans.txt 
-              │
-              ├ RD131-CH275.flac 
-              │
-              └ RD131-CH275.trans.txt 
+           ┌RD129-CH275.flac
+           │                
+           ├RD129-CH275.trans.txt
+           │                     
+           ├RD129-CH276.flac
+           │                
+           ├RD129-CH276.trans.txt
+           │                     
+           ├RD130-CH276.flac
+Librispeech┤                
+           ├RD130-CH276.trans.txt
+           │                     
+           ├RD130-CH277.flac
+           │                
+           ├RD130-CH277.trans.txt
+           │                     
+           ├RD131-CH275.flac
+           │                
+           └RD131-CH275.trans.txt
 ```
 
-# User Story 2: Distributor
+# User Story 2: Complex Dataset Understanding Validation
 
 Now suppose Librispeech has noticed the success of our first user with CayLang, and would like to add it to their project so other users can manipulate the dataset as easily.
 
@@ -360,3 +392,5 @@ def gapless(seq) -> range min seq ((max seq) + 1) == seq
 def complete(seq) -> range 0 ((max seq) + 1) == seq
 ```
 Function definition sequence WIP.
+
+

@@ -1,0 +1,20 @@
+TreeDirectorySet SmallTreeDir {
+    Names: r"test_2",
+    Structure: {
+        layers: {
+            A: Directory<r"A-[0-9]{3}">,
+            B: Directory
+        },
+        edges: {
+            F: File
+        }
+    }
+}
+
+fold "test/testbed/test_2": SmallTreeDir {
+    A { name as a } => {
+        B { name as b } => {
+            F {name as f} => `{b}_hi_{a}_{f}`
+        }
+    }
+}

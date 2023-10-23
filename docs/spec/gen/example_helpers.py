@@ -101,7 +101,13 @@ def fsys_tree(tree: Tree):
             _dfs(c, f"{trace}/")
     return d
 
+def tdir(name, kids):
+    t = Tree(name)
+    t.add_children(kids)
+    return r
 
+def tfile(name):
+    return Tree(name)
 
 # def fold(tree: Tree, old_paths: list[str], new_paths: list[str]):
 #     fd = fsys_tree(tree)

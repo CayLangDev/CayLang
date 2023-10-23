@@ -1,5 +1,5 @@
 import random
-from example_helpers import make_tree, tree_to_str, gen_tree, dfs_flatten, Tree
+from example_helpers import make_tree, tree_to_str, gen_tree, dfs_flatten, Tree, tdir, tfile
 from simple_spec_gen import specfunc, gen, demo
 from PrettyPrint import PrettyPrintTree
 # examples for UserStories.md
@@ -51,7 +51,7 @@ def librispeech_tree(maker=make_libritree):
 @specfunc("librispeech")
 def librispeech():
     tree = librispeech_tree()
-    return tree_to_str(tree, orientation = PrettyPrintTree.HORIZONTAL)
+    return tree_to_str(tree, orientation = PrettyPrintTree.Horizontal)
 
 # LibriSpeech
 # Subset
@@ -78,14 +78,14 @@ def libri_joined_spec(trace, leaves):
 @specfunc("librispeech_partflattened")
 def librispeech_partflattened():
     tree = librispeech_tree(maker=make_libritree_fl1_cat)
-    return tree_to_str(tree, orientation = PrettyPrintTree.HORIZONTAL)
+    return tree_to_str(tree, orientation = PrettyPrintTree.Horizontal)
 
 @specfunc("librispeech_flattened")
 def librispeech_flattened():
     tree = librispeech_tree()
     new_tree = Tree("Librispeech")
     dfs_flatten_spec(new_tree, tree, "Librispeech", libri_joined_spec)
-    return tree_to_str(new_tree, orientation = PrettyPrintTree.HORIZONTAL)
+    return tree_to_str(new_tree, orientation = PrettyPrintTree.Horizontal)
 
 def librispeech_map(tree: Tree):
     readers = tree.children[0].children
@@ -126,8 +126,60 @@ def librispeech_folded_c_r():
     file_leaves(tree)
     return tree_to_str(tree)
 
+def by_layer(root: str, layers: list[tuple[str, int]]):
+    r = Tree(root)
+    current_l = [r]
+    for (name, size) in layers:
+        next_l = []
+        n = 0
+        for p in current_l:
+            for i in range(size):
+                n += 1
+                c = Tree(f"{name}-{n}")
+                p.add_child(c)
+                next_l.append(c)
+        current_l = next_l
+    return r
+
+
+
+@specfunc("rust_proj")
+def rust_proj():
+    tree = by_layer("proj", [("package",3), ("src", 1), ("mod", 2)])
+    return tree_to_str(tree)
+
+@specfunc("simple")
+def shuffle():
+    tree = by_layer("root", [("year",3), ("student-id", 3), ("course-grade", 3)])
+    return tree_to_str(tree)
+
+def flatten_bottom(root):
+    def _flatten_bottom(p, c):
+        n = []
+        nn = []
+        for l in c: n.extend(l.children)
+        for l in n: nn.extend(l.children)
+        if nn:
+            _flatten_bottom(c, n)
+        else:
+            p.children = []
+            for l in c:
+
+    _flatten_bottom([root],root.children)
+
+@specfunc("student")
+def shuffle():
+    tree = by_layer("root", [("A",3), ("B", 3), ("C", 3)])
+    return tree_to_str(tree)
+
+@specfunc("shuffle")
+def shuffle():
+    tree = by_layer("root", [("B",3), ("A", 3), ("C", 3)])
+    return tree_to_str(tree)
+
+
 def get_all():
-    return [librispeech, librispeech_partflattened, librispeech_flattened, librispeech_folded_r_c, librispeech_folded_c_r]
+    return [librispeech, librispeech_partflattened, librispeech_flattened, librispeech_folded_r_c, librispeech_folded_c_r, rust_proj]
 
 def gen_all(source, pub):
     gen(source, pub, get_all())
