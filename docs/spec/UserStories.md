@@ -22,16 +22,6 @@ C-1 C-2 C-3 C-4 C-5 C-6 C-7 C-8 C-9 C-10 C-11 C-12 C-13 C-14 C-15 C-16 C-17 C-18
 
 Then they should be able to write cay code to shuffle the first to layers.
 
-```
-                                                                                                                                                                                                 root
-                 ┌───────────────────────────────────────┬────────────────────────────────────────────┬────────────────────────────────────────────┬────────────────────────────────────────────┬─┴──────────────────────────────────────────┬────────────────────────────────────────────┬────────────────────────────────────────────┬────────────────────────────────────────────┐
-                B-1                                     B-2                                          B-3                                          B-4                                          B-5                                          B-6                                          B-7                                          B-8                                          B-9                     
-                 |                                       |                                            |                                            |                                            |                                            |                                            |                                            |                                            |                      
-                A-1                                     A-2                                          A-3                                          A-4                                          A-5                                          A-6                                          A-7                                          A-8                                          A-9                     
- ┌───┬───┬───┬───┼───┬───┬───┬───┐   ┌────┬────┬────┬────┼────┬────┬────┬────┐    ┌────┬────┬────┬────┼────┬────┬────┬────┐    ┌────┬────┬────┬────┼────┬────┬────┬────┐    ┌────┬────┬────┬────┼────┬────┬────┬────┐    ┌────┬────┬────┬────┼────┬────┬────┬────┐    ┌────┬────┬────┬────┼────┬────┬────┬────┐    ┌────┬────┬────┬────┼────┬────┬────┬────┐    ┌────┬────┬────┬────┼────┬────┬────┬────┐  
-C-1 C-2 C-3 C-4 C-5 C-6 C-7 C-8 C-9 C-10 C-11 C-12 C-13 C-14 C-15 C-16 C-17 C-18 C-19 C-20 C-21 C-22 C-23 C-24 C-25 C-26 C-27 C-28 C-29 C-30 C-31 C-32 C-33 C-34 C-35 C-36 C-37 C-38 C-39 C-40 C-41 C-42 C-43 C-44 C-45 C-46 C-47 C-48 C-49 C-50 C-51 C-52 C-53 C-54 C-55 C-56 C-57 C-58 C-59 C-60 C-61 C-62 C-63 C-64 C-65 C-66 C-67 C-68 C-69 C-70 C-71 C-72 C-73 C-74 C-75 C-76 C-77 C-78 C-79 C-80 C-81
-```
-
 # User Story 3: Simple Dataset Flatten
 
 A user is able to write a cay script that can flatten directories in the file system. Running the cay file with ‘cay’ will merge various directory and file paths to easily simplify the structure. A user may wish to use this to flatten a student grades dataset from the structure year/student-id/course-grade.txt to year_student-id_course-grade.txt.

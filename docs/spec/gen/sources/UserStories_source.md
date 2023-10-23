@@ -16,10 +16,6 @@ Suppose the user's tree looks like the following
 
 Then they should be able to write cay code to shuffle the first to layers.
 
-```
-{{shuffle}}
-```
-
 # User Story 3: Simple Dataset Flatten
 
 A user is able to write a cay script that can flatten directories in the file system. Running the cay file with ‘cay’ will merge various directory and file paths to easily simplify the structure. A user may wish to use this to flatten a student grades dataset from the structure year/student-id/course-grade.txt to year_student-id_course-grade.txt.
