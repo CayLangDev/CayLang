@@ -3,7 +3,7 @@ DirectorySet SmallNumDir {
 }
 
 TreeDirectorySet SmallTreeDir {
-    Names: r"test_2",
+    Names: r"test_1",
     Structure: {
         layers: {
             A: SmallNumDir,
@@ -15,7 +15,7 @@ TreeDirectorySet SmallTreeDir {
     }
 }
 
-fold "test/testbed/test_2": SmallTreeDir {
+fold "test/testbed/test_1": SmallTreeDir {
     A { name as a } => {
         B { name as b } => {
             F {name as f} => `{b}/{a}/{f}`
