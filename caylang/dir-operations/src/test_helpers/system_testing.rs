@@ -60,8 +60,6 @@ pub fn system_test(
     out_structure.apply(&tmp_out)?;
 
      println!("cd3: {:?}", std::env::current_dir());
-
-    let c = cay_code.replace("<PATH>", tmp_in.to_str().unwrap());
     // println!("code: {:?}", c);
 
     fs::write(
