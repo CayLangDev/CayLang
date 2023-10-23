@@ -1,5 +1,6 @@
 use crate::from_ast::{IntoInterpObject};
-use caylang_parser::ast::{Expr, Ident, NodeType, Prototype, TreePrototype, NodePrototype};
+use caylang_parser::ast::{Expr, Literal, Ident, to_ident, ParamIdent, SuperIdent,
+    StructurePair, StructureList, TreePrototype, NodePrototype, NodeType, Prototype};
 use crate::from_ast::{InterpObject, OperationApplication};
 use std::collections::HashMap;
 use std::mem::{discriminant, Discriminant};
@@ -10,12 +11,16 @@ use std::mem::{discriminant, Discriminant};
 #[derive(Debug, PartialEq)]
 pub enum LookupError {
     IgnoreLookup,
-    VariableNotFound
+    VariableNotFound,
+    InvalidParamIdent,
+    BadParameter
 }
 
 pub enum TargetedLookupError {
     IgnoreLookup,
     VariableNotFound,
+    InvalidParamIdent,
+    BadParameter,
     IncorrectTypeObjectFound
 }
 
@@ -73,19 +78,58 @@ impl DefnMap {
         return operations;
     }
 
-    pub fn get_object(&self, name: &Ident) -> Result<&Object, LookupError> {
+    pub fn get_object(&self, name: &SuperIdent) -> Result<Object, LookupError> {
         match name {
-            Ident::Variable(s) => {
-                match self.data.get(s) {
-                    Some(val) => Ok(val),
+            SuperIdent::Ident(ident) => match ident {
+                Ident::Variable(s) => match self.data.get(s) {
+                    Some(val) => Ok(val.clone()),
                     None => Err(LookupError::VariableNotFound)
                 }
+                Ident::Ignored => Err(LookupError::IgnoreLookup)
             }
-            Ident::Ignored => Err(LookupError::IgnoreLookup)
+
+            SuperIdent::ParamIdent(param) => {
+                match param.name.as_str() {
+                    "Directory" => {
+                        if let Literal::Regex(r) = &param.param {
+                            Ok( Prototype::NodePrototype(
+                                NodePrototype {regex: r.to_string(), node_type: NodeType::Dir}
+                            ))
+                        } else {
+                            Err(LookupError::BadParameter)
+                        }
+                    }
+
+                    "Star" => {
+                        if let Literal::Integer(i) = &param.param {
+                            if i > &0 && *i as usize <= usize::MAX {
+                                let layers: StructureList = vec![ StructurePair(
+                                        Ident::Ignored,
+                                        SuperIdent::Ident(to_ident("Directory"))
+                                    ); (i - 1) as usize];
+                                let edges: StructureList = vec![ StructurePair(
+                                        Ident::Ignored,
+                                        SuperIdent::Ident(to_ident("File"))
+                                    )];
+                                    
+                                Ok( Prototype::TreePrototype(
+                                    TreePrototype {regex: r".*".to_string(), layers, edges}
+                                ))
+                            }
+                            else {
+                                Err(LookupError::BadParameter)
+                            }
+                        } else {
+                            Err(LookupError::BadParameter)
+                        }
+                    }
+                    _ => Err(LookupError::InvalidParamIdent)
+                }
+            }
         }
     }
 
-    pub fn get_tree_object(&self, name: &Ident) ->  Result<&TreePrototype, TargetedLookupError> {
+    pub fn get_tree_object(&self, name: &SuperIdent) ->  Result<TreePrototype, TargetedLookupError> {
         match self.get_object(name) {
             Ok(r) => match r {
                  Prototype::TreePrototype(p) => Ok(p),
@@ -93,12 +137,14 @@ impl DefnMap {
             }
             Err(e) => Err(match e {
                 LookupError::IgnoreLookup => TargetedLookupError::IgnoreLookup,
-                LookupError::VariableNotFound => TargetedLookupError::VariableNotFound
+                LookupError::VariableNotFound => TargetedLookupError::VariableNotFound,
+                LookupError::InvalidParamIdent => TargetedLookupError::InvalidParamIdent,
+                LookupError::BadParameter => TargetedLookupError::BadParameter,
             })
         }
     }
 
-    pub fn get_node_object(&self, name: &Ident) ->  Result<&NodePrototype, TargetedLookupError> {
+    pub fn get_node_object(&self, name: &SuperIdent) ->  Result<NodePrototype, TargetedLookupError> {
         match self.get_object(name) {
             Ok(r) => match r {
                  Prototype::NodePrototype(p) => Ok(p),
@@ -106,7 +152,9 @@ impl DefnMap {
             }
             Err(e) => Err(match e {
                 LookupError::IgnoreLookup => TargetedLookupError::IgnoreLookup,
-                LookupError::VariableNotFound => TargetedLookupError::VariableNotFound
+                LookupError::VariableNotFound => TargetedLookupError::VariableNotFound,
+                LookupError::InvalidParamIdent => TargetedLookupError::InvalidParamIdent,
+                LookupError::BadParameter => TargetedLookupError::BadParameter,
             })
         }
     }

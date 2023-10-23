@@ -4,8 +4,8 @@ use std::{collections::HashMap};
 use crate::template::parse::{parse};
 use crate::template::ast::{TemplatePart};
 use caylang_parser::ast::{
-    Clause, ClauseType, Destination, Expr, FoldExpr, Ident, Literal,
-    Prototype, NodePrototype, PrototypeDeclaration, NodeType
+    Clause, ClauseType, Destination, Expr, FoldExpr, SuperIdent, Ident, ParamIdent,
+    Literal, Prototype, NodePrototype, PrototypeDeclaration, NodeType
 };
 
 pub trait Matches {
@@ -64,13 +64,13 @@ pub(crate) fn to_rename(variable_depth_map: &HashMap<String, usize>, path: &Stri
 
 #[derive(Debug)]
 pub struct FoldOperation {
-    pub options: Vec<Ident>,
+    pub options: Vec<SuperIdent>,
     pub targets: Vec<Rename>,
 }
 
 #[derive(Debug)]
 pub struct FoldStructure {
-    pub top_level: Ident,
+    pub top_level: SuperIdent,
     // pub layers: Vec<Ident>,
     // pub edges: Vec<Ident>
 }
@@ -93,7 +93,7 @@ pub enum TopLevelFoldPrototypeError {
     NodeGiven
 }
 
-pub fn top_level_ident(f: &FoldExpr) -> Ident {
+pub fn top_level_ident(f: &FoldExpr) -> SuperIdent {
     return f.dir_type.name.clone();
 }
 
@@ -134,11 +134,15 @@ impl IntoInterpObject for Expr {
     }
 }
 
+// tree stuff
 impl IntoInterpObject for PrototypeDeclaration {
     fn to_interp_object(self) -> Option<InterpObject> {
         match self.name {
-            Ident::Variable(s) => Some(InterpObject::Declaration(Declaration {name: s, prototype: self.prototype})),
-            Ident::Ignored => None
+            SuperIdent::Ident(ident) => match ident {
+                Ident::Variable(s) => Some(InterpObject::Declaration(Declaration {name: s, prototype: self.prototype})),
+                Ident::Ignored => None,
+            }
+            _ => None
         }
     }
 }
@@ -191,7 +195,7 @@ impl ToInterpObject for FoldExpr {
         }
 
         // TODO: Once NodePrototypes are properly parsed, can do proper options here.
-        let options: Vec<Ident> = vec![Ident::Variable("File".to_string()); rename_templates.len()];
+        let options: Vec<SuperIdent> = vec![SuperIdent::Ident(Ident::Variable("File".to_string())); rename_templates.len()];
 
         Some(InterpObject::Application(OperationApplication {
             from: self.directory.clone(),

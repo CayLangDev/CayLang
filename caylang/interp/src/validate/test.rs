@@ -5,8 +5,8 @@ use caylang_parser::test_helpers::{to_ident,
                                    simple_node_prototype,
     compl_tree_prototype
 };
-use caylang_parser::ast::{Prototype, TreePrototype,
-                          NodePrototype, NodeType, Ident, StructurePair};
+use caylang_parser::ast::{Prototype, TreePrototype, NodePrototype,
+                    NodeType, SuperIdent, ParamIdent, Ident, StructurePair};
 
 use caylang_io::test_helpers::tree_builder::{file, dir};
 
@@ -45,9 +45,9 @@ fn test_make_tree_prototype() {
     let b = dir_p("b");
     let f = file_p("f");
 
-    assert_eq!(d.get_object(&to_ident("a")), res(&a));
-    assert_eq!(d.get_object(&to_ident("b")), res(&b));
-    assert_eq!(d.get_object(&to_ident("f")), res(&f));
+    assert_eq!(d.get_object(&SuperIdent::Ident(to_ident("a"))), res(&a).cloned());
+    assert_eq!(d.get_object(&SuperIdent::Ident(to_ident("b"))), res(&b).cloned());
+    assert_eq!(d.get_object(&SuperIdent::Ident(to_ident("f"))), res(&f).cloned());
 }
 
 #[test]
@@ -57,16 +57,16 @@ fn test_make_tree_prototype_structure() {
 
     let p = Prototype::TreePrototype(TreePrototype {
         regex: "t".to_string(),
-        layers: vec![StructurePair(Ident::Ignored, to_ident("a")),
-                     StructurePair(Ident::Ignored, to_ident("b"))],
-        edges: vec![StructurePair(Ident::Ignored, to_ident("f"))]
+        layers: vec![StructurePair(Ident::Ignored, SuperIdent::Ident(to_ident("a"))),
+                     StructurePair(Ident::Ignored, SuperIdent::Ident(to_ident("b")))],
+        edges: vec![StructurePair(Ident::Ignored, SuperIdent::Ident(to_ident("f")))]
     });
 
     fn res(p: &Prototype) -> Result<&Prototype, LookupError> {
         return Ok(p);
     }
 
-    assert_eq!(d.get_object(&to_ident("t")), res(&p));
+    assert_eq!(d.get_object(&SuperIdent::Ident(to_ident("t"))), res(&p).cloned());
 }
 
 #[test]
@@ -79,13 +79,13 @@ fn test_get_tree_prototype() {
     );
 
     let p = simple_tree_prototype("a");
-    assert_eq!(get_tree_prototype(&d, &to_ident("a")), Ok(&p) as Result<&TreePrototype, ValidationError>);
+    assert_eq!(get_tree_prototype(&d, &SuperIdent::Ident(to_ident("a"))), (Ok(&p) as Result<&TreePrototype, ValidationError>).cloned());
 
-    let b = to_ident("b");
+    let b = SuperIdent::Ident(to_ident("b"));
     let res = get_tree_prototype(&d, &b);
     assert_eq!(res, Err(ValidationError::IdentifiedPrototypeNotFound(b)));
 
-    let i = to_ident("_");
+    let i = SuperIdent::Ident(to_ident("_"));
     let res = get_tree_prototype(&d, &i);
     assert_eq!(res, Err(ValidationError::IdentifiedPrototypeNotFound(i)));
 }
@@ -100,14 +100,14 @@ fn test_get_node_prototype() {
     );
 
     let p = simple_node_prototype("a", NodeType::File);
-    assert_eq!(get_node_prototype(&d, &to_ident("a")),
-               Ok(&p) as Result<&NodePrototype, ValidationError>);
+    assert_eq!(get_node_prototype(&d, &SuperIdent::Ident(to_ident("a"))),
+               (Ok(&p) as Result<&NodePrototype, ValidationError>).cloned());
 
-    let b = to_ident("b");
+    let b = SuperIdent::Ident(to_ident("b"));
     let res = get_node_prototype(&d, &b);
     assert_eq!(res, Err(ValidationError::IdentifiedPrototypeNotFound(b)));
 
-    let i = to_ident("_");
+    let i = SuperIdent::Ident(to_ident("_"));
     let res = get_node_prototype(&d, &i);
     assert_eq!(res, Err(ValidationError::IdentifiedPrototypeNotFound(i)));
 }
@@ -121,7 +121,7 @@ fn test_false_negative() {
 
     make_tree_prototype(&mut d, "t", vec!["a","b","f"]);
 
-    let res = validate_tree(&d, &tree, &to_ident("t"));
+    let res = validate_tree(&d, &tree, &SuperIdent::Ident(to_ident("t")));
     println!("out: {:?}", res);
     assert!(res.is_ok());
 
@@ -136,7 +136,7 @@ fn test_simple_false_negative() {
 
     make_tree_prototype(&mut d, "t", vec!["a","f"]);
 
-    let res = validate_tree(&d, &tree, &to_ident("t"));
+    let res = validate_tree(&d, &tree, &SuperIdent::Ident(to_ident("t")));
     println!("out: {:?}", res);
     assert!(res.is_ok());
 

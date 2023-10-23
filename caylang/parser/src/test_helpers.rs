@@ -1,7 +1,16 @@
-use crate::ast::{Ident, TreePrototype, NodePrototype, NodeType, StructureList, StructurePair};
+use crate::ast::{Ident, ParamIdent, SuperIdent, Literal, 
+    TreePrototype, NodePrototype, NodeType, StructureList, StructurePair};
 
 pub fn to_ident(name: &str) -> Ident {
     return Ident::Variable(name.to_string());
+}
+
+pub fn to_int_param_ident(name: &str, num: i32) -> ParamIdent {
+    return ParamIdent {name: name.to_string(), param: Literal::Integer(num)};
+}
+
+pub fn to_regex_param_ident(name: &str, regex: &str) -> ParamIdent {
+    return ParamIdent {name: name.to_string(), param: Literal::Regex(regex.to_string())};
 }
 
 pub fn simple_tree_prototype(name: &str) -> TreePrototype {
@@ -19,7 +28,7 @@ node_type: NodeType
 }
 
 pub fn ign_label_slist(idens: &[&str]) -> StructureList {
-    idens.iter().map(|s| StructurePair(Ident::Ignored, Ident::Variable(s.to_string()))).collect()
+    idens.iter().map(|s| StructurePair(Ident::Ignored, SuperIdent::Ident(Ident::Variable(s.to_string())))).collect()
 }
 
 pub fn compl_tree_prototype(

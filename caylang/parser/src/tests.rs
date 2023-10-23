@@ -63,6 +63,40 @@ mod tests {
     }
 
     #[test]
+    fn test_fold_with_tree_param() {
+        let cay =
+                "fold \"~/dataset\": Star<3> { name as school, .. } {
+                    Year { name as year, .. } => {
+                      Subject { name as subject, .. } => {
+                        File { name, .. }
+                          | matches name \"hi.txt\" => \"hello.txt\"
+                          | matches name \"data*.txt\" && lengthGreaterThan name 10 => \"Flattened/{school}_{year}_{subject}_{name}\"
+                      }
+                    }
+                    _ => .
+                  }";
+        test_parsing(cay);
+    }
+
+    #[test]
+    fn test_tree_with_dir_param() {
+        let cay =
+                r#"TreeDirectorySet SmallTreeDir {
+                    Names: r"[123]",
+                    Structure: {
+                        layers: {
+                            A: Directory<r"[ABC]">,
+                            B: Directory<r"test[012]*">
+                        },
+                        edges: {
+                            F: File
+                        }
+                    }
+                }"#;
+        test_parsing(cay);
+    }
+
+    #[test]
     fn test_dirset() {
         let input = r#"DirectorySet SmallNumDir { Names: r"[123]", Tags: { num: asint name } }"#;
         test_parsing(input);

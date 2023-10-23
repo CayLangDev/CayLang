@@ -1,14 +1,10 @@
 use crate::defn_map::{new_defn_map, DefnMap};
-use crate::from_ast::{top_level_ident, FoldOperation, Matches, Rename, RenamePart};
-use crate::validate::{validate_tree, ValidationError};
-use caylang_parser::ast::{
-    Expr, Ident, NodePrototype, Prototype, StructureList, StructurePair, TreePrototype,
-};
+use crate::from_ast::{FoldOperation, Matches, Rename, RenamePart};
+use crate::validate::{validate_tree};
+use caylang_parser::ast::{Expr, Prototype};
 
 use caylang_io::filesys::{load_full_tree, write_full_tree};
-use caylang_io::tree::{NodeIdx, Tree};
-
-use std::collections::VecDeque;
+use caylang_io::tree::{Tree};
 
 use std::iter::zip;
 use std::path::Component;
