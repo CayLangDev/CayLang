@@ -112,6 +112,7 @@ fn test_get_node_prototype() {
     assert_eq!(res, Err(ValidationError::IdentifiedPrototypeNotFound(i)));
 }
 
+// tests validate correctly not throwing an error for a prototype that matches a 3 layer tree
 #[test]
 fn test_false_negative() {
     let tree = dir("a", vec![dir("b", vec![file("f")])]).build_tree();
@@ -127,6 +128,7 @@ fn test_false_negative() {
 
 }
 
+// tests validate correctly not throwing an error for a prototype that matches a simple 2 layer tree
 #[test]
 fn test_simple_false_negative() {
     let tree = dir("a", vec![file("f")]).build_tree();
@@ -139,5 +141,19 @@ fn test_simple_false_negative() {
     let res = validate_tree(&d, &tree, &SuperIdent::Ident(to_ident("t")));
     println!("out: {:?}", res);
     assert!(res.is_ok());
+}
 
+// tests validate correctly throwing an error if the tree prototype has less layers than the tree
+#[test]
+fn test_simple_false_positive() {
+    let tree = dir("a", vec![dir("b", vec![file("a")])]).build_tree();
+    tree.print();
+    let mut d = new_defn_map();
+    d.add_defaults();
+
+    make_tree_prototype(&mut d, "t", vec!["a","f"]);
+
+    let res = validate_tree(&d, &tree, &SuperIdent::Ident(to_ident("t")));
+    println!("out: {:?}", res);
+    assert!(res.is_err());
 }

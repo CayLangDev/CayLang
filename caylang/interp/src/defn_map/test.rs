@@ -24,6 +24,26 @@ fn test_default_dir() {
 }
 
 #[test]
+fn test_default_file() {
+    let mut d = new_defn_map();
+    d.add_defaults();
+    let file = d.get_object(&SuperIdent::Ident(to_ident("File")));
+    assert!(matches!(&file, Ok(Prototype::NodePrototype(p))));
+    match file {
+        Ok(Prototype::NodePrototype(p)) => {
+            assert!(p.regex == r".*".to_string());
+            assert!(matches!(p.node_type, NodeType::File));
+        }
+        _ => unreachable!()
+    }
+}
+
+#[test]
+fn test_add_file() {
+//
+}
+
+#[test]
 fn test_param_dir() {
     let mut d = new_defn_map();    
     let dir = d.get_object(&SuperIdent::ParamIdent(to_regex_param_ident("Directory", r"test")));
