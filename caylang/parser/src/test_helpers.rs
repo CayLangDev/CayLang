@@ -9,8 +9,8 @@ pub fn to_int_param_ident(name: &str, num: i32) -> ParamIdent {
     return ParamIdent {name: name.to_string(), param: Literal::Integer(num)};
 }
 
-pub fn to_str_param_ident(name: &str, string: &str) -> ParamIdent {
-    return ParamIdent {name: name.to_string(), param: Literal::String(string.to_string())};
+pub fn to_regex_param_ident(name: &str, regex: &str) -> ParamIdent {
+    return ParamIdent {name: name.to_string(), param: Literal::Regex(regex.to_string())};
 }
 
 pub fn simple_tree_prototype(name: &str) -> TreePrototype {

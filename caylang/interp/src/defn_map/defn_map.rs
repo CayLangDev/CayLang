@@ -1,5 +1,5 @@
 use crate::from_ast::{IntoInterpObject};
-use caylang_parser::ast::{Expr, Literal, Ident, ParamIdent, SuperIdent,
+use caylang_parser::ast::{Expr, Literal, Ident, to_ident, ParamIdent, SuperIdent,
     StructurePair, StructureList, TreePrototype, NodePrototype, NodeType, Prototype};
 use crate::from_ast::{InterpObject, OperationApplication};
 use std::collections::HashMap;
@@ -92,7 +92,6 @@ impl DefnMap {
                 match param.name.as_str() {
                     "Directory" => {
                         if let Literal::Regex(r) = &param.param {
-
                             Ok( Prototype::NodePrototype(
                                 NodePrototype {regex: r.to_string(), node_type: NodeType::Dir}
                             ))
@@ -103,14 +102,14 @@ impl DefnMap {
 
                     "Star" => {
                         if let Literal::Integer(i) = &param.param {
-                            if i > &0 && i <= &(usize::MAX as i32) {
+                            if i > &0 && *i as usize <= usize::MAX {
                                 let layers: StructureList = vec![ StructurePair(
-                                        Ident::Variable("".to_string()),
-                                        SuperIdent::Ident(Ident::Variable("Directory".to_string()))
+                                        Ident::Ignored,
+                                        SuperIdent::Ident(to_ident("Directory"))
                                     ); (i - 1) as usize];
                                 let edges: StructureList = vec![ StructurePair(
-                                        Ident::Variable("".to_string()),
-                                        SuperIdent::Ident(Ident::Variable("File".to_string()))
+                                        Ident::Ignored,
+                                        SuperIdent::Ident(to_ident("File"))
                                     )];
                                     
                                 Ok( Prototype::TreePrototype(
