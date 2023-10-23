@@ -6,7 +6,7 @@ import hashlib
 def gen_nice_test(root, layer_pairs, edge_pairs, lb = 1, ub = 10):
     current_layer = [root]
     for layer_prototype, size in layer_pairs:
-        print(layer_prototype, size)
+        # print(layer_prototype, size)
         if size is None:
             size = random.randint(lb, ub)
             
@@ -110,7 +110,7 @@ def gen_test_3(root):
 def main(r):
     gen_test_1(r)
     gen_test_2(r)
-    gen_test_3(r)
+    # gen_test_3(r)
 
 def display(r, tests):
     for d in tests:
@@ -123,10 +123,11 @@ def clean(r, tests):
 if __name__ == "__main__":
     root = "test/testbed"
     random.seed(1)
-    tests = ["test_1", "test_2", "test_3"]
+    # tests = ["test_1", "test_2"]
+    # tests = ["test_1", "test_2", "test_3"]
     # clean(root, tests)
     main(root)
-    tests = ["test_1", "test_2", "test_3"]
-    display(root, tests)
+    # tests = ["test_1", "test_2"]
+    # display(root, tests)
     # clean(root, tests)
 
