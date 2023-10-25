@@ -14,6 +14,12 @@ This will create a `target/release` directory containing the binaries. To run th
 ```
 Calling `./target/release/cay help` will display a list of commands.
 
+To complete the installation run
+```bash
+./install.sh
+```
+To move the binary to `/usr/bin`, or use any method of your choice to add the binary to your path.
+
 ## Unit Tests
 
 To run all unit tests you must specify all caylang packages in this workspace with a glob specifier.
@@ -33,28 +39,31 @@ To run all the system tests you must specify the cay package for testing.
 cargo test -p cay
 ```
 
-
 ## Samples
 
-Samples are available to run in the `samples` folder, to run one execute:
+Samples are available to run in the `samples` folder, to build one and inspect the AST execute:
 ```bash
-./target/release/cay build samples/<program>
+cay build -v samples/<program>
+```
+To build one and execute the code in the interpreter, run:
+```bash
+cay build -r samples/<program>
 ```
 
-To demonstrate the current progress of the interpreter, run from the project root
-```
-python test/simple_tests.py
-cargo run build -r -v samples/simple_test_1.cay
-```
+Or equivalent, i.e. `cargo run build <flags> <file_path>` or `./target/release/cay build <flags> <file_path>` if cay is not installed.
 
-you may need to first run 
-```
-./test/tests_clean.sh
-```
-if you've already ran `python test/simple_tests.py` previously.
+All the samples in the `parse_tests` and `final_demo` directories can be actually executed by the interpreter.
 
-and then 
+These samples operate on datasets generated in the "testbed" folder by running `./demo_setup.sh`. Ensure to run that command atleast once before interacting with the samples.
+
+It is recommended users install and utilise the program `tree` to inspect `test/testbed` after executing the samples.
+
+Run
+```bash
+tree test/testbed
 ```
-cargo run build -r -v samples/simple_test_2.cay
+To see the state of all test datasets, or
+```bash
+tree test/testbed/test_<i>
 ```
-(this might not work)
+to see the state of test dataset i.
