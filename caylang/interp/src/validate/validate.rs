@@ -1,3 +1,5 @@
+//! Validate component core module,
+
 use crate::defn_map::{DefnMap, TargetedLookupError};
 use crate::from_ast::{Matches};
 use caylang_parser::ast::{SuperIdent, Ident, NodePrototype, Prototype, StructureList, StructurePair, TreePrototype};
@@ -53,7 +55,9 @@ pub(super) fn load_validation_prototypes<'a>(
     return Ok(prototypes);
 }
 
-// needs to access prototypes by identifiers from a defn_map
+/// Validates the given tree's structure matches the prototype ident refers to
+/// Will throw an error of type ValidationError indicating different error conditions,
+/// i.e. ident doesn't refer to a tree prototype, the tree has the wrong depth
 pub fn validate_tree(d: &DefnMap, tree: &Tree, ident: &SuperIdent) -> Result<(), ValidationError> {
     let tree_layers: Vec<Vec<NodeIdx>> = tree.proper_layers().collect();
     let prototype = get_tree_prototype(d, ident)?;

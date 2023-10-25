@@ -11,6 +11,9 @@ use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
 
+/// Calculate the old paths and new paths of each leaf in the given tree based on the given FoldOperation
+/// Uses given DefnMap to retrieve the leaf node prototypes described in the fold operation
+/// Checks each leaf node of the tree matches some leaf node prototype and its new path based on that leaf node's rename described in FoldOperation
 pub fn to_fold(d: &DefnMap, tree: &Tree, fold_desc: FoldOperation) -> (Vec<PathBuf>, Vec<PathBuf>) {
     let mut old_paths = vec![];
     let mut new_paths = vec![];
@@ -36,6 +39,7 @@ pub fn to_fold(d: &DefnMap, tree: &Tree, fold_desc: FoldOperation) -> (Vec<PathB
     return (old_paths, new_paths);
 }
 
+/// Makes a full path from path components
 pub fn make_full_path<'a>(i: impl Iterator<Item = &'a Path> + 'a) -> PathBuf {
     let mut b = PathBuf::from("");
     for p in i {
@@ -44,6 +48,7 @@ pub fn make_full_path<'a>(i: impl Iterator<Item = &'a Path> + 'a) -> PathBuf {
     return b;
 }
 
+/// Transforms a path based on a rename description
 pub fn new_name(path: &PathBuf, target: &Rename) -> PathBuf {
     let comps: Vec<Component> = path.components().collect();
 
@@ -62,13 +67,11 @@ pub fn new_name(path: &PathBuf, target: &Rename) -> PathBuf {
     return make_full_path(name_comps.iter().map(|c| c.as_ref()));
 }
 
+/// Interpret the given AST
 pub fn interpret(ast: Expr) {
     let mut defn_map = new_defn_map();
     let operations = defn_map.load_objects(ast);
     defn_map.add_defaults();
-    // println!("defns {:?}", defn_map);
-    // println!("operations {:?}", operations);
-    // now run to_fold
     for op in operations {
         let root: PathBuf = op.from.into();
         let tree = load_full_tree(&root);

@@ -1,3 +1,5 @@
+//! Test module for validate component
+
 use crate::validate::{get_tree_prototype, get_node_prototype, ValidationError, validate_tree};
 use crate::defn_map::{DefnMap, new_defn_map, LookupError};
 use caylang_parser::test_helpers::{to_ident,
