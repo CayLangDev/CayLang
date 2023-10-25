@@ -160,7 +160,7 @@ Now our tree is fully flattened.
 {{librispeech_flattened}}
 ```
 
-# User Story N: Complex Dataset Understanding Validation
+# User Story 7: Complex Dataset Understanding Validation
 
 Now suppose Librispeech has noticed the success of our first user with CayLang, and would like to add it to their project so other users can manipulate the dataset as easily.
 
