@@ -2,6 +2,10 @@
 
 CayLang is a powerful directory description and manipulation language and toolkit.
 
+To learn about cay, its implementation and goals you can read through the markdown files in spec.
+
+For interacting with this iteration of Cay the FinalImplementationGuide documents all existing features with a simple example.
+
 ## Installation
 ### Compile from source
 CayLang is built in Rust, so in order to build it you'll need to install the Cargo toolchain. Afterwards, you can build the binaries with the following command:
