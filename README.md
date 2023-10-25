@@ -2,9 +2,9 @@
 
 CayLang is a powerful directory description and manipulation language and toolkit.
 
-To learn about cay, its implementation and goals you can read through the markdown files in spec.
+To learn about cay, its implementation and goals you can read through the markdown files in `docs/spec`.
 
-For interacting with this iteration of Cay the FinalImplementationGuide documents all existing features with a simple example.
+For interacting with this iteration of Cay the `FinalImplementationGuide` in `spec` documents all existing features with a simple example.
 
 ## Installation
 ### Compile from source
@@ -71,3 +71,11 @@ To see the state of all test datasets, or
 tree test/testbed/test_<i>
 ```
 to see the state of test dataset i.
+
+## Documentation
+
+To generate the documentation of the cay and caylang code itself, run 
+```bash
+./make_docs.sh
+```
+Note: documentation is somewhat sparse, as the bulk of documentation efforts has been directed towards the language spec.
