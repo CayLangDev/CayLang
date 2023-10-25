@@ -1,6 +1,10 @@
+//! File relocation literal ("template") parser
+//! Custom implementation of a LR(1) parser with integrated lexing because
+//! LALRPOP doesn't allow whitespace without writing our own lexer.
+
 use crate::template::ast::{TemplateLiteral, TemplatePart};
 use std::collections::VecDeque;
-// custom implementation of a LR(2) parser because LALRPOP doesn't allow whitespace without writing our own lexer.
+
 
 #[derive(PartialEq)]
 enum State {
@@ -8,13 +12,14 @@ enum State {
     Text,
     TextCancel,
     EndFullPart,
-    // Iterations ending on EndFullPart conclude the building of the current full part.
-    // Iterations ending on EndFullPart start on NewState
+    //! Iterations ending on EndFullPart conclude the building of the current full part.
+    //! Iterations ending on EndFullPart start on NewState
     NewState
-    // Iterations starting on NewState switch to an appropriate state for their character
-    // Iterations ending on NewState conclude the building of the current subpart.
+    //! Iterations starting on NewState switch to an appropriate state for their character
+    //! Iterations ending on NewState conclude the building of the current subpart.
 }
 
+/// Parsing function
 pub fn parse(path: String) -> TemplateLiteral {
     if path.len() == 0 {
         panic!("Empty template path!");
