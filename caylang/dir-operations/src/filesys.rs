@@ -11,6 +11,7 @@ use fs_extra::dir::copy;
 
 use dir_diff::is_different;
 use tempdir::TempDir;
+use debug_print::debug_println;
 
 pub fn load_full_tree(root: &PathBuf) -> Tree {
     let mut tree: Tree = Tree::new();
@@ -29,11 +30,11 @@ pub fn load_full_tree(root: &PathBuf) -> Tree {
                 let mut parent_path = relative_path.clone();
                 parent_path.pop();
 
-                print!("{} {}\n", entry.path().display(), parent_path.display());
+                debug_println!("{} {}\n", entry.path().display(), parent_path.display());
                 // Path sorting means we can expect the parent to exist
                 let parent_idx = tree.path_map.get(&parent_path);
 
-                println!("root: {} path: {}", root.display(), relative_path.display());
+                debug_println!("root: {} path: {}", root.display(), relative_path.display());
 
                 match parent_idx {
                     Some(idx) => {
@@ -44,7 +45,7 @@ pub fn load_full_tree(root: &PathBuf) -> Tree {
                     }
                 }
             }
-            _ => println!("File doesn't exist"),
+            _ => panic!("File doesn't exist"),
         }
     }
 
@@ -79,7 +80,7 @@ pub fn write_full_tree(from_path: &PathBuf, to_path: &PathBuf, from_tree: &Tree,
         let mut abs_original_path = from_path.clone();
         abs_original_path.push(&node.data.original_path);
 
-        println!("{} {}", node.data.path.display(), abs_path.display());
+        debug_println!("{} {}", node.data.path.display(), abs_path.display());
 
         match node.data.node_type {
             NodeType::Directory => match to_tree.path_map.get(&node.data.path) {

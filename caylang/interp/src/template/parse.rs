@@ -59,9 +59,7 @@ pub fn parse(path: String) -> TemplateLiteral {
                                 state = State::Text;
                                 switch = Some(State::NewState);
                             }
-                            _ => {
-                                println!("{:?}", c2);
-                            }
+                            _ => { }
                         }
                     }
                 }
@@ -83,9 +81,7 @@ pub fn parse(path: String) -> TemplateLiteral {
                             Some('{') => {
                                 switch = Some(State::NewState);
                             }
-                            _ => {
-                                println!("{:?}", c2);
-                            }
+                            _ => { }
                         }
                     }
                 }
@@ -102,9 +98,6 @@ pub fn parse(path: String) -> TemplateLiteral {
                     }
                     _ => {
                         panic!("Unidentified escape sequence in path template.");
-                        // buffer += "\\";
-                        // buffer += c;
-                        // switch = Some(State::Text);
                     }
                 }
             }

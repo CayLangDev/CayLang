@@ -46,13 +46,12 @@ pub fn exec(
     match result {
         Ok(program) => {
             // Pretty-print the parsed program (AST)
-            println!("Successfully parsed {}!", &cay_file);
+            println!("Building {}!", &cay_file);
 
             if verbose {
                 println!("Parsed program:\n{}", pretty_print(&program));
             } 
             if run {
-                println!("Trying to run");
                 interpret(program);
             }
         }

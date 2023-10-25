@@ -1,13 +1,9 @@
-DirectorySet SmallNumDir {
-    Names: r"A-[0-9]{3}"
-}
-
 TreeDirectorySet SmallTreeDir {
     Names: r"test_2",
     Structure: {
         layers: {
-            A: SmallNumDir,
-            B: Directory
+            A: Directory,
+            B: Directory<r"A-[0-9]{3}">
         },
         edges: {
             F: File

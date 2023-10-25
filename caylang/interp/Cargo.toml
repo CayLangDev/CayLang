@@ -9,3 +9,4 @@ edition = "2021"
 caylang-parser = { path = "../parser", version="0.1.0" }
 caylang-io = { path = "../dir-operations", version="0.1.0" }
 regex = "1.9.5"
+debug_print = "1.0.0"

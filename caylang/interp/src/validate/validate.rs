@@ -5,7 +5,7 @@ use crate::from_ast::{Matches};
 use caylang_parser::ast::{SuperIdent, Ident, NodePrototype, Prototype, StructureList, StructurePair, TreePrototype};
 use caylang_io::tree::{NodeIdx, Tree};
 use std::iter::zip;
-use std::mem::{Discriminant};
+use debug_print::{debug_println};
 
 #[derive(Debug, PartialEq)]
 pub enum ValidationError {
@@ -62,7 +62,7 @@ pub fn validate_tree(d: &DefnMap, tree: &Tree, ident: &SuperIdent) -> Result<(),
     let tree_layers: Vec<Vec<NodeIdx>> = tree.proper_layers().collect();
     let prototype = get_tree_prototype(d, ident)?;
     let offset = if prototype.edges.len() > 0 { 1 } else { 0 };
-    println!("offset: {:?}, tree_layers len: {:?}", offset, tree_layers.len());
+    debug_println!("offset: {:?}, tree_layers len: {:?}", offset, tree_layers.len());
 
     // There should be as many tree layers as there are prototype layers
     // unless the prototype has an edge, in which case there ought to be one more
@@ -77,8 +77,6 @@ pub fn validate_tree(d: &DefnMap, tree: &Tree, ident: &SuperIdent) -> Result<(),
 
     let inner_layers = &tree_layers[0..tree_layers.len() - offset];
     let layer_prototypes = load_validation_prototypes(&d, &prototype.layers)?;
-    println!("here 1");
-    println!("il: {:?}", inner_layers);
     for (layer, (l_ident, l_prototype)) in zip(inner_layers, layer_prototypes) {
         for node_idx in layer {
             let node = &tree.nodes[*node_idx];
@@ -91,7 +89,6 @@ pub fn validate_tree(d: &DefnMap, tree: &Tree, ident: &SuperIdent) -> Result<(),
     if offset == 0 {
         return Ok(());
     }
-    println!("here 2");
 
     let edge_prototypes = load_validation_prototypes(&d, &prototype.edges)?;
     // return false if there's any leaf node that doesn't match some

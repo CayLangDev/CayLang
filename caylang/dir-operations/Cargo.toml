@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+debug_print = "1.0.0"
 jwalk = "0.8.1"
 tempdir = "0.3.7"
 file_diff = "1.0.0"

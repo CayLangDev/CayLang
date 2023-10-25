@@ -6,10 +6,12 @@ use caylang_parser::ast::{Expr, Prototype};
 use caylang_io::filesys::{load_full_tree, write_full_tree};
 use caylang_io::tree::{Tree};
 
+
 use std::iter::zip;
 use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
+use debug_print::{debug_println};
 
 /// Calculate the old paths and new paths of each leaf in the given tree based on the given FoldOperation
 /// Uses given DefnMap to retrieve the leaf node prototypes described in the fold operation
@@ -76,13 +78,13 @@ pub fn interpret(ast: Expr) {
         let root: PathBuf = op.from.into();
         let tree = load_full_tree(&root);
         let tlp_ident = op.structure.top_level;
-        tree.print();
+        #[cfg(debug_assertions)] tree.print(); // print tree if debugging
         validate_tree(&defn_map, &tree, &tlp_ident).unwrap();
 
         // tree.print();
         let (old_paths, new_paths) = to_fold(&defn_map, &tree, op.operation);
-        println!("old paths: {:?}", old_paths);
-        println!("new paths: {:?}", new_paths);
+        debug_println!("old paths: {:?}", old_paths);
+        debug_println!("new paths: {:?}", new_paths);
         let new_tree = Tree::from_fold(&tree, old_paths, new_paths);
         write_full_tree(&root, &root, &tree, &new_tree);
     }

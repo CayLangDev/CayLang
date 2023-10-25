@@ -7,6 +7,8 @@ use caylang_parser::ast::{
     Clause, ClauseType, Destination, Expr, FoldExpr, SuperIdent, Ident, ParamIdent,
     Literal, Prototype, NodePrototype, PrototypeDeclaration, NodeType
 };
+use debug_print::{debug_println};
+
 
 pub trait Matches {
     fn matches(&self, node: &NodeData) -> bool;
@@ -38,16 +40,16 @@ pub struct Rename {
 
 pub(crate) fn to_rename(variable_depth_map: &HashMap<String, usize>, path: &String) -> Option<Rename> {
     // let parser = syntax::MainParser::new();
-    println!("input: {:?}", path);
+    debug_println!("input: {:?}", path);
     let result = parse(path.clone());
-    println!("result: {:?}",result);
+    debug_println!("result: {:?}",result);
     let mut parts = vec![];
     for part in result.parts {
         let mut subpart = vec![];
         for atom in part {
             match atom {
                 TemplatePart::LayerPart(name) => {
-                    println!("name: {:?}", name);
+                    debug_println!("name: {:?}", name);
                     let idx = variable_depth_map.get(&name).unwrap(); // propogates None if an ident doesn't exist
                                                          // should use result really
                     subpart.push(RenamePart::Idx(*idx));
