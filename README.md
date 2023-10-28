@@ -1,6 +1,16 @@
-# USYD-09-DataEinops
+# CayLang
 
 CayLang is a powerful directory description and manipulation language and toolkit.
+
+CayLang was developed as part of a Usyd Computer Science Capstone project by 
+
+* William Saffery
+* Jayden Taylor
+* Lochie Westfall
+* Kris Parekh
+* Gleb Kozlov
+
+In cooperation with [Strong Compute](https://strongcompute.com/).
 
 To learn about cay, its implementation and goals you can read through the markdown files in `docs/spec`.
 
